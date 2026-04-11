@@ -31,7 +31,7 @@ export default function LogoMark({ height = 40, dark = false }: Props) {
         strokeLinecap="square"
       />
 
-      {/* ASPECT — left aligned */}
+      {/* ASPCT — left aligned */}
       <text
         x="16"
         y="21"
@@ -41,7 +41,7 @@ export default function LogoMark({ height = 40, dark = false }: Props) {
         fontSize="18"
         letterSpacing="4"
         fill={color}
-      >ASPECT</text>
+      >ASPCT</text>
 
       {/* RATIO — left aligned so R sits under A */}
       <text
