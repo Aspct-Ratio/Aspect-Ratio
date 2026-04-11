@@ -31,11 +31,11 @@ export default function LogoMark({ height = 40, dark = false }: Props) {
         strokeLinecap="square"
       />
 
-      {/* ASPCT — left aligned */}
+      {/* ASPCT — centered between brackets */}
       <text
-        x="16"
-        y="21"
-        textAnchor="start"
+        x="64"
+        y="19"
+        textAnchor="middle"
         fontFamily="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
         fontWeight="800"
         fontSize="18"
@@ -43,11 +43,11 @@ export default function LogoMark({ height = 40, dark = false }: Props) {
         fill={color}
       >ASPCT</text>
 
-      {/* RATIO — left aligned so R sits under A */}
+      {/* RATIO — centered under ASPCT */}
       <text
-        x="16"
-        y="40"
-        textAnchor="start"
+        x="64"
+        y="37"
+        textAnchor="middle"
         fontFamily="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
         fontWeight="800"
         fontSize="18"
