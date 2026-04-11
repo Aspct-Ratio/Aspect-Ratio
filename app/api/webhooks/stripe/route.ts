@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+}
 
-const PRICE_TO_PLAN: Record<string, string> = {
-  [process.env.STRIPE_PRICE_FREELANCER!]: 'freelancer',
-  [process.env.STRIPE_PRICE_STUDIO!]:     'studio',
-  [process.env.STRIPE_PRICE_AGENCY!]:     'agency',
+function getPriceToPlан(): Record<string, string> {
+  return {
+    [process.env.STRIPE_PRICE_FREELANCER!]: 'freelancer',
+    [process.env.STRIPE_PRICE_STUDIO!]:     'studio',
+    [process.env.STRIPE_PRICE_AGENCY!]:     'agency',
+  }
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -59,7 +63,7 @@ async function getUserIdByCustomer(customerId: string): Promise<string | null> {
 
 function planFromSubscription(subscription: Stripe.Subscription): string {
   const priceId = subscription.items.data[0]?.price?.id ?? ''
-  return PRICE_TO_PLAN[priceId] ?? 'freelancer'
+  return getPriceToPlан()[priceId] ?? 'freelancer'
 }
 
 function toIso(ts: number | null | undefined): string | null {
@@ -76,7 +80,7 @@ async function handleCheckoutCompleted(event: Stripe.CheckoutSessionCompletedEve
   const customerId = session.customer as string
   const customerEmail = session.customer_details?.email ?? session.customer_email ?? null
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
   const plan = planFromSubscription(subscription)
 
   // Resolve user — try email first, fall back to existing customer record
@@ -108,7 +112,7 @@ async function handlePaymentSucceeded(event: Stripe.InvoicePaymentSucceededEvent
   const subscriptionId = invoice.subscription as string | null
   if (!subscriptionId) return
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
   const plan = planFromSubscription(subscription)
   const customerId = subscription.customer as string
 
@@ -197,7 +201,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err) {
     console.error('Webhook signature verification failed:', err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })

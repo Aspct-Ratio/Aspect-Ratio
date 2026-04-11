@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
-
-const PRICE_MAP: Record<string, string | undefined> = {
-  freelancer: process.env.STRIPE_PRICE_FREELANCER,
-  studio:     process.env.STRIPE_PRICE_STUDIO,
-  agency:     process.env.STRIPE_PRICE_AGENCY,
-}
-
 export async function POST(req: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+
+    const PRICE_MAP: Record<string, string | undefined> = {
+      freelancer: process.env.STRIPE_PRICE_FREELANCER,
+      studio:     process.env.STRIPE_PRICE_STUDIO,
+      agency:     process.env.STRIPE_PRICE_AGENCY,
+    }
+
     const { plan, email } = await req.json() as { plan: string; email?: string }
 
     const priceId = PRICE_MAP[plan]
