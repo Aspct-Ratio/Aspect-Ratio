@@ -534,7 +534,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                   </li>
                 ))}
               </ul>
-              <a href="mailto:hello@aspct.io" className="w-full h-10 flex items-center justify-center text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors no-underline">
+              <a href="mailto:hello@aspctratio.com" className="w-full h-10 flex items-center justify-center text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors no-underline">
                 Talk to us →
               </a>
             </div>
@@ -569,7 +569,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <div className="flex gap-5">
             <Link href="/privacy" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Privacy</Link>
             <Link href="/terms" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Terms</Link>
-            <a href="mailto:hello@aspct.io" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Contact</a>
+            <a href="mailto:hello@aspctratio.com" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Contact</a>
           </div>
         </div>
       </footer>

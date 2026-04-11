@@ -64,7 +64,7 @@ const sections = [
     n: '11',
     title: 'Contact',
     body: 'For questions about these Terms contact us at:',
-    email: 'kirk@aspctratio.com',
+    email: 'hello@aspctratio.com',
   },
 ]
 
