@@ -8,6 +8,7 @@ import LogoMark from '@/components/LogoMark'
 
 export default function LandingPage({ isLoggedIn = false, userEmail }: { isLoggedIn?: boolean; userEmail?: string }) {
   const [annual, setAnnual] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
 
   function goToConfirm(plan: string) {
@@ -20,29 +21,31 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
     router.refresh()
   }
 
+  function closeMenu() { setMenuOpen(false) }
+
   return (
     <div className="bg-white text-gray-800 antialiased leading-relaxed">
 
       {/* ── NAV ─────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 px-10 pt-3">
-        <div className="grid h-[80px]" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
-          {/* Left: logo */}
-          <div className="flex items-center">
-            <Link href="/" className="no-underline">
-              <LogoMark height={42} />
-            </Link>
-          </div>
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+        {/* ── Desktop & mobile top bar ── */}
+        <div className="flex items-center justify-between h-[72px] sm:h-[80px] px-5 sm:px-10">
 
-          {/* Center: nav links */}
-          <div className="hidden sm:flex items-center gap-7">
+          {/* Logo */}
+          <Link href="/" className="no-underline flex-shrink-0">
+            <LogoMark height={38} />
+          </Link>
+
+          {/* Center nav links — desktop only */}
+          <div className="hidden md:flex items-center gap-7">
             <a href="#how-it-works" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">HOW IT WORKS</a>
             <a href="#features" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">FEATURES</a>
             <a href="#channels" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">CHANNELS</a>
             <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">SEE PLANS</a>
           </div>
 
-          {/* Right: auth actions */}
-          <div className="flex items-center justify-end gap-2">
+          {/* Right auth actions — desktop only */}
+          <div className="hidden md:flex items-center gap-2">
             {isLoggedIn ? (
               <>
                 <Link href="/app" className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
@@ -51,10 +54,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 <Link href="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 no-underline tracking-wide">
                   ACCOUNT
                 </Link>
-                <button
-                  onClick={signOut}
-                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 tracking-wide"
-                >
+                <button onClick={signOut} className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 tracking-wide">
                   SIGN OUT
                 </button>
               </>
@@ -69,7 +69,62 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </>
             )}
           </div>
+
+          {/* Hamburger — mobile only */}
+          <button
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* ── Mobile dropdown menu ── */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-gray-100 bg-white px-5 py-4 flex flex-col gap-1">
+            {/* Nav links */}
+            <a href="#how-it-works" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">HOW IT WORKS</a>
+            <a href="#features" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">FEATURES</a>
+            <a href="#channels" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">CHANNELS</a>
+            <a href="#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">SEE PLANS</a>
+
+            {/* Divider */}
+            <div className="my-2 border-t border-gray-100" />
+
+            {/* Auth actions */}
+            {isLoggedIn ? (
+              <>
+                <Link href="/app" onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
+                  GO TO APP →
+                </Link>
+                <Link href="/dashboard" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">
+                  ACCOUNT
+                </Link>
+                <button onClick={() => { closeMenu(); signOut() }} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors tracking-wide px-3 py-3 rounded-lg text-left">
+                  SIGN OUT
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">
+                  SIGN IN
+                </Link>
+                <Link href="/signup" onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
+                  START FREE TRIAL
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* ── HERO ────────────────────────────────────────────── */}
