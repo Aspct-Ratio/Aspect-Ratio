@@ -39,7 +39,7 @@ const sections = [
     n: '6',
     title: 'Your Rights',
     body: 'You may request deletion of your account and associated data at any time by contacting us at:',
-    email: 'kirkdyer85@gmail.com',
+    email: 'kirk@aspctratio.com',
   },
   {
     n: '7',
@@ -50,7 +50,7 @@ const sections = [
     n: '8',
     title: 'Contact',
     body: 'For privacy-related questions contact us at:',
-    email: 'kirkdyer85@gmail.com',
+    email: 'kirk@aspctratio.com',
   },
 ]
 

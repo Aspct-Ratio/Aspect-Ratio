@@ -9,12 +9,12 @@ const sections = [
   {
     n: '1',
     title: 'Agreement to Terms',
-    body: 'By accessing or using Aspct Ratio ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.',
+    body: 'By accessing or using Aspect Ratio LLC ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.',
   },
   {
     n: '2',
     title: 'Description of Service',
-    body: 'Aspct Ratio is a SaaS web application that allows marketing teams, creative agencies, and brand managers to upload master image and video assets and automatically resize and reformat them into platform-specific dimensions. Users can customize file naming conventions, organize exports into folder structures, and download formatted assets as a ZIP file.',
+    body: 'Aspect Ratio LLC is a SaaS web application that allows marketing teams, creative agencies, and brand managers to upload master image and video assets and automatically resize and reformat them into platform-specific dimensions. Users can customize file naming conventions, organize exports into folder structures, and download formatted assets as a ZIP file.',
   },
   {
     n: '3',
@@ -33,7 +33,7 @@ const sections = [
   {
     n: '5',
     title: 'User Content',
-    body: 'You retain full ownership of all files you upload. Aspct Ratio does not claim any rights to your uploaded content. You are solely responsible for ensuring you have the rights to upload and process any files submitted to the Service.',
+    body: 'You retain full ownership of all files you upload. Aspect Ratio LLC does not claim any rights to your uploaded content. You are solely responsible for ensuring you have the rights to upload and process any files submitted to the Service.',
   },
   {
     n: '6',
@@ -43,12 +43,12 @@ const sections = [
   {
     n: '7',
     title: 'Payment Processing',
-    body: "Payments are processed securely through Stripe. Aspct Ratio does not store your payment information. By subscribing you agree to Stripe's terms of service.",
+    body: "Payments are processed securely through Stripe. Aspect Ratio LLC does not store your payment information. By subscribing you agree to Stripe's terms of service.",
   },
   {
     n: '8',
     title: 'Limitation of Liability',
-    body: "To the maximum extent permitted by law, Aspct Ratio's liability to you for any claims arising from your use of the Service is limited to the amount you paid us in the six months prior to the claim.",
+    body: "To the maximum extent permitted by law, Aspect Ratio LLC's liability to you for any claims arising from your use of the Service is limited to the amount you paid us in the six months prior to the claim.",
   },
   {
     n: '9',
@@ -64,7 +64,7 @@ const sections = [
     n: '11',
     title: 'Contact',
     body: 'For questions about these Terms contact us at:',
-    email: 'kirkdyer85@gmail.com',
+    email: 'kirk@aspctratio.com',
   },
 ]
 
