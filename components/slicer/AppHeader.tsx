@@ -60,24 +60,24 @@ export default function AppHeader({ step }: Props) {
       </nav>
 
       {/* Right: nav actions */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <Link
           href="/"
-          className="text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-2.5 py-1.5 rounded-md transition no-underline"
+          className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition no-underline tracking-wide"
         >
-          Home
+          HOME
         </Link>
         <Link
           href="/dashboard"
-          className="text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-2.5 py-1.5 rounded-md transition no-underline"
+          className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition no-underline tracking-wide"
         >
-          Account
+          ACCOUNT
         </Link>
         <button
           onClick={signOut}
-          className="text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-2.5 py-1.5 rounded-md transition"
+          className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition tracking-wide"
         >
-          Sign out
+          SIGN OUT
         </button>
       </div>
     </header>
