@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import LogoMark from '@/components/LogoMark'
@@ -36,6 +36,10 @@ const PLAN_INFO: Record<string, {
 }
 
 export default function CheckoutConfirmPage() {
+  return <Suspense><CheckoutConfirmForm /></Suspense>
+}
+
+function CheckoutConfirmForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const planKey = searchParams.get('plan') ?? ''
