@@ -367,12 +367,12 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                   <MockupCropDemo />
                 </div>
 
-                {/* Right: mock sidebar */}
-                <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
-                  <div className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-white border-b border-gray-100 flex items-center justify-between text-[10px] sm:text-xs font-semibold text-gray-700">
+                {/* Right: mock sidebar — full width on mobile */}
+                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-3.5 py-2.5 bg-white border-b border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-700">
                     <span>All formats</span><span className="text-indigo-600">12 selected</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-2.5 sm:p-3">
+                  <div className="grid grid-cols-3 gap-2 p-3">
                     {[
                       { label: 'Feed Sq', cls: 'aspect-square', pos: '50% 40%' },
                       { label: 'Story', cls: 'aspect-[9/16]', pos: '50% 30%' },
@@ -381,23 +381,23 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                       { label: 'Banner', cls: 'aspect-video', pos: '50% 45%' },
                       { label: 'TikTok', cls: 'aspect-[9/16]', pos: '45% 30%' },
                     ].map(({ label, cls, pos }) => (
-                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
+                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full min-w-[100px] ${cls}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/Imag2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[7px] sm:text-[8px] font-semibold px-1 py-0.5">{label}</div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold px-1.5 py-0.5">{label}</div>
                       </div>
                     ))}
                   </div>
-                  <div className="px-2.5 sm:px-3.5 pb-2.5 sm:pb-3.5 flex flex-col gap-2.5 sm:gap-3">
+                  <div className="px-3.5 pb-3.5 flex flex-col gap-3">
                     <div>
-                      <div className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-1.5">Channels</div>
-                      <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                        <span className="text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded bg-indigo-50 text-indigo-600">Social</span>
-                        <span className="text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded bg-green-50 text-green-700">Ecomm</span>
-                        <span className="text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded bg-amber-50 text-amber-600">Paid</span>
+                      <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-1.5">Channels</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-indigo-50 text-indigo-600">Social</span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-green-50 text-green-700">Ecomm</span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-amber-50 text-amber-600">Paid</span>
                       </div>
                     </div>
-                    <div className="w-full h-8 sm:h-9 bg-indigo-600 text-white text-[11px] sm:text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+                    <div className="w-full h-9 bg-indigo-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
                       <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9L2.5 5h3V1.5h2V5h3L6.5 9z" fill="white"/><rect x="1.5" y="10" width="10" height="1.5" rx="0.75" fill="white"/></svg>
                       Export ZIP
                     </div>
