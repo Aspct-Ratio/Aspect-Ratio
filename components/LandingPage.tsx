@@ -186,12 +186,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── PROOF BAR ───────────────────────────────────────── */}
       <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
         <div className="max-w-[900px] mx-auto flex items-center justify-center gap-10 flex-wrap">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">Built for teams at</span>
-          <div className="flex items-center gap-8 flex-wrap">
-            {['NIKE', 'WIEDEN+KENNEDY', 'UGG', 'R/GA', 'HUGE', 'PUBLICIS'].map(b => (
-              <span key={b} className="text-[13px] font-bold tracking-tight text-gray-300 whitespace-nowrap">{b}</span>
-            ))}
-          </div>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">Built for brands, agencies, and studios</span>
         </div>
       </div>
 
