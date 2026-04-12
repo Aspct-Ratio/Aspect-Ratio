@@ -1,10 +1,103 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
+
+// ── Helpers for crop demo animation ────────────────────────
+function easeIO(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t }
+function ep(elapsed: number, startMs: number, endMs: number) {
+  return easeIO(Math.max(0, Math.min(1, (elapsed - startMs) / (endMs - startMs))))
+}
+
+function MockupCropDemo() {
+  const [anim, setAnim] = useState({
+    cursorX: 65, cursorY: 50, panX: 0, panY: 0, zoom: 115, pressing: false, visible: false,
+  })
+
+  useEffect(() => {
+    const LOOP = 10000
+    const t0 = Date.now()
+    const id = setInterval(() => {
+      const e = (Date.now() - t0) % LOOP
+
+      // cursor position
+      let cx = 65, cy = 50
+      if (e >= 800 && e < 3500)       { cx = lerp(65, 28, ep(e, 800, 3500));  cy = 50 }
+      else if (e >= 3500 && e < 4200) { cx = lerp(28, 88, ep(e, 3500, 4200)); cy = lerp(50, 82, ep(e, 3500, 4200)) }
+      else if (e >= 4200 && e < 6800) { cx = 88; cy = 82 }
+      else if (e >= 6800 && e < 7300) { cx = lerp(88, 35, ep(e, 6800, 7300)); cy = lerp(82, 50, ep(e, 6800, 7300)) }
+      else if (e >= 7300 && e < 9200) { cx = lerp(35, 70, ep(e, 7300, 9200)); cy = 50 }
+      else if (e >= 9200)             { cx = 70; cy = 50 }
+
+      // pressing
+      const pressing = (e >= 800 && e < 3500) || (e >= 7300 && e < 9200)
+
+      // pan
+      let panX = 0, panY = 0
+      if (e >= 800 && e < 3500)       { panX = lerp(0, -15, ep(e, 800, 3500));   panY = lerp(0, 4, ep(e, 800, 3500)) }
+      else if (e >= 3500 && e < 7300) { panX = -15; panY = 4 }
+      else if (e >= 7300 && e < 9200) { panX = lerp(-15, 10, ep(e, 7300, 9200)); panY = lerp(4, -3, ep(e, 7300, 9200)) }
+      else if (e >= 9200)             { panX = lerp(10, 0, ep(e, 9200, 10000));   panY = lerp(-3, 0, ep(e, 9200, 10000)) }
+
+      // zoom
+      let zoom = 115
+      if (e >= 4500 && e < 6800)      { zoom = lerp(115, 148, ep(e, 4500, 6800)) }
+      else if (e >= 6800 && e < 9200) { zoom = 148 }
+      else if (e >= 9200)             { zoom = lerp(148, 115, ep(e, 9200, 10000)) }
+
+      setAnim({ cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom), pressing, visible: e > 300 && e < 9700 })
+    }, 33)
+    return () => clearInterval(id)
+  }, [])
+
+  const { cursorX, cursorY, panX, panY, zoom, pressing, visible } = anim
+  const sliderPct = Math.round((zoom - 100) / 150 * 100)
+
+  return (
+    <div className="flex flex-col items-center py-3">
+      {/* Crop viewport */}
+      <div className="relative" style={{ width: 126, height: 228 }}>
+        <div className="w-full h-full rounded overflow-hidden relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/demo-asset.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ transform: `scale(${zoom / 100}) translate(${panX}px, ${panY}px)`, transformOrigin: 'center center' }}
+          />
+          {/* Crop border + handles */}
+          <div className="absolute inset-0 border-2 border-indigo-600 pointer-events-none">
+            {([['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']] as const).map(([t,l],i) => (
+              <div key={i} className={`absolute w-2 h-2 border-2 border-indigo-600 bg-white rounded-[1px] ${t} ${l}`} />
+            ))}
+          </div>
+          {/* Dimension badge */}
+          <div className="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded pointer-events-none">1080 × 1920</div>
+          {/* Cursor */}
+          {visible && (
+            <div className="absolute pointer-events-none z-10" style={{ left: `${cursorX}%`, top: `${cursorY}%` }}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 1.5l9.5 5.5-4.5 1L5.5 12 2 1.5z" fill={pressing ? '#6366f1' : 'white'} stroke={pressing ? '#4338ca' : '#4b5563'} strokeWidth="1.1" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          )}
+        </div>
+      </div>
+      {/* Zoom slider */}
+      <div className="flex items-center gap-2 px-1 mt-2 w-full" style={{ maxWidth: 126 }}>
+        <span className="text-[9px] text-gray-400">⊕</span>
+        <div className="flex-1 h-[3px] bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${sliderPct}%` }} />
+        </div>
+        <span className="text-[9px] font-mono text-gray-400 min-w-[24px] text-right">{zoom}%</span>
+      </div>
+    </div>
+  )
+}
 
 const FAQ_ITEMS = [
   {
@@ -215,23 +308,14 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </section>
 
       {/* ── PROOF BAR ───────────────────────────────────────── */}
-      <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
+      <div className="border-t border-b border-gray-100 bg-white py-8 px-6">
         <div className="max-w-[900px] mx-auto flex items-center justify-center">
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
         </div>
       </div>
 
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
-      <style>{`
-        @keyframes cropPan {
-          0%   { transform: scale(1.15) translate(0%, 0%); }
-          25%  { transform: scale(1.18) translate(-4%, 2%); }
-          50%  { transform: scale(1.22) translate(-2%, -1%); }
-          75%  { transform: scale(1.18) translate(4%, 1%); }
-          100% { transform: scale(1.15) translate(0%, 0%); }
-        }
-      `}</style>
-      <section className="pt-12 pb-16 px-6 bg-gray-50">
+      <section className="pt-16 pb-16 px-6 bg-gray-50">
         <div className="max-w-[900px] mx-auto">
           <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
@@ -268,18 +352,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                     <span>BrandName_SpringCampaign_Hero.jpg</span>
                     <span className="text-gray-400 font-normal">Instagram Story · 1080 × 1920</span>
                   </div>
-                  <div className="h-64 flex items-center justify-center py-3">
-                    <div className="w-[108px] h-[192px] rounded relative overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ animation: 'cropPan 10s ease-in-out infinite', transformOrigin: 'center center' }} />
-                      <div className="absolute inset-0 border-2 border-indigo-600">
-                        {[['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']].map(([t,l],i) => (
-                          <div key={i} className={`absolute w-2 h-2 border-2 border-indigo-600 bg-white rounded-[1px] ${t} ${l}`} />
-                        ))}
-                      </div>
-                      <div className="absolute bottom-1.5 right-1.5 bg-black/60 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded">1080 × 1920</div>
-                    </div>
-                  </div>
+                  <MockupCropDemo />
                 </div>
 
                 {/* Right: mock sidebar */}
@@ -298,7 +371,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                     ].map(({ label, cls, pos }) => (
                       <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
+                        <img src="/images/demo-asset.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-semibold px-1 py-0.5">{label}</div>
                       </div>
                     ))}
