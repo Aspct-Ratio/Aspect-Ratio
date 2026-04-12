@@ -161,6 +161,15 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </div>
 
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
+      <style>{`
+        @keyframes cropPan {
+          0%   { transform: scale(1.15) translate(0%, 0%); }
+          25%  { transform: scale(1.18) translate(-4%, 2%); }
+          50%  { transform: scale(1.22) translate(-2%, -1%); }
+          75%  { transform: scale(1.18) translate(4%, 1%); }
+          100% { transform: scale(1.15) translate(0%, 0%); }
+        }
+      `}</style>
       <section className="pt-12 pb-16 px-6 bg-gray-50">
         <div className="max-w-[900px] mx-auto">
           <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
@@ -198,10 +207,10 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                     <span>BrandName_SpringCampaign_Hero.jpg</span>
                     <span className="text-gray-400 font-normal">Instagram Story · 1080 × 1920</span>
                   </div>
-                  <div className="h-44 flex items-center justify-center">
-                    <div className="w-28 h-40 rounded relative overflow-hidden">
+                  <div className="h-64 flex items-center justify-center py-3">
+                    <div className="w-[108px] h-[192px] rounded relative overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-[50%_30%]" />
+                      <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ animation: 'cropPan 10s ease-in-out infinite', transformOrigin: 'center center' }} />
                       <div className="absolute inset-0 border-2 border-indigo-600">
                         {[['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']].map(([t,l],i) => (
                           <div key={i} className={`absolute w-2 h-2 border-2 border-indigo-600 bg-white rounded-[1px] ${t} ${l}`} />
