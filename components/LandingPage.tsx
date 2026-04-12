@@ -6,6 +6,67 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
 
+const FAQ_ITEMS = [
+  {
+    q: 'How does the free trial work?',
+    a: 'You get 7 days free with full access to all features. No credit card required to start. Cancel anytime before the trial ends and you won\'t be charged.',
+  },
+  {
+    q: 'What file types can I upload?',
+    a: 'We support JPG, PNG, WebP, GIF, MP4, MOV, and WebM. Upload up to 50 files per session depending on your plan.',
+  },
+  {
+    q: 'Do I need design skills to use Aspct Ratio?',
+    a: 'Not at all. If you can drag and drop a file, you can use Aspct Ratio. The tool handles all the technical resizing — you just adjust the crop if needed.',
+  },
+  {
+    q: 'Can I use my own naming conventions?',
+    a: 'Yes. You can set your brand name, campaign name, and the tool builds the filename automatically using your inputs. The folder structure is also organized by channel, platform, and section automatically.',
+  },
+  {
+    q: 'What happens to my files after export?',
+    a: 'Your files are processed securely and not stored after your session. Once you download your ZIP, the files are cleared.',
+  },
+  {
+    q: 'Can my whole team use this?',
+    a: 'Yes — our Studio and Agency plans are built for teams. Multiple users can access the tool under one account.',
+  },
+  {
+    q: 'How do I cancel my subscription?',
+    a: 'You can cancel anytime directly from your account page. No need to contact support.',
+  },
+]
+
+function FAQ() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <section className="py-20 px-6 bg-white">
+      <div className="max-w-[720px] mx-auto">
+        <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Frequently asked questions</p>
+        <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] mb-12">Got questions?</h2>
+        <div className="divide-y divide-gray-100">
+          {FAQ_ITEMS.map((item, i) => (
+            <div key={i}>
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="w-full flex items-center justify-between gap-4 py-5 text-left group"
+              >
+                <span className="text-[15px] font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors leading-snug">{item.q}</span>
+                <span className={`flex-shrink-0 w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 group-hover:border-indigo-300 group-hover:text-indigo-500 transition-colors text-sm font-bold ${open === i ? 'bg-indigo-50 border-indigo-200 text-indigo-500' : ''}`}>
+                  {open === i ? '−' : '+'}
+                </span>
+              </button>
+              {open === i && (
+                <p className="pb-5 text-[15px] text-gray-500 leading-[1.7]">{item.a}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function LandingPage({ isLoggedIn = false, userEmail }: { isLoggedIn?: boolean; userEmail?: string }) {
   const [annual, setAnnual] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -566,6 +627,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </Link>
         </div>
       </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────── */}
+      <FAQ />
 
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer className="bg-gray-900 border-t border-white/[0.06] py-8 px-6">
