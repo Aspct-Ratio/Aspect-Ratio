@@ -91,7 +91,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
     if (!file || !fmt || !canvasRef.current) return
     const canvas = renderToCanvas(canvasRef.current, fmt, file, state.crops[file.id][fmt.id])
     const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
-    const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, fmt, assetName: file.name }) + '.' + ext
+    const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext
     if (ef === 'pdf') { await exportPDF(canvas, fn, fmt); return }
     const blob = await canvasToBlob(canvas, ef === 'tiff' ? 'png' : ef, state.quality)
     dlBlob(blob, fn)
@@ -120,7 +120,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
         const canvas = renderToCanvas(canvasRef.current, fmt, file, crop)
         for (const ef of efArr) {
           const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
-          const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, fmt, assetName: file.name }) + '.' + ext
+          const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext
           const parts = getFolderParts(fmt, state.folderLevels)
           let folder = rootFolder
           for (const part of parts) { folder = folder.folder(part)! }
@@ -181,7 +181,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
           <div className="max-h-[400px] overflow-y-auto">
             {pairs.slice(0, 50).map(({ file, fmt, ef }, i) => {
               const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
-              const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, fmt, assetName: file.name }) + '.' + ext
+              const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext
               return (
                 <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-50 transition">
                   <span className="text-[13px] text-gray-400">◻</span>

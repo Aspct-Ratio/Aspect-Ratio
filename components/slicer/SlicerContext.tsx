@@ -24,6 +24,7 @@ type Action =
   | { type: 'REMOVE_CUSTOM'; id: string }
   | { type: 'SET_NAMING_PATTERN'; pattern: string }
   | { type: 'SET_CLIENT_NAME'; name: string }
+  | { type: 'SET_CAMPAIGN_NAME'; name: string }
   | { type: 'SET_ROOT_FOLDER'; name: string }
   | { type: 'TOGGLE_EXPORT_FORMAT'; fmt: ExportFormat }
   | { type: 'SET_QUALITY'; value: number }
@@ -43,6 +44,7 @@ const initialState: SlicerState = {
   exportFormats: new Set(['jpeg']),
   folderLevels: DEFAULT_FOLDER_LEVELS.map(l => ({ ...l })),
   clientName: '',
+  campaignName: '',
   rootFolderName: '',
   quality: 90,
 }
@@ -152,6 +154,9 @@ function reducer(state: SlicerState, action: Action): SlicerState {
 
     case 'SET_CLIENT_NAME':
       return { ...state, clientName: action.name }
+
+    case 'SET_CAMPAIGN_NAME':
+      return { ...state, campaignName: action.name }
 
     case 'SET_ROOT_FOLDER':
       return { ...state, rootFolderName: action.name }

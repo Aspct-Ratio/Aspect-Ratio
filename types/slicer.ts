@@ -81,6 +81,7 @@ export interface SlicerState {
   exportFormats: Set<ExportFormat>
   folderLevels: FolderLevel[]
   clientName: string
+  campaignName: string
   rootFolderName: string
   quality: number                // 60–100
 }

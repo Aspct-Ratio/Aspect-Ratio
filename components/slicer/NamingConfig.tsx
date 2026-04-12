@@ -39,7 +39,7 @@ export default function NamingConfig() {
   const firstExt = Array.from(state.exportFormats)[0]
   const ext = firstExt === 'jpeg' ? 'jpg' : firstExt
   const previewName = sampleFmt
-    ? buildFilename({ pattern: state.namingPattern, clientName: state.clientName, fmt: sampleFmt, assetName: 'hero-image' }) + '.' + ext
+    ? buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt: sampleFmt, assetName: 'hero-image' }) + '.' + ext
     : 'Brand_1080x1080.jpg'
 
   const pathParts = sampleFmt ? getFolderParts(sampleFmt, state.folderLevels) : []
@@ -72,6 +72,19 @@ export default function NamingConfig() {
             value={state.clientName}
             onChange={e => dispatch({ type: 'SET_CLIENT_NAME', name: e.target.value })}
           />
+        </div>
+
+        <div className="mb-3.5">
+          <label className="block text-xs font-medium text-gray-700 mb-1">
+            Campaign Name <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+            placeholder="e.g. FY26-Tech-Fleece"
+            value={state.campaignName}
+            onChange={e => dispatch({ type: 'SET_CAMPAIGN_NAME', name: e.target.value })}
+          />
+          <p className="text-[10px] text-gray-400 mt-1">When filled, outputs as Brand_Campaign_… in the filename.</p>
         </div>
 
         <div className="mb-3.5">

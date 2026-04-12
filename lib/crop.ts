@@ -76,15 +76,21 @@ export function canvasToBlob(
 export function buildFilename(opts: {
   pattern: string
   clientName: string
+  campaignName?: string
   fmt: FormatDef
   assetName: string
 }): string {
-  const { pattern, clientName, fmt, assetName } = opts
+  const { pattern, clientName, campaignName, fmt, assetName } = opts
   const cl = (clientName || 'Brand').replace(/\s+/g, '-')
+  const camp = campaignName?.trim().replace(/\s+/g, '-') ?? ''
   const dt = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   const an = assetName.replace(/\.[^.]+$/, '').replace(/\s+/g, '-')
+
+  // Build client prefix: Brand or Brand_Campaign
+  const clientPrefix = camp ? `${cl}_${camp}` : cl
+
   return pattern
-    .replace('{client}', cl)
+    .replace('{client}', clientPrefix)
     .replace('{channel}', fmt.cf ?? 'Ch')
     .replace('{platform}', fmt.pf ?? fmt.platform ?? 'Pl')
     .replace('{width}x{height}', `${fmt.w}x${fmt.h}`)
