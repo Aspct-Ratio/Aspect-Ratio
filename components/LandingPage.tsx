@@ -153,12 +153,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         </div>
       </section>
 
-      {/* ── PROOF BAR ───────────────────────────────────────── */}
-      <div className="border-t border-b border-gray-100 bg-white py-8 px-6">
-        <div className="max-w-[900px] mx-auto flex flex-col items-center gap-5">
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] text-center">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
-        </div>
+      {/* ── CREDIBILITY LINE ────────────────────────────────── */}
+      <div className="bg-white pt-10 pb-6 px-6">
+        <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
       </div>
 
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
@@ -253,6 +250,13 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </div>
         </div>
       </section>
+
+      {/* ── PROOF BAR ───────────────────────────────────────── */}
+      <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
+        <div className="max-w-[900px] mx-auto flex items-center justify-center">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
+        </div>
+      </div>
 
       {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
       <section id="features" className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
