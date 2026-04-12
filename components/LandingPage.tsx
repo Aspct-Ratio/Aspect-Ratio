@@ -381,7 +381,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                       { label: 'Banner', cls: 'aspect-video', pos: '50% 45%' },
                       { label: 'TikTok', cls: 'aspect-[9/16]', pos: '45% 30%' },
                     ].map(({ label, cls, pos }) => (
-                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full min-w-[100px] ${cls}`}>
+                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src="/images/Imag2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold px-1.5 py-0.5">{label}</div>
