@@ -293,12 +293,12 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             Asset slicing is a time sink that shouldn&apos;t exist
           </h2>
           <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-12">
-            Marketing teams at the world&apos;s biggest brands still pay agencies thousands of dollars — and wait days — to manually resize creative. It&apos;s repetitive, error-prone, and completely solvable.
+            Whether you&apos;re in-house or at an agency, your team is spending days on work that should take minutes. It&apos;s repetitive, error-prone, and completely solvable.
           </p>
           <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             {[
               { icon: '⏳', bg: 'bg-red-50', title: 'Days of turnaround', body: 'A single campaign launch can require 60–100 individual format variants. Agencies charge by the hour. Teams wait days for delivery.' },
-              { icon: '💸', bg: 'bg-amber-50', title: 'Expensive agency work', body: 'Nike, UGG, and agencies like Wieden+Kennedy spend significant budget on what is essentially mechanical resizing — work that should be instant.' },
+              { icon: '💸', bg: 'bg-amber-50', title: 'Hours lost to mechanical work', body: 'Your team\'s time is worth more than resizing. Every hour spent manually slicing assets is an hour not spent on strategy, concepting, or client work that actually moves the needle.' },
               { icon: '🗂️', bg: 'bg-orange-50', title: 'Inconsistent naming & structure', body: 'Files land in inboxes with random names. Teams spend extra hours renaming, sorting, and distributing assets to the right channel owners.' },
             ].map(({ icon, bg, title, body }) => (
               <div key={title} className="bg-white border border-gray-200 rounded-xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
