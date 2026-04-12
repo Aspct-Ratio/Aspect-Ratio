@@ -132,9 +132,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         <div className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs font-semibold tracking-[0.5px] uppercase px-3 py-1.5 rounded-full mb-7">
           <span>✦</span> Now live · Free to start
         </div>
-        <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[820px] mx-auto mb-5">
-          ASSET SLICING FOR<br />
-          <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">MODERN MARKETING TEAMS.</em>
+        <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[900px] mx-auto mb-5">
+          BUILT FOR THE WAY<br />
+          <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">CAMPAIGNS ACTUALLY WORK.</em>
         </h1>
         <p className="text-[18px] text-gray-500 max-w-[560px] mx-auto mb-11 leading-[1.7] font-normal">
           Upload once. Export every format, named and sorted, in minutes.
@@ -150,6 +150,35 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <a href="#how-it-works" className="h-12 px-7 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 text-[15px] font-semibold rounded-[10px] transition-all whitespace-nowrap flex items-center no-underline">
             See how it works
           </a>
+        </div>
+      </section>
+
+      {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
+      <section className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="h-px flex-1 bg-gray-200" />
+            <span className="text-[11px] font-bold uppercase tracking-[1.2px] text-gray-400">What you get</span>
+            <div className="h-px flex-1 bg-gray-200" />
+          </div>
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+            {[
+              { title: '60+ platform formats', body: 'Instagram, TikTok, YouTube, X, Snapchat, Pinterest, LinkedIn, PDP, homepage, email, IAB display, in-store, OOH, and more — all preloaded.' },
+              { title: 'Custom naming conventions', body: 'Build tokens from client name, channel, dimension, platform, asset name, and date. Your file naming system — your rules.' },
+              { title: 'Batch multi-asset upload', body: 'Upload up to 50 images and videos at once. Apply a crop adjustment to one file, or fine-tune every asset individually.' },
+              { title: 'Interactive crop adjustment', body: 'Pan and zoom each crop independently. Smart upper-center bias gets you 80% of the way there on hero product imagery.' },
+              { title: 'Multi-format export', body: 'Export as JPG, PNG, WebP, PDF, or TIFF. Select multiple simultaneously. Full-resolution output in every format.' },
+              { title: 'Nested folder structure', body: 'Every ZIP is organized by Channel → Platform → Section. The right person gets the right files instantly, no guesswork.' },
+            ].map(({ title, body }) => (
+              <div key={title} className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
+                <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center mb-4">
+                  <div className="w-5 h-5 rounded bg-indigo-600 opacity-70" />
+                </div>
+                <h3 className="text-base font-bold text-gray-900 mb-2 tracking-[-0.3px]">{title}</h3>
+                <p className="text-sm text-gray-500 leading-[1.7]">{body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -314,25 +343,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         <div className="max-w-[1100px] mx-auto">
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Features</p>
           <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Built for the way campaigns actually work</h2>
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-12">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
-          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            {[
-              { title: '60+ platform formats', body: 'Instagram, TikTok, YouTube, X, Snapchat, Pinterest, LinkedIn, PDP, homepage, email, IAB display, in-store, OOH, and more — all preloaded.' },
-              { title: 'Custom naming conventions', body: 'Build tokens from client name, channel, dimension, platform, asset name, and date. Your file naming system — your rules.' },
-              { title: 'Batch multi-asset upload', body: 'Upload up to 50 images and videos at once. Apply a crop adjustment to one file, or fine-tune every asset individually.' },
-              { title: 'Interactive crop adjustment', body: 'Pan and zoom each crop independently. Smart upper-center bias gets you 80% of the way there on hero product imagery.' },
-              { title: 'Multi-format export', body: 'Export as JPG, PNG, WebP, PDF, or TIFF. Select multiple simultaneously. Full-resolution output in every format.' },
-              { title: 'Nested folder structure', body: 'Every ZIP is organized by Channel → Platform → Section. The right person gets the right files instantly, no guesswork.' },
-            ].map(({ title, body }) => (
-              <div key={title} className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
-                <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center mb-4">
-                  <div className="w-5 h-5 rounded bg-indigo-600 opacity-70" />
-                </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2 tracking-[-0.3px]">{title}</h3>
-                <p className="text-sm text-gray-500 leading-[1.7]">{body}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px]">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
         </div>
       </section>
 
