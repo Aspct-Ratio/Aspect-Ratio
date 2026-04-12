@@ -154,8 +154,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </section>
 
       {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
-      <section className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
+      <section id="features" className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-[1100px] mx-auto">
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
           <div className="flex items-center gap-3 mb-10">
             <div className="h-px flex-1 bg-gray-200" />
             <span className="text-[11px] font-bold uppercase tracking-[1.2px] text-gray-400">What you get</span>
@@ -336,16 +337,6 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         </div>
       </section>
 
-      <div className="h-px bg-gray-100" />
-
-      {/* ── FEATURES ─────────────────────────────────────────── */}
-      <section id="features" className="py-20 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Features</p>
-          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Built for the way campaigns actually work</h2>
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px]">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
-        </div>
-      </section>
 
       {/* ── CHANNELS ─────────────────────────────────────────── */}
       <section id="channels" className="py-20 px-6 bg-indigo-600">
