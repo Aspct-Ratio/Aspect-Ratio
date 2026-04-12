@@ -74,9 +74,13 @@ export default function Step4Export({ onBack, onReset }: Props) {
       treeLines.push(`${ind}📁 ${k}/`)
       if (Array.isArray(v)) {
         const fileInd = '  '.repeat(depth + 1)
+        const fmt = v[0] as FormatDef | undefined
         for (const ef of efArr) {
           const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
-          treeLines.push(`${fileInd}📄 [filename].${ext}`)
+          const fn = fmt
+            ? buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: 'filename' }) + '.' + ext
+            : `filename.${ext}`
+          treeLines.push(`${fileInd}📄 ${fn}`)
         }
       } else {
         renderTree(v as Record<string, unknown>, depth + 1)
