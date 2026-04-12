@@ -319,7 +319,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </section>
 
       {/* ── PROOF BAR ───────────────────────────────────────── */}
-      <div className="border-t border-b border-gray-100 bg-white py-10 px-6">
+      <div className="border-t border-b border-gray-100 bg-white py-4 px-6">
         <div className="max-w-[900px] mx-auto flex items-center justify-center">
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
         </div>
