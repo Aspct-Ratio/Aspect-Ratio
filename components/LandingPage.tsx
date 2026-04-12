@@ -76,7 +76,7 @@ function MockupCropDemo() {
       <div className="relative rounded-lg overflow-hidden" style={{ width: 270, height: 480 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/demo-asset.jpg"
+          src="/images/demo-asset.jpg?v=2"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           style={{ transform: `scale(${zoom / 100}) translate(${panX}%, ${panY}%)`, transformOrigin: 'center center' }}
@@ -382,7 +382,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                     ].map(({ label, cls, pos }) => (
                       <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/demo-asset.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
+                        <img src="/images/demo-asset.jpg?v=2" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-semibold px-1 py-0.5">{label}</div>
                       </div>
                     ))}
