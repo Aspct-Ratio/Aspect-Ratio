@@ -18,9 +18,11 @@ type Action =
   | { type: 'TOGGLE_FORMAT'; id: string }
   | { type: 'SELECT_ALL' }
   | { type: 'SELECT_NONE' }
+  | { type: 'SET_SELECTION'; ids: string[] }
   | { type: 'TOGGLE_CHANNEL_ALL'; channelKey: string }
   | { type: 'TOGGLE_PLATFORM_ALL'; channelKey: string; platformKey: string }
   | { type: 'ADD_CUSTOM'; fmt: FormatDef }
+  | { type: 'LOAD_SAVED_CUSTOM'; fmts: FormatDef[] }
   | { type: 'REMOVE_CUSTOM'; id: string }
   | { type: 'SET_NAMING_PATTERN'; pattern: string }
   | { type: 'SET_CLIENT_NAME'; name: string }
@@ -105,6 +107,27 @@ function reducer(state: SlicerState, action: Action): SlicerState {
 
     case 'SELECT_NONE':
       return { ...state, selected: new Set() }
+
+    case 'SET_SELECTION':
+      return { ...state, selected: new Set(action.ids) }
+
+    case 'LOAD_SAVED_CUSTOM': {
+      // Batch-add saved dims, deduplicating by ID
+      const existingIds = new Set(state.custom.map(c => c.id))
+      const newFmts = action.fmts.filter(f => !existingIds.has(f.id))
+      if (newFmts.length === 0) return state
+      const custom = [...state.custom, ...newFmts]
+      const selected = new Set(state.selected)
+      newFmts.forEach(f => selected.add(f.id))
+      const newCrops = { ...state.crops }
+      for (const file of state.files) {
+        newCrops[file.id] = { ...newCrops[file.id] }
+        for (const f of newFmts) {
+          newCrops[file.id][f.id] = calcCrop(f, file)
+        }
+      }
+      return { ...state, custom, selected, crops: newCrops }
+    }
 
     case 'TOGGLE_CHANNEL_ALL': {
       const { CHANNELS } = require('@/lib/formats')

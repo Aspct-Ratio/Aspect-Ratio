@@ -1,29 +1,76 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CHANNELS } from '@/lib/formats'
 import { useSlicer } from './SlicerContext'
 import type { FormatDef } from '@/types/slicer'
 
-interface SavedDim {
+interface SavedCampaign {
   id: string
-  label: string
-  group: string | null
-  width: number
-  height: number
+  campaign_name: string
+  selected_formats: string[]
   created_at: string
-}
-
-const TAG_CLASSES: Record<string, string> = {
-  't-soc': 'bg-indigo-50 text-indigo-600',
-  't-eco': 'bg-green-50 text-green-700',
-  't-pai': 'bg-amber-50 text-amber-600 border border-yellow-200',
-  't-ret': 'bg-red-50 text-red-600 border border-red-100',
 }
 
 export default function ChannelAccordion() {
   const { state, dispatch } = useSlicer()
   const [open, setOpen] = useState<Set<string>>(new Set(['social']))
+
+  // ── Past campaigns ────────────────────────────────────────────
+  const [showCampaigns, setShowCampaigns] = useState(false)
+  const [campaigns, setCampaigns] = useState<SavedCampaign[]>([])
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false)
+  const campaignRef = useRef<HTMLDivElement>(null)
+
+  // ── Saved custom dim IDs (from Supabase, to distinguish from session-only) ──
+  const [savedCustomIds, setSavedCustomIds] = useState<Set<string>>(new Set())
+
+  // Load saved custom dims once on mount → dispatch LOAD_SAVED_CUSTOM
+  const customLoadedRef = useRef(false)
+  useEffect(() => {
+    if (customLoadedRef.current) return
+    customLoadedRef.current = true
+    fetch('/api/custom-dimensions')
+      .then(r => r.json())
+      .then((data: unknown) => {
+        if (!Array.isArray(data) || data.length === 0) return
+        const fmts: FormatDef[] = (data as { id: string; name: string; group: string | null; width: number; height: number }[])
+          .map(d => ({
+            id: d.id,
+            n: d.name,
+            zf: d.name.replace(/\s+/g, '-'),
+            platform: d.group ?? 'Custom',
+            w: d.width,
+            h: d.height,
+          }))
+        dispatch({ type: 'LOAD_SAVED_CUSTOM', fmts })
+        setSavedCustomIds(new Set(fmts.map(f => f.id)))
+      })
+      .catch(() => {})
+  }, [dispatch])
+
+  // Load past campaigns when dropdown opens
+  useEffect(() => {
+    if (!showCampaigns) return
+    setLoadingCampaigns(true)
+    fetch('/api/saved-campaigns')
+      .then(r => r.json())
+      .then((data: unknown) => { if (Array.isArray(data)) setCampaigns(data as SavedCampaign[]) })
+      .catch(() => {})
+      .finally(() => setLoadingCampaigns(false))
+  }, [showCampaigns])
+
+  // Close campaign dropdown on outside click
+  useEffect(() => {
+    if (!showCampaigns) return
+    function handler(e: MouseEvent) {
+      if (campaignRef.current && !campaignRef.current.contains(e.target as Node)) {
+        setShowCampaigns(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showCampaigns])
 
   function toggle(k: string) {
     setOpen(prev => {
@@ -33,17 +80,63 @@ export default function ChannelAccordion() {
     })
   }
 
+  function restoreCampaign(c: SavedCampaign) {
+    dispatch({ type: 'SET_SELECTION', ids: c.selected_formats })
+    setShowCampaigns(false)
+  }
+
   const allFmts = Object.entries(CHANNELS).flatMap(([, ch]) =>
     Object.values(ch.plats).flatMap(p => p.fmts),
   )
-  const totalSel = allFmts.filter(f => state.selected.has(f.id)).length
+  // Include custom dims in total selected count
+  const totalSel = [...allFmts, ...state.custom].filter(f => state.selected.has(f.id)).length
 
   return (
     <div>
       {/* Header row */}
-      <div className="flex items-center justify-between mb-2.5">
+      <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
         <div className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.7px]">Channels &amp; Formats</div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+
+          {/* Past campaigns dropdown */}
+          <div className="relative" ref={campaignRef}>
+            <button
+              onClick={() => setShowCampaigns(p => !p)}
+              className={`text-xs px-2 py-1 rounded transition flex items-center gap-1 ${showCampaigns ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'}`}
+            >
+              🕐 Past campaigns
+            </button>
+            {showCampaigns && (
+              <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg w-[260px] overflow-hidden">
+                {loadingCampaigns && (
+                  <p className="text-xs text-gray-400 px-3 py-3">Loading…</p>
+                )}
+                {!loadingCampaigns && campaigns.length === 0 && (
+                  <div className="px-3 py-3">
+                    <p className="text-[11px] text-gray-500 font-medium">No past campaigns yet.</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Your format selections are saved each time you proceed past this step.</p>
+                  </div>
+                )}
+                {!loadingCampaigns && campaigns.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => restoreCampaign(c)}
+                    className="w-full text-left px-3 py-2.5 hover:bg-indigo-50 transition-colors flex items-start justify-between gap-3 group border-b border-gray-100 last:border-0"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[12px] font-semibold text-gray-800 group-hover:text-indigo-700 truncate">{c.campaign_name}</div>
+                      <div className="text-[10px] text-gray-400 mt-0.5">
+                        {c.selected_formats.length} formats · {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-indigo-500 font-semibold mt-0.5 flex-shrink-0 group-hover:text-indigo-700">Use →</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-4 bg-gray-200" />
           <button onClick={() => dispatch({ type: 'SELECT_ALL' })} className="text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded transition">Select all</button>
           <button onClick={() => dispatch({ type: 'SELECT_NONE' })} className="text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 px-2 py-1 rounded transition">Clear</button>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${totalSel > 0 ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-gray-100 text-gray-400 border-gray-200'}`}>
@@ -125,89 +218,89 @@ export default function ChannelAccordion() {
       })}
 
       {/* Custom dimensions */}
-      <CustomDimensions />
+      <CustomDimensions savedCustomIds={savedCustomIds} setSavedCustomIds={setSavedCustomIds} />
     </div>
   )
 }
 
-function CustomDimensions() {
+// ── Custom Dimensions panel ────────────────────────────────────
+
+function CustomDimensions({
+  savedCustomIds,
+  setSavedCustomIds,
+}: {
+  savedCustomIds: Set<string>
+  setSavedCustomIds: React.Dispatch<React.SetStateAction<Set<string>>>
+}) {
   const { state, dispatch } = useSlicer()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [group, setGroup] = useState('')
   const [w, setW] = useState('')
   const [h, setH] = useState('')
+  const [adding, setAdding] = useState(false)
 
-  // Saved dimensions from Supabase
-  const [savedDims, setSavedDims] = useState<SavedDim[]>([])
-  const [loadingSaved, setLoadingSaved] = useState(false)
+  // Saved dims = those in state.custom whose IDs came from Supabase
+  const savedDims = state.custom.filter(f => savedCustomIds.has(f.id))
+  // Session-only dims = added this session but not saved (e.g. not logged in)
+  const sessionDims = state.custom.filter(f => !savedCustomIds.has(f.id))
 
-  // Inline save UX: which session chip is in "name + save" mode
-  const [savingId, setSavingId] = useState<string | null>(null)
-  const [saveLabel, setSaveLabel] = useState('')
-  const [savePending, setSavePending] = useState(false)
-
-  // Load saved dims when the panel opens
-  useEffect(() => {
-    if (!open) return
-    setLoadingSaved(true)
-    fetch('/api/custom-dimensions')
-      .then(r => r.json())
-      .then((data: unknown) => { if (Array.isArray(data)) setSavedDims(data as SavedDim[]) })
-      .catch(() => {})
-      .finally(() => setLoadingSaved(false))
-  }, [open])
-
-  function add() {
+  async function add() {
     if (!name || !w || !h) return
-    const id = 'c-' + Math.random().toString(36).slice(2, 8)
-    dispatch({
-      type: 'ADD_CUSTOM',
-      fmt: { id, n: name, zf: name.replace(/\s+/g, '-'), platform: group || 'Custom', w: parseInt(w), h: parseInt(h) },
-    })
-    setName(''); setGroup(''); setW(''); setH('')
-  }
-
-  async function handleSave(fmt: FormatDef) {
-    setSavePending(true)
+    const width = parseInt(w), height = parseInt(h)
+    if (isNaN(width) || isNaN(height)) return
+    setAdding(true)
     try {
       const res = await fetch('/api/custom-dimensions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label: saveLabel.trim() || fmt.n, group: fmt.platform, width: fmt.w, height: fmt.h }),
+        body: JSON.stringify({ name, group: group || null, width, height }),
       })
-      const data = await res.json() as SavedDim
       if (res.ok) {
-        setSavedDims(prev => [data, ...prev])
-        setSavingId(null)
-        setSaveLabel('')
+        const saved = await res.json() as { id: string }
+        dispatch({
+          type: 'ADD_CUSTOM',
+          fmt: { id: saved.id, n: name, zf: name.replace(/\s+/g, '-'), platform: group || 'Custom', w: width, h: height },
+        })
+        setSavedCustomIds(prev => new Set([...prev, saved.id]))
+      } else {
+        // Not logged in or error — add with temp ID (session only)
+        dispatch({
+          type: 'ADD_CUSTOM',
+          fmt: { id: 'c-' + Math.random().toString(36).slice(2, 8), n: name, zf: name.replace(/\s+/g, '-'), platform: group || 'Custom', w: width, h: height },
+        })
       }
+    } catch {
+      dispatch({
+        type: 'ADD_CUSTOM',
+        fmt: { id: 'c-' + Math.random().toString(36).slice(2, 8), n: name, zf: name.replace(/\s+/g, '-'), platform: group || 'Custom', w: width, h: height },
+      })
     } finally {
-      setSavePending(false)
+      setAdding(false)
+      setName(''); setGroup(''); setW(''); setH('')
     }
   }
 
   async function deleteSaved(id: string) {
-    setSavedDims(prev => prev.filter(d => d.id !== id))
+    // Optimistic remove
+    dispatch({ type: 'REMOVE_CUSTOM', id })
+    setSavedCustomIds(prev => { const next = new Set(prev); next.delete(id); return next })
     await fetch(`/api/custom-dimensions/${id}`, { method: 'DELETE' })
   }
 
-  function useSaved(dim: SavedDim) {
-    const id = 'c-' + Math.random().toString(36).slice(2, 8)
-    dispatch({
-      type: 'ADD_CUSTOM',
-      fmt: { id, n: dim.label, zf: dim.label.replace(/\s+/g, '-'), platform: dim.group ?? 'Custom', w: dim.width, h: dim.height },
-    })
-  }
+  const totalCustom = state.custom.length
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden mb-2 bg-white shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition select-none" onClick={() => setOpen(p => !p)}>
+      <div
+        className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition select-none"
+        onClick={() => setOpen(p => !p)}
+      >
         <div className="flex items-center gap-2">
           <span className="text-base">✏️</span>
           <h3 className="text-[13px] font-bold text-gray-800">Custom Dimensions</h3>
-          {state.custom.length > 0 && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 ml-1">{state.custom.length}</span>
+          {totalCustom > 0 && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 ml-1">{totalCustom}</span>
           )}
         </div>
         <span className={`text-[10px] text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▾</span>
@@ -216,45 +309,65 @@ function CustomDimensions() {
       {open && (
         <div className="px-4 pb-4 pt-3 border-t border-gray-100">
 
-          {/* ── Saved dimensions ──────────────────────────────── */}
-          {loadingSaved && (
-            <p className="text-[11px] text-gray-400 mb-3">Loading saved dimensions…</p>
-          )}
-          {!loadingSaved && savedDims.length > 0 && (
+          {/* ── Saved custom dims as format cards ─────────────── */}
+          {savedDims.length > 0 && (
             <div className="mb-4">
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.6px] mb-2">Saved Dimensions</div>
-              <div className="flex flex-wrap gap-1.5">
-                {savedDims.map(dim => (
-                  <span key={dim.id} className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-[11px] font-medium text-indigo-700">
-                    <span>{dim.label}</span>
-                    <span className="text-indigo-400 font-normal">{dim.width}×{dim.height}</span>
-                    <button
-                      onClick={() => useSaved(dim)}
-                      title="Add to this session"
-                      className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-1.5 py-0.5 rounded transition"
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.6px] mb-2">Your saved dimensions</div>
+              <div className="grid gap-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
+                {savedDims.map(fmt => {
+                  const sel = state.selected.has(fmt.id)
+                  return (
+                    <div
+                      key={fmt.id}
+                      className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border transition-all ${sel ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-white hover:border-indigo-200 hover:bg-indigo-50'}`}
                     >
-                      + Use
-                    </button>
-                    <button
-                      onClick={() => deleteSaved(dim.id)}
-                      title="Delete saved dimension"
-                      className="text-indigo-300 hover:text-red-500 transition leading-none"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
+                      {/* Checkbox area */}
+                      <div
+                        onClick={() => dispatch({ type: 'TOGGLE_FORMAT', id: fmt.id })}
+                        className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+                      >
+                        <div className={`w-[15px] h-[15px] rounded-[4px] border-[1.5px] flex items-center justify-center flex-shrink-0 text-[8px] text-white transition-all ${sel ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'}`}>
+                          {sel && '✓'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-medium text-gray-800 leading-tight truncate">{fmt.n}</div>
+                          <div className="text-[10px] text-gray-400 mt-0.5">{fmt.w}×{fmt.h}</div>
+                        </div>
+                      </div>
+                      {/* Trash icon — permanent delete */}
+                      <button
+                        onClick={() => deleteSaved(fmt.id)}
+                        title="Permanently delete this saved dimension"
+                        className="flex-shrink-0 text-gray-300 hover:text-red-500 transition leading-none text-sm"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
 
-          {/* ── Add new ───────────────────────────────────────── */}
+          {/* ── Session-only dims (not saved, e.g. logged-out user) ── */}
+          {sessionDims.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {sessionDims.map(f => (
+                <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-[11px] font-medium text-gray-700">
+                  {f.n} <span className="text-gray-400">{f.w}×{f.h}</span>
+                  <button onClick={() => dispatch({ type: 'REMOVE_CUSTOM', id: f.id })} className="text-gray-400 hover:text-red-500 ml-0.5 text-xs leading-none">✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* ── Add new dimension form ────────────────────────── */}
           <p className="text-xs text-gray-500 mb-3">Add any dimensions not covered above — print specs, retail signage, bespoke placements.</p>
           <div className="flex gap-2 flex-wrap items-end">
             {[
-              { label: 'Name', val: name, set: setName, ph: 'Store Window', w: '140px' },
-              { label: 'Group', val: group, set: setGroup, ph: 'Retail', w: '100px' },
-            ].map(({ label, val, set, ph, w: fw }) => (
+              { label: 'Name', val: name, set: setName, ph: 'Store Window', fw: '140px' },
+              { label: 'Group', val: group, set: setGroup, ph: 'Retail', fw: '100px' },
+            ].map(({ label, val, set, ph, fw }) => (
               <div key={label} className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4px]">{label}</label>
                 <input
@@ -278,67 +391,18 @@ function CustomDimensions() {
                   placeholder={ph}
                   value={val}
                   onChange={e => set(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') add() }}
                 />
               </div>
             ))}
-            <button onClick={add} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition h-[34px]">+ Add</button>
+            <button
+              onClick={add}
+              disabled={adding || !name || !w || !h}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition h-[34px] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {adding ? '…' : '+ Add'}
+            </button>
           </div>
-
-          {/* ── Session chips with inline save ────────────────── */}
-          {state.custom.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2.5">
-              {state.custom.map(f => {
-                const isSaving = savingId === f.id
-                const alreadySaved = savedDims.some(d => d.width === f.w && d.height === f.h && d.label === f.n)
-                return isSaving ? (
-                  // Inline label input for saving
-                  <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-400 text-[11px] font-medium text-indigo-700">
-                    <input
-                      autoFocus
-                      value={saveLabel}
-                      onChange={e => setSaveLabel(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') handleSave(f); if (e.key === 'Escape') { setSavingId(null); setSaveLabel('') } }}
-                      placeholder={f.n}
-                      className="bg-transparent outline-none border-b border-indigo-300 w-28 text-[11px] placeholder-indigo-300"
-                    />
-                    <button
-                      onClick={() => handleSave(f)}
-                      disabled={savePending}
-                      title="Confirm save"
-                      className="text-indigo-500 hover:text-indigo-700 font-bold transition disabled:opacity-50"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={() => { setSavingId(null); setSaveLabel('') }}
-                      title="Cancel"
-                      className="text-indigo-300 hover:text-red-400 transition"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ) : (
-                  <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-[11px] font-medium text-gray-700">
-                    {f.n} <span className="text-gray-400">{f.w}×{f.h}</span>
-                    {/* Save for future use */}
-                    {!alreadySaved && (
-                      <button
-                        onClick={() => { setSavingId(f.id); setSaveLabel(f.n) }}
-                        title="Save for future use"
-                        className="text-gray-400 hover:text-indigo-500 transition text-xs leading-none"
-                      >
-                        🔖
-                      </button>
-                    )}
-                    {alreadySaved && (
-                      <span title="Already saved" className="text-indigo-400 text-xs leading-none">🔖</span>
-                    )}
-                    <button onClick={() => dispatch({ type: 'REMOVE_CUSTOM', id: f.id })} className="text-gray-400 hover:text-red-500 ml-0.5 text-xs leading-none">✕</button>
-                  </span>
-                )
-              })}
-            </div>
-          )}
         </div>
       )}
     </div>
