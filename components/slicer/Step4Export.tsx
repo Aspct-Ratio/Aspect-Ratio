@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { useSlicer } from './SlicerContext'
 import { getSelectedFormats } from '@/lib/formats'
 import { renderToCanvas, canvasToBlob, buildFilename, getFolderParts } from '@/lib/crop'
