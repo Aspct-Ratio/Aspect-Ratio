@@ -1,9 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CHANNELS } from '@/lib/formats'
 import { useSlicer } from './SlicerContext'
 import type { FormatDef } from '@/types/slicer'
+
+interface SavedDim {
+  id: string
+  label: string
+  group: string | null
+  width: number
+  height: number
+  created_at: string
+}
 
 const TAG_CLASSES: Record<string, string> = {
   't-soc': 'bg-indigo-50 text-indigo-600',
@@ -129,6 +138,26 @@ function CustomDimensions() {
   const [w, setW] = useState('')
   const [h, setH] = useState('')
 
+  // Saved dimensions from Supabase
+  const [savedDims, setSavedDims] = useState<SavedDim[]>([])
+  const [loadingSaved, setLoadingSaved] = useState(false)
+
+  // Inline save UX: which session chip is in "name + save" mode
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [saveLabel, setSaveLabel] = useState('')
+  const [savePending, setSavePending] = useState(false)
+
+  // Load saved dims when the panel opens
+  useEffect(() => {
+    if (!open) return
+    setLoadingSaved(true)
+    fetch('/api/custom-dimensions')
+      .then(r => r.json())
+      .then((data: unknown) => { if (Array.isArray(data)) setSavedDims(data as SavedDim[]) })
+      .catch(() => {})
+      .finally(() => setLoadingSaved(false))
+  }, [open])
+
   function add() {
     if (!name || !w || !h) return
     const id = 'c-' + Math.random().toString(36).slice(2, 8)
@@ -137,6 +166,38 @@ function CustomDimensions() {
       fmt: { id, n: name, zf: name.replace(/\s+/g, '-'), platform: group || 'Custom', w: parseInt(w), h: parseInt(h) },
     })
     setName(''); setGroup(''); setW(''); setH('')
+  }
+
+  async function handleSave(fmt: FormatDef) {
+    setSavePending(true)
+    try {
+      const res = await fetch('/api/custom-dimensions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: saveLabel.trim() || fmt.n, group: fmt.platform, width: fmt.w, height: fmt.h }),
+      })
+      const data = await res.json() as SavedDim
+      if (res.ok) {
+        setSavedDims(prev => [data, ...prev])
+        setSavingId(null)
+        setSaveLabel('')
+      }
+    } finally {
+      setSavePending(false)
+    }
+  }
+
+  async function deleteSaved(id: string) {
+    setSavedDims(prev => prev.filter(d => d.id !== id))
+    await fetch(`/api/custom-dimensions/${id}`, { method: 'DELETE' })
+  }
+
+  function useSaved(dim: SavedDim) {
+    const id = 'c-' + Math.random().toString(36).slice(2, 8)
+    dispatch({
+      type: 'ADD_CUSTOM',
+      fmt: { id, n: dim.label, zf: dim.label.replace(/\s+/g, '-'), platform: dim.group ?? 'Custom', w: dim.width, h: dim.height },
+    })
   }
 
   return (
@@ -154,6 +215,40 @@ function CustomDimensions() {
 
       {open && (
         <div className="px-4 pb-4 pt-3 border-t border-gray-100">
+
+          {/* ── Saved dimensions ──────────────────────────────── */}
+          {loadingSaved && (
+            <p className="text-[11px] text-gray-400 mb-3">Loading saved dimensions…</p>
+          )}
+          {!loadingSaved && savedDims.length > 0 && (
+            <div className="mb-4">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.6px] mb-2">Saved Dimensions</div>
+              <div className="flex flex-wrap gap-1.5">
+                {savedDims.map(dim => (
+                  <span key={dim.id} className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-md bg-indigo-50 border border-indigo-200 text-[11px] font-medium text-indigo-700">
+                    <span>{dim.label}</span>
+                    <span className="text-indigo-400 font-normal">{dim.width}×{dim.height}</span>
+                    <button
+                      onClick={() => useSaved(dim)}
+                      title="Add to this session"
+                      className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-1.5 py-0.5 rounded transition"
+                    >
+                      + Use
+                    </button>
+                    <button
+                      onClick={() => deleteSaved(dim.id)}
+                      title="Delete saved dimension"
+                      className="text-indigo-300 hover:text-red-500 transition leading-none"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Add new ───────────────────────────────────────── */}
           <p className="text-xs text-gray-500 mb-3">Add any dimensions not covered above — print specs, retail signage, bespoke placements.</p>
           <div className="flex gap-2 flex-wrap items-end">
             {[
@@ -162,7 +257,13 @@ function CustomDimensions() {
             ].map(({ label, val, set, ph, w: fw }) => (
               <div key={label} className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4px]">{label}</label>
-                <input className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition" style={{ width: fw }} placeholder={ph} value={val} onChange={e => set(e.target.value)} />
+                <input
+                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                  style={{ width: fw }}
+                  placeholder={ph}
+                  value={val}
+                  onChange={e => set(e.target.value)}
+                />
               </div>
             ))}
             {[
@@ -171,20 +272,71 @@ function CustomDimensions() {
             ].map(({ label, val, set, ph }) => (
               <div key={label} className="flex flex-col gap-1">
                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4px]">{label}</label>
-                <input type="number" className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition w-20" placeholder={ph} value={val} onChange={e => set(e.target.value)} />
+                <input
+                  type="number"
+                  className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition w-20"
+                  placeholder={ph}
+                  value={val}
+                  onChange={e => set(e.target.value)}
+                />
               </div>
             ))}
             <button onClick={add} className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition h-[34px]">+ Add</button>
           </div>
 
+          {/* ── Session chips with inline save ────────────────── */}
           {state.custom.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2.5">
-              {state.custom.map(f => (
-                <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-[11px] font-medium text-gray-700">
-                  {f.n} <span className="text-gray-400">{f.w}×{f.h}</span>
-                  <button onClick={() => dispatch({ type: 'REMOVE_CUSTOM', id: f.id })} className="text-gray-400 hover:text-red-500 ml-0.5 text-xs leading-none">✕</button>
-                </span>
-              ))}
+              {state.custom.map(f => {
+                const isSaving = savingId === f.id
+                const alreadySaved = savedDims.some(d => d.width === f.w && d.height === f.h && d.label === f.n)
+                return isSaving ? (
+                  // Inline label input for saving
+                  <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-400 text-[11px] font-medium text-indigo-700">
+                    <input
+                      autoFocus
+                      value={saveLabel}
+                      onChange={e => setSaveLabel(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleSave(f); if (e.key === 'Escape') { setSavingId(null); setSaveLabel('') } }}
+                      placeholder={f.n}
+                      className="bg-transparent outline-none border-b border-indigo-300 w-28 text-[11px] placeholder-indigo-300"
+                    />
+                    <button
+                      onClick={() => handleSave(f)}
+                      disabled={savePending}
+                      title="Confirm save"
+                      className="text-indigo-500 hover:text-indigo-700 font-bold transition disabled:opacity-50"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => { setSavingId(null); setSaveLabel('') }}
+                      title="Cancel"
+                      className="text-indigo-300 hover:text-red-400 transition"
+                    >
+                      ✕
+                    </button>
+                  </span>
+                ) : (
+                  <span key={f.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 border border-gray-200 text-[11px] font-medium text-gray-700">
+                    {f.n} <span className="text-gray-400">{f.w}×{f.h}</span>
+                    {/* Save for future use */}
+                    {!alreadySaved && (
+                      <button
+                        onClick={() => { setSavingId(f.id); setSaveLabel(f.n) }}
+                        title="Save for future use"
+                        className="text-gray-400 hover:text-indigo-500 transition text-xs leading-none"
+                      >
+                        🔖
+                      </button>
+                    )}
+                    {alreadySaved && (
+                      <span title="Already saved" className="text-indigo-400 text-xs leading-none">🔖</span>
+                    )}
+                    <button onClick={() => dispatch({ type: 'REMOVE_CUSTOM', id: f.id })} className="text-gray-400 hover:text-red-500 ml-0.5 text-xs leading-none">✕</button>
+                  </span>
+                )
+              })}
             </div>
           )}
         </div>
