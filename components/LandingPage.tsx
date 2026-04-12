@@ -199,7 +199,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               <div className="w-3 h-3 rounded-full bg-[#FC625D]" />
               <div className="w-3 h-3 rounded-full bg-[#FDBC40]" />
               <div className="w-3 h-3 rounded-full bg-[#34C749]" />
-              <div className="ml-3 flex-1 bg-gray-100 rounded-md h-[26px] max-w-[340px] flex items-center px-3 text-xs text-gray-500">app.aspct.io / adjust</div>
+              <div className="ml-3 flex-1 bg-gray-100 rounded-md h-[26px] max-w-[340px] flex items-center px-3 text-xs text-gray-500">app.aspctratio.com / adjust</div>
             </div>
             {/* Mock UI */}
             <div className="p-8">
@@ -224,12 +224,13 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 {/* Left: mock crop card */}
                 <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
                   <div className="px-3.5 py-2.5 bg-white border-b border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-700">
-                    <span>UGG_SpringCampaign_Hero.jpg</span>
+                    <span>BrandName_SpringCampaign_Hero.jpg</span>
                     <span className="text-gray-400 font-normal">Instagram Story · 1080 × 1920</span>
                   </div>
                   <div className="h-44 flex items-center justify-center">
-                    <div className="w-28 h-40 bg-gray-200 rounded relative overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-200 via-indigo-300 to-indigo-400 opacity-70" />
+                    <div className="w-28 h-40 rounded relative overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover object-[50%_30%]" />
                       <div className="absolute inset-0 border-2 border-indigo-600">
                         {[['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']].map(([t,l],i) => (
                           <div key={i} className={`absolute w-2 h-2 border-2 border-indigo-600 bg-white rounded-[1px] ${t} ${l}`} />
@@ -247,15 +248,16 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                   </div>
                   <div className="grid grid-cols-3 gap-2 p-3">
                     {[
-                      { label: 'Feed Sq', cls: 'aspect-square' },
-                      { label: 'Story', cls: 'aspect-[9/16]' },
-                      { label: 'YT Cover', cls: 'aspect-video' },
-                      { label: 'PDP Hero', cls: 'aspect-square' },
-                      { label: 'Banner', cls: 'aspect-video' },
-                      { label: 'TikTok', cls: 'aspect-[9/16]' },
-                    ].map(({ label, cls }) => (
-                      <div key={label} className="rounded-md overflow-hidden relative bg-gray-100">
-                        <div className={`w-full ${cls} bg-gradient-to-br from-indigo-100 to-indigo-200`} />
+                      { label: 'Feed Sq', cls: 'aspect-square', pos: '50% 40%' },
+                      { label: 'Story', cls: 'aspect-[9/16]', pos: '50% 30%' },
+                      { label: 'YT Cover', cls: 'aspect-video', pos: '50% 35%' },
+                      { label: 'PDP Hero', cls: 'aspect-square', pos: '60% 40%' },
+                      { label: 'Banner', cls: 'aspect-video', pos: '50% 45%' },
+                      { label: 'TikTok', cls: 'aspect-[9/16]', pos: '45% 30%' },
+                    ].map(({ label, cls, pos }) => (
+                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/Bach1.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[8px] font-semibold px-1 py-0.5">{label}</div>
                       </div>
                     ))}
