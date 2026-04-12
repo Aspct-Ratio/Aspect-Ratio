@@ -153,14 +153,17 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         </div>
       </section>
 
-      {/* ── CREDIBILITY LINE ────────────────────────────────── */}
-      <div className="bg-white pt-10 pb-6 px-6">
-        <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
+      {/* ── PROOF BAR ───────────────────────────────────────── */}
+      <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
+        <div className="max-w-[900px] mx-auto flex items-center justify-center">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
+        </div>
       </div>
 
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
-      <section className="py-16 px-6 bg-gray-50">
+      <section className="pt-12 pb-16 px-6 bg-gray-50">
         <div className="max-w-[900px] mx-auto">
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             {/* Window chrome */}
             <div className="h-11 bg-gray-50 border-b border-gray-200 flex items-center gap-2 px-4">
@@ -250,13 +253,6 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </div>
         </div>
       </section>
-
-      {/* ── PROOF BAR ───────────────────────────────────────── */}
-      <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
-        <div className="max-w-[900px] mx-auto flex items-center justify-center">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
-        </div>
-      </div>
 
       {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
       <section id="features" className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
