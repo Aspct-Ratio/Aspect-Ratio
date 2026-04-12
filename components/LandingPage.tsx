@@ -15,39 +15,51 @@ function ep(elapsed: number, startMs: number, endMs: number) {
 
 function MockupCropDemo() {
   const [anim, setAnim] = useState({
-    cursorX: 60, cursorY: 45, panX: 0, panY: 0, zoom: 100, pressing: false, visible: false,
+    cursorX: 60, cursorY: 44, panX: 0, panY: 0, zoom: 100, pressing: false, visible: false,
   })
 
   useEffect(() => {
+    // Sequence: appear → move to slider → zoom up → move to image → drag pan → release → reset
+    // Pan only happens AFTER zoom > 100%, so the image always fully covers the frame.
     const LOOP = 12000
     const t0 = Date.now()
     const id = setInterval(() => {
       const e = (Date.now() - t0) % LOOP
 
-      // ── Cursor position ──────────────────────────────────
-      let cx = 60, cy = 45
-      if (e < 3500)                    { cx = lerp(62, 30, ep(e, 600, 3500));  cy = lerp(44, 58, ep(e, 600, 3500)) }   // drag left-down
-      else if (e < 4400)               { cx = lerp(30, 86, ep(e, 3500, 4400)); cy = lerp(58, 84, ep(e, 3500, 4400)) }  // arc to slider
-      else if (e < 8200)               { cx = 86; cy = 84 }                                                              // hold on slider
-      else if (e < 8800)               { cx = lerp(86, 48, ep(e, 8200, 8800)); cy = lerp(84, 42, ep(e, 8200, 8800)) }  // back to image
-      else if (e < 11300)              { cx = lerp(48, 74, ep(e, 8800, 11300)); cy = lerp(42, 54, ep(e, 8800, 11300)) } // drag right
-      else                             { cx = 74; cy = 54 }
+      // ── Cursor ───────────────────────────────────────────
+      let cx = 60, cy = 44
+      if (e < 800)                     { cx = 60;  cy = 44 }                                                               // appear
+      else if (e < 1700)               { cx = lerp(60, 88, ep(e, 800, 1700));  cy = lerp(44, 86, ep(e, 800, 1700)) }      // arc to slider
+      else if (e < 6200)               { cx = 88;  cy = 86 }                                                               // hold on slider while zoom increases
+      else if (e < 7000)               { cx = lerp(88, 52, ep(e, 6200, 7000)); cy = lerp(86, 42, ep(e, 6200, 7000)) }     // arc back to image
+      else if (e < 9800)               { cx = lerp(52, 28, ep(e, 7000, 9800)); cy = lerp(42, 60, ep(e, 7000, 9800)) }     // drag left-down
+      else if (e < 10500)              { cx = lerp(28, 68, ep(e, 9800, 10500)); cy = lerp(60, 46, ep(e, 9800, 10500)) }   // drag back right
+      else if (e < 11200)              { cx = lerp(68, 88, ep(e, 10500, 11200)); cy = lerp(46, 86, ep(e, 10500, 11200)) } // arc to slider to reset
+      else                             { cx = 88;  cy = 86 }
 
       // ── Pressing ─────────────────────────────────────────
-      const pressing = (e >= 600 && e < 3500) || (e >= 8800 && e < 11300)
+      const pressing = e >= 7000 && e < 10500
 
-      // ── Pan (% — pre-zoom space) ──────────────────────────
-      let panX = 0, panY = 0
-      if (e >= 600 && e < 3500)        { panX = lerp(0, -9, ep(e, 600, 3500));   panY = lerp(0, 4, ep(e, 600, 3500)) }
-      else if (e >= 3500 && e < 8800)  { panX = -9; panY = 4 }
-      else if (e >= 8800 && e < 11300) { panX = lerp(-9, 7, ep(e, 8800, 11300)); panY = lerp(4, -3, ep(e, 8800, 11300)) }
-      else if (e >= 11300)             { panX = lerp(7, 0, ep(e, 11300, 12000)); panY = lerp(-3, 0, ep(e, 11300, 12000)) }
-
-      // ── Zoom 100 → 180 → 100 ─────────────────────────────
+      // ── Zoom: 100 → 175 → 100 ────────────────────────────
+      // Zoom happens FIRST so panning is always safe
       let zoom = 100
-      if (e >= 4800 && e < 8200)       { zoom = lerp(100, 180, ep(e, 4800, 8200)) }
-      else if (e >= 8200 && e < 11300) { zoom = 180 }
-      else if (e >= 11300)             { zoom = lerp(180, 100, ep(e, 11300, 12000)) }
+      if (e >= 1700 && e < 6200)       { zoom = lerp(100, 175, ep(e, 1700, 6200)) }
+      else if (e >= 6200 && e < 11200) { zoom = 175 }
+      else if (e >= 11200)             { zoom = lerp(175, 100, ep(e, 11200, 12000)) }
+
+      // ── Pan: only after zoom is up ────────────────────────
+      // maxSafePan(z) = (z-1)/(2z)*100 — the furthest % we can translate
+      // without revealing any background behind the image edge.
+      const z = zoom / 100
+      const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
+
+      let rawPanX = 0, rawPanY = 0
+      if (e >= 7000 && e < 9800)       { rawPanX = lerp(0, -14, ep(e, 7000, 9800));  rawPanY = lerp(0, 6, ep(e, 7000, 9800)) }
+      else if (e >= 9800 && e < 11200) { rawPanX = lerp(-14, 0, ep(e, 9800, 11200)); rawPanY = lerp(6, 0, ep(e, 9800, 11200)) }
+
+      // Hard clamp — image never reveals empty space regardless of float drift
+      const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
+      const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
 
       setAnim({ cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom), pressing, visible: e > 300 && e < 11800 })
     }, 33)
@@ -55,12 +67,12 @@ function MockupCropDemo() {
   }, [])
 
   const { cursorX, cursorY, panX, panY, zoom, pressing, visible } = anim
-  // 100→180% maps to 0→100% on the slider track
-  const sliderPct = Math.round(Math.max(0, Math.min(100, (zoom - 100) / 80 * 100)))
+  // 100→175 maps to 0→100% on the slider track
+  const sliderPct = Math.round(Math.max(0, Math.min(100, (zoom - 100) / 75 * 100)))
 
   return (
     <div className="flex flex-col items-center px-4 py-4">
-      {/* Crop viewport — 270×480 (9:16) */}
+      {/* Crop viewport — 270×480 (9:16), overflow-hidden clips the image to frame at all times */}
       <div className="relative rounded-lg overflow-hidden" style={{ width: 270, height: 480 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
