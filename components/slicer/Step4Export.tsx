@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useSlicer } from './SlicerContext'
 import { getSelectedFormats } from '@/lib/formats'
 import { renderToCanvas, canvasToBlob, buildFilename, getFolderParts } from '@/lib/crop'
@@ -33,6 +33,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
   const [progressLabel, setProgressLabel] = useState('')
   const [exporting, setExporting] = useState(false)
   const [done, setDone] = useState(false)
+  const [outputOpen, setOutputOpen] = useState(false)
 
   const fmts = getSelectedFormats(state.selected, state.custom)
   const efArr = Array.from(state.exportFormats)
@@ -200,9 +201,60 @@ export default function Step4Export({ onBack, onReset }: Props) {
         <div>
           <FolderStructure />
 
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.7px] mb-2 mt-4">Output Preview</div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow p-3 max-h-[240px] overflow-y-auto mb-3.5">
-            <pre className="font-mono text-[11px] text-gray-500 whitespace-pre overflow-x-auto">{treeLines.join('\n')}</pre>
+          {/* Output Preview — collapsible */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 mb-3.5 mt-1">
+            <button
+              onClick={() => setOutputOpen(o => !o)}
+              className="w-full flex items-center justify-between group"
+            >
+              <span className="flex items-center gap-1 text-xs font-semibold text-gray-600">
+                Show output preview
+                <span className="group/tip relative inline-flex items-center ml-1">
+                  <span className="w-[14px] h-[14px] rounded-full bg-gray-200 text-gray-500 text-[9px] font-bold flex items-center justify-center cursor-default select-none">?</span>
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 z-20 w-48 bg-gray-900 text-white text-[11px] leading-snug rounded-lg px-2.5 py-1.5 opacity-0 group-hover/tip:opacity-100 pointer-events-none transition-opacity whitespace-normal">
+                    Preview your complete folder structure before exporting
+                  </span>
+                </span>
+              </span>
+              <svg
+                width="14" height="14" viewBox="0 0 14 14" fill="none"
+                className={`text-gray-400 transition-transform duration-200 ${outputOpen ? 'rotate-180' : ''}`}
+              >
+                <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {outputOpen && (
+              <div className="mt-3 bg-gray-50 rounded-lg border border-gray-200 px-3 py-3 max-h-[260px] overflow-y-auto">
+                {treeLines.map((line, i) => {
+                  const trimmed = line.trimStart()
+                  const depth = (line.length - trimmed.length) / 2
+                  const isFile = trimmed.startsWith('📄')
+                  const name = trimmed.replace(/^📁 |^📄 /, '').replace(/\/$/, '')
+                  return (
+                    <div key={i} className="flex items-center gap-1.5 py-[3px]" style={{ paddingLeft: depth * 16 }}>
+                      {isFile ? (
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="flex-shrink-0 text-gray-300">
+                          <rect x="1" y="1" width="8" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                          <path d="M3.5 4.5h5M3.5 6.5h5M3.5 8.5h3" stroke="currentColor" strokeWidth="1"/>
+                        </svg>
+                      ) : (
+                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="flex-shrink-0 text-indigo-400">
+                          <path d="M1 3.5C1 2.67 1.67 2 2.5 2h2.62c.35 0 .68.14.92.4l.76.82H10.5c.83 0 1.5.67 1.5 1.5V10c0 .83-.67 1.5-1.5 1.5h-8C1.67 11.5 1 10.83 1 10V3.5z" fill="#EEF2FF" stroke="#818CF8" strokeWidth="1"/>
+                        </svg>
+                      )}
+                      <span className={isFile
+                        ? 'text-[11px] text-gray-400 font-mono'
+                        : depth === 0
+                          ? 'text-[12px] font-bold text-gray-800'
+                          : 'text-[11px] font-semibold text-gray-700'
+                      }>
+                        {name}{!isFile ? '/' : ''}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           <button
