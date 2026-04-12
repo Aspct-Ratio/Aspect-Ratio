@@ -154,9 +154,10 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </section>
 
       {/* ── PROOF BAR ───────────────────────────────────────── */}
-      <div className="border-t border-b border-gray-100 bg-white py-5 px-6">
-        <div className="max-w-[900px] mx-auto flex items-center justify-center gap-10 flex-wrap">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">Brands · Agencies · Studios · Creatives</span>
+      <div className="border-t border-b border-gray-100 bg-white py-8 px-6">
+        <div className="max-w-[900px] mx-auto flex flex-col items-center gap-5">
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] text-center">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
         </div>
       </div>
 
@@ -256,7 +257,6 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
       <section id="features" className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-[1100px] mx-auto">
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
           <div className="flex items-center gap-3 mb-10">
             <div className="h-px flex-1 bg-gray-200" />
             <span className="text-[11px] font-bold uppercase tracking-[1.2px] text-gray-400">What you get</span>
