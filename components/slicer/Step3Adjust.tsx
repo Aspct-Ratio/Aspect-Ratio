@@ -78,8 +78,41 @@ export default function Step3Adjust({ onBack, onNext }: Props) {
         </div>
       )}
       {file && fmts.length > 0 && (
-        <div className="grid gap-3.5 mt-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))' }}>
-          {fmts.map(fmt => <CropCard key={fmt.id} fmt={fmt} file={file} />)}
+        <div className="mt-1.5 space-y-6">
+          {(() => {
+            // Group formats by channel, preserving catalogue order
+            const groups: { ck: string; label: string; formats: typeof fmts }[] = []
+            const seen = new Map<string, number>()
+            for (const fmt of fmts) {
+              const ck = fmt.ck ?? 'custom'
+              const label = fmt.cl ?? 'Custom'
+              if (!seen.has(ck)) {
+                seen.set(ck, groups.length)
+                groups.push({ ck, label, formats: [] })
+              }
+              groups[seen.get(ck)!].formats.push(fmt)
+            }
+            const SECTION_LABELS: Record<string, string> = {
+              social:  'SOCIAL MEDIA',
+              ecomm:   'ECOMMERCE',
+              paid:    'PAID MEDIA',
+              retail:  'RETAIL & OOH',
+              custom:  'CUSTOM',
+            }
+            return groups.map(({ ck, label, formats }) => (
+              <div key={ck}>
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.8px] whitespace-nowrap">
+                    {SECTION_LABELS[ck] ?? label.toUpperCase()}
+                  </span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))' }}>
+                  {formats.map(fmt => <CropCard key={fmt.id} fmt={fmt} file={file} />)}
+                </div>
+              </div>
+            ))
+          })()}
         </div>
       )}
 
