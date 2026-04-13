@@ -5,7 +5,7 @@ interface Props {
   dark?: boolean
 }
 
-export default function LogoMark({ height = 40, dark = false }: Props) {
+export default function LogoMark({ height = 75, dark = false }: Props) {
   return (
     <Image
       src="/images/logo.jpg"

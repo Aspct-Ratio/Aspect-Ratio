@@ -82,7 +82,7 @@ function CheckoutConfirmForm() {
       {/* Header */}
       <header className="bg-white border-b border-gray-100 px-6 h-[64px] flex items-center justify-between flex-shrink-0">
         <Link href="/" className="no-underline">
-          <LogoMark height={38} />
+          <LogoMark height={75} />
         </Link>
         <Link href="/#pricing" className="text-sm text-gray-500 hover:text-gray-800 transition no-underline">
           ← Back to plans
