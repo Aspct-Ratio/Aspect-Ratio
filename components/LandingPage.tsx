@@ -194,14 +194,16 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── NAV ─────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         {/* ── Desktop & mobile top bar ── */}
-        <div className="flex items-center justify-between h-[72px] sm:h-[80px] px-5 sm:px-10">
+        <div className="grid h-[72px] sm:h-[80px] px-5 sm:px-10" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
 
-          {/* Logo */}
-          <Link href="/" className="no-underline flex-shrink-0">
-            <LogoMark height={38} />
-          </Link>
+          {/* Left: Logo */}
+          <div className="flex items-center">
+            <Link href="/" className="no-underline flex-shrink-0">
+              <LogoMark height={75} />
+            </Link>
+          </div>
 
-          {/* Center nav links — desktop only */}
+          {/* Center nav links — desktop only, truly centered */}
           <div className="hidden md:flex items-center gap-7">
             <a href="#how-it-works" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">HOW IT WORKS</a>
             <a href="#features" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">FEATURES</a>
@@ -209,8 +211,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">SEE PLANS</a>
           </div>
 
-          {/* Right auth actions — desktop only */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Right: auth actions — desktop only */}
+          <div className="hidden md:flex items-center justify-end gap-2">
             {isLoggedIn ? (
               <>
                 <Link href="/app" className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
@@ -235,22 +237,24 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             )}
           </div>
 
-          {/* Hamburger — mobile only */}
-          <button
-            className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            )}
-          </button>
+          {/* Hamburger — mobile only (sits in right column) */}
+          <div className="md:hidden flex items-center justify-end">
+            <button
+              className="flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* ── Mobile dropdown menu ── */}
@@ -720,7 +724,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       <footer className="bg-gray-900 border-t border-white/[0.06] py-8 px-6">
         <div className="max-w-[1100px] mx-auto flex items-center justify-between flex-wrap gap-4">
           <Link href="/" className="no-underline">
-            <LogoMark height={36} dark />
+            <LogoMark height={75} dark />
           </Link>
           <span className="text-[13px] text-gray-600">© 2026 ASPCT RATIO LLC. All rights reserved.</span>
           <div className="flex gap-5">
