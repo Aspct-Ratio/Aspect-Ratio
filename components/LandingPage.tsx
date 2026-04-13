@@ -616,7 +616,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
                   '15 projects / month',
-                  'Up to 50 files per project',
+                  'Up to 150 files per project',
                   'All export types — JPG, PNG, WebP, PDF, TIFF',
                   'Custom naming & folder structure',
                   '5 team seats',
@@ -647,7 +647,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
                   'Unlimited projects',
-                  'Up to 50 files per project',
+                  'Unlimited files per project',
                   'All export types',
                   'API access',
                   '20 team seats',
