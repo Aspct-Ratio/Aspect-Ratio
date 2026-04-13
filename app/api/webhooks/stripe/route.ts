@@ -8,9 +8,9 @@ function getStripe() {
 
 function getPriceToPlан(): Record<string, string> {
   return {
-    [process.env.STRIPE_PRICE_FREELANCER!]: 'freelancer',
-    [process.env.STRIPE_PRICE_STUDIO!]:     'studio',
-    [process.env.STRIPE_PRICE_AGENCY!]:     'agency',
+    [process.env.STRIPE_FREELANCER_PRICE_ID!]: 'freelancer',
+    [process.env.STRIPE_STUDIO_PRICE_ID!]:     'studio',
+    [process.env.STRIPE_AGENCY_PRICE_ID!]:     'agency',
   }
 }
 
