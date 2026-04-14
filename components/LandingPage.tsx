@@ -298,9 +298,6 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section className="pt-24 pb-20 px-6 text-center bg-gradient-to-b from-white to-gray-50">
-        <div className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs font-semibold tracking-[0.5px] uppercase px-3 py-1.5 rounded-full mb-7">
-          <span>✦</span> Now live · Free to start
-        </div>
         <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[900px] mx-auto mb-5">
           BUILT FOR THE WAY<br />
           <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">CAMPAIGNS ACTUALLY WORK.</em>
