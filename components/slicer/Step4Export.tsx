@@ -163,14 +163,32 @@ export default function Step4Export({ onBack, onReset }: Props) {
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">EXPORT YOUR ASSETS</h1>
-      <p className="text-sm text-gray-500 mb-1">
-        {total} file{total !== 1 ? 's' : ''} ready — {state.files.length} asset{state.files.length !== 1 ? 's' : ''} × {fmts.length} format{fmts.length !== 1 ? 's' : ''} × {efArr.length} type{efArr.length !== 1 ? 's' : ''}
-      </p>
+      <div className="mb-6">
+        <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">Ready to export</h1>
+        <p className="text-sm text-gray-500">
+          {state.files.length} asset{state.files.length !== 1 ? 's' : ''} × {fmts.length} format{fmts.length !== 1 ? 's' : ''} × {efArr.length} file type{efArr.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Summary + primary download CTA */}
+      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-6 py-5 mb-6 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-base font-bold text-indigo-900">All set! Your {total} file{total !== 1 ? 's' : ''} are ready.</p>
+          <p className="text-sm text-indigo-600 mt-0.5">{folderNote}</p>
+        </div>
+        <button
+          onClick={dlAll}
+          disabled={exporting}
+          className={`flex items-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-xl transition flex-shrink-0 ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
+        >
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 10.5L3 6h3V1.5h3V6h3L7.5 10.5z" fill="currentColor"/><rect x="1.5" y="12" width="12" height="1.5" rx="0.75" fill="currentColor"/></svg>
+          {done ? 'Downloaded ✓' : exporting ? 'Building ZIP…' : 'Download all as ZIP'}
+        </button>
+      </div>
 
       {/* Progress */}
       {(exporting || done) && (
-        <div className="mt-3">
+        <div className="mb-5">
           <div className="h-[3px] bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
@@ -178,25 +196,31 @@ export default function Step4Export({ onBack, onReset }: Props) {
         </div>
       )}
 
-      <div className="grid gap-5 mt-4.5" style={{ gridTemplateColumns: '1fr 340px' }}>
+      <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 340px' }}>
         {/* Left: file list */}
         <div>
-          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.7px] mb-2">Files Ready</div>
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="text-sm font-bold text-gray-700 mb-3">Your exports</div>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden max-h-[420px] overflow-y-auto">
             {pairs.slice(0, 50).map(({ file, fmt, ef }, i) => {
               const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
               const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext
               return (
-                <div key={i} className="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-50 transition">
-                  <span className="text-[13px] text-gray-400">◻</span>
-                  <span className="font-mono text-[11px] text-gray-700 flex-1 truncate">{fn}</span>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${TAG_CLASSES[fmt.pc ?? 't-soc'] ?? ''}`}>{fmt.pf}</span>
-                  <button onClick={() => dlSingle(file.id, fmt.id, ef)} className="text-xs border border-gray-200 rounded px-2 py-0.5 font-medium text-gray-600 hover:bg-gray-50 transition flex-shrink-0">↓</button>
+                <div key={i} className={`flex items-center gap-3 px-4 py-3 border-b border-gray-100 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-300 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-800 flex-1 truncate">{fn}</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded flex-shrink-0 ${TAG_CLASSES[fmt.pc ?? 't-soc'] ?? ''}`}>{fmt.pf}</span>
+                  <button
+                    onClick={() => dlSingle(file.id, fmt.id, ef)}
+                    className="text-xs font-semibold border border-gray-200 rounded-lg px-3 py-1 text-gray-600 bg-white hover:bg-gray-50 transition flex-shrink-0 flex items-center gap-1"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 7.5L2 4h2V1h3v3h2L5.5 7.5z" fill="currentColor"/><rect x="1" y="9" width="9" height="1" rx="0.5" fill="currentColor"/></svg>
+                    Download
+                  </button>
                 </div>
               )
             })}
             {pairs.length > 50 && (
-              <div className="px-2.5 py-2 text-xs text-gray-400">…and {pairs.length - 50} more included in ZIP</div>
+              <div className="px-4 py-3 text-sm text-gray-400">…and {pairs.length - 50} more included in ZIP</div>
             )}
           </div>
         </div>
@@ -264,11 +288,11 @@ export default function Step4Export({ onBack, onReset }: Props) {
           <button
             onClick={dlAll}
             disabled={exporting}
-            className={`w-full py-3 font-semibold text-sm rounded-lg transition ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
+            className={`w-full py-3 font-semibold text-sm rounded-xl transition flex items-center justify-center gap-2 ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
           >
-            {done ? '✓ Downloaded' : exporting ? 'Building ZIP…' : '↓  Download All as ZIP'}
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 10.5L3 6h3V1.5h3V6h3L7.5 10.5z" fill="currentColor"/><rect x="1.5" y="12" width="12" height="1.5" rx="0.75" fill="currentColor"/></svg>
+            {done ? 'Downloaded ✓' : exporting ? 'Building ZIP…' : 'Download all as ZIP'}
           </button>
-          <p className="text-[11px] text-gray-400 text-center mt-2">{folderNote}</p>
         </div>
       </div>
 
