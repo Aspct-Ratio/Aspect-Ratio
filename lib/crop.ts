@@ -89,16 +89,25 @@ export function buildFilename(opts: {
   // Build client prefix: Brand or Brand_Campaign
   const clientPrefix = camp ? `${cl}_${camp}` : cl
 
+  const platVal = fmt.pf ?? fmt.platform ?? 'Pl'
+  const chanVal = fmt.cf ?? 'Ch'
+
   return pattern
-    .replace('{client}', clientPrefix)
-    .replace('{channel}', fmt.cf ?? 'Ch')
-    .replace('{platform}', fmt.pf ?? fmt.platform ?? 'Pl')
-    .replace('{width}x{height}', `${fmt.w}x${fmt.h}`)
-    .replace('{width}', String(fmt.w))
-    .replace('{height}', String(fmt.h))
-    .replace('{dimension}', `${fmt.w}x${fmt.h}`)
-    .replace('{assetname}', an)
-    .replace('{date}', dt)
+    // Named aliases (friendlier)
+    .replace(/{brand}/g, clientPrefix)
+    .replace(/{campaign}/g, camp || cl)
+    .replace(/{format}/g, platVal)
+    .replace(/{asset}/g, an)
+    // Original tokens
+    .replace(/{client}/g, clientPrefix)
+    .replace(/{channel}/g, chanVal)
+    .replace(/{platform}/g, platVal)
+    .replace(/{width}x{height}/g, `${fmt.w}x${fmt.h}`)
+    .replace(/{width}/g, String(fmt.w))
+    .replace(/{height}/g, String(fmt.h))
+    .replace(/{dimension}/g, `${fmt.w}x${fmt.h}`)
+    .replace(/{assetname}/g, an)
+    .replace(/{date}/g, dt)
 }
 
 /** Get ordered folder path parts for a given format */
