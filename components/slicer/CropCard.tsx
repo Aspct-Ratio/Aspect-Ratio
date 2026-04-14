@@ -128,22 +128,31 @@ function ZoomControl({ crop, fmt, file, onCropChange }: {
   onCropChange: (c: CropState) => void
 }) {
   function onZoom(val: number) {
-    const c = { ...crop, zoom: Math.max(1, val / 100) }
+    const clamped = Math.max(100, Math.min(400, val))
+    const c = { ...crop, zoom: clamped / 100 }
     clampCrop(c, fmt, file)
     onCropChange(c)
   }
+
+  const pct = Math.round(crop.zoom * 100)
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-gray-400">⊕</span>
       <input
-        type="range" min={100} max={400} value={Math.round(crop.zoom * 100)}
+        type="range" min={100} max={400} value={pct}
         onChange={e => onZoom(parseInt(e.target.value))}
         className="flex-1 cursor-pointer"
       />
-      <span className="text-[10px] font-mono text-gray-500 min-w-[30px] text-right">
-        {Math.round(crop.zoom * 100)}%
-      </span>
+      <input
+        type="number"
+        min={100} max={400}
+        value={pct}
+        onChange={e => onZoom(parseInt(e.target.value) || 100)}
+        onBlur={e => onZoom(parseInt(e.target.value) || 100)}
+        className="w-[50px] text-xs text-center border border-gray-200 rounded-md py-0.5 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 font-mono text-gray-600"
+      />
+      <span className="text-xs text-gray-400">%</span>
     </div>
   )
 }
@@ -334,15 +343,13 @@ export default function CropCard({ fmt, file }: Props) {
         </div>
 
         {/* Controls */}
-        <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
-          <div className="mb-2">
-            <ZoomControl crop={crop} fmt={fmt} file={file} onCropChange={setCrop} />
-          </div>
-          <div className="text-xs font-mono text-gray-400 truncate mb-2">{filename}</div>
-          <div className="flex items-center gap-1.5">
-            <button onClick={doSmartCrop} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">✦ Smart Crop</button>
-            <button onClick={doReset} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">↺ Reset</button>
-            <button onClick={() => setModalOpen(true)} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">⤢ Expand</button>
+        <div className="px-4 py-3 border-t border-gray-100 bg-gray-50 space-y-2">
+          <ZoomControl crop={crop} fmt={fmt} file={file} onCropChange={setCrop} />
+          <div className="text-xs text-gray-500 truncate">{filename}</div>
+          <div className="flex items-center gap-2 flex-nowrap">
+            <button onClick={doSmartCrop} className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 text-gray-700 bg-white hover:bg-gray-100 transition whitespace-nowrap">✦ Smart Crop</button>
+            <button onClick={doReset} className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 text-gray-700 bg-white hover:bg-gray-100 transition whitespace-nowrap">↺ Reset</button>
+            <button onClick={() => setModalOpen(true)} className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 text-gray-700 bg-white hover:bg-gray-100 transition whitespace-nowrap">⤢ Expand</button>
           </div>
         </div>
       </div>
