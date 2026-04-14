@@ -63,8 +63,20 @@ export default function NamingConfig() {
     }
   }
 
-  function insertToken(t: string) {
-    dispatch({ type: 'SET_NAMING_PATTERN', pattern: state.namingPattern + t })
+  function toggleToken(t: string) {
+    const current = state.namingPattern
+    if (current.includes(t)) {
+      // Remove the token plus any adjacent underscore separator
+      const cleaned = current
+        .replace(new RegExp(`_?${t.replace(/[{}]/g, '\\$&')}_?`, 'g'), '_')
+        .replace(/_+/g, '_')       // collapse double underscores
+        .replace(/^_|_$/g, '')     // trim leading/trailing underscores
+      dispatch({ type: 'SET_NAMING_PATTERN', pattern: cleaned || '{brand}' })
+    } else {
+      // Append with underscore separator
+      const next = current ? `${current}_${t}` : t
+      dispatch({ type: 'SET_NAMING_PATTERN', pattern: next })
+    }
   }
 
   return (
@@ -113,16 +125,23 @@ export default function NamingConfig() {
             <label className="block text-xs font-medium text-gray-700 mb-1.5">Custom pattern</label>
 
             {/* Token buttons */}
-            <p className="text-[11px] text-gray-500 mb-2">Click a token to append it, or type directly below.</p>
+            <p className="text-[11px] text-gray-500 mb-2">Click to toggle a token on or off. Active tokens are highlighted.</p>
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {TOKENS.map(({ t, dim, title }) => (
-                <button
-                  key={t}
-                  title={title}
-                  onClick={() => insertToken(t)}
-                  className={`font-mono text-[11px] font-medium px-2 py-1 rounded-[5px] border transition cursor-pointer ${dim ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold' : 'bg-white border-gray-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200'}`}
-                >{t}</button>
-              ))}
+              {TOKENS.map(({ t, title }) => {
+                const active = state.namingPattern.includes(t)
+                return (
+                  <button
+                    key={t}
+                    title={title}
+                    onClick={() => toggleToken(t)}
+                    className={`font-mono text-[11px] font-semibold px-2 py-1 rounded-[5px] border transition cursor-pointer select-none ${
+                      active
+                        ? 'bg-indigo-600 border-indigo-600 text-white'
+                        : 'bg-white border-gray-200 text-indigo-500 hover:bg-indigo-50 hover:border-indigo-300'
+                    }`}
+                  >{t}</button>
+                )
+              })}
             </div>
 
             {/* Free-text input */}
