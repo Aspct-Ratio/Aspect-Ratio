@@ -28,12 +28,6 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/dashboard`,
       cancel_url:  `${baseUrl}/checkout/confirm?plan=${plan}`,
       allow_promotion_codes: true,
-      consent_collection: { terms_of_service: 'required' },
-      custom_text: {
-        terms_of_service_acceptance: {
-          message: 'By completing this purchase you agree to the ASPCT RATIO Terms of Service (aspct.io/terms) and Privacy Policy (aspct.io/privacy).',
-        },
-      },
     })
 
     return NextResponse.json({ url: session.url })
