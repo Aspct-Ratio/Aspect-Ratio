@@ -238,7 +238,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </div>
 
           {/* Hamburger — mobile only (sits in right column) */}
-          <div className="md:hidden flex items-center justify-end">
+          <div className="md:hidden flex items-center justify-end col-start-3">
             <button
               className="flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setMenuOpen(o => !o)}
