@@ -12,8 +12,8 @@ const TAG_CLASSES: Record<string, string> = {
   't-ret': 'bg-red-50 text-red-600',
 }
 
-const MAX_W = 220
-const MAX_H = 180
+const MAX_W = 280
+const MAX_H = 220
 const MODAL_MAX_W = 560
 const MODAL_MAX_H = 460
 
@@ -314,8 +314,8 @@ export default function CropCard({ fmt, file }: Props) {
         {/* Header */}
         <div className="px-3.5 py-2.5 border-b border-gray-100 flex items-start justify-between gap-2">
           <div>
-            <div className="text-xs font-bold text-gray-800 leading-tight">{fmt.n}</div>
-            <div className="text-[10px] text-gray-400 mt-0.5">{fmt.w}×{fmt.h} · {fmt.pl}</div>
+            <div className="text-sm font-bold text-gray-800 leading-tight">{fmt.n}</div>
+            <div className="text-xs text-gray-400 mt-0.5">{fmt.w}×{fmt.h} · {fmt.pl}</div>
           </div>
           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${TAG_CLASSES[fmt.pc ?? 't-soc'] ?? ''}`}>
             {fmt.pf}
@@ -334,15 +334,15 @@ export default function CropCard({ fmt, file }: Props) {
         </div>
 
         {/* Controls */}
-        <div className="px-3 py-2 border-t border-gray-100 bg-gray-50">
-          <div className="mb-1.5">
+        <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
+          <div className="mb-2">
             <ZoomControl crop={crop} fmt={fmt} file={file} onCropChange={setCrop} />
           </div>
+          <div className="text-xs font-mono text-gray-400 truncate mb-2">{filename}</div>
           <div className="flex items-center gap-1.5">
-            <div className="text-[9px] font-mono text-gray-400 flex-1 truncate">{filename}</div>
-            <button onClick={doSmartCrop} title="Smart Crop" className="text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-200 px-1.5 py-0.5 rounded transition">✦</button>
-            <button onClick={doReset} title="Reset" className="text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-200 px-1.5 py-0.5 rounded transition">↺</button>
-            <button onClick={() => setModalOpen(true)} title="Expand" className="text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-200 px-1.5 py-0.5 rounded transition">⤢</button>
+            <button onClick={doSmartCrop} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">✦ Smart Crop</button>
+            <button onClick={doReset} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">↺ Reset</button>
+            <button onClick={() => setModalOpen(true)} className="flex-1 text-xs font-semibold border border-gray-200 rounded-lg px-2.5 py-1 text-gray-700 bg-white hover:bg-gray-100 transition">⤢ Expand</button>
           </div>
         </div>
       </div>
