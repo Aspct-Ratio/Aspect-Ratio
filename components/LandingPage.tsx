@@ -194,7 +194,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── NAV ─────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         {/* ── Desktop & mobile top bar ── */}
-        <div className="grid h-[72px] sm:h-[80px] px-5 sm:px-10" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+        <div className="flex md:grid items-center h-[72px] sm:h-[80px] px-5 sm:px-10 justify-between" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
 
           {/* Left: Logo */}
           <div className="flex items-center">
@@ -237,8 +237,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             )}
           </div>
 
-          {/* Hamburger — mobile only (sits in right column) */}
-          <div className="md:hidden flex items-center justify-end col-start-3">
+          {/* Hamburger — mobile only */}
+          <div className="md:hidden flex items-center justify-end">
             <button
               className="flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
               onClick={() => setMenuOpen(o => !o)}
