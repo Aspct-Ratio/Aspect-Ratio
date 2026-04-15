@@ -5,8 +5,110 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
-import DemoSlicer from '@/components/slicer/DemoSlicer'
 
+// ── Helpers for crop demo animation ────────────────────────
+function easeIO(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t }
+function ep(elapsed: number, startMs: number, endMs: number) {
+  return easeIO(Math.max(0, Math.min(1, (elapsed - startMs) / (endMs - startMs))))
+}
+
+function MockupCropDemo() {
+  const [anim, setAnim] = useState({
+    cursorX: 60, cursorY: 44, panX: 0, panY: 0, zoom: 100, pressing: false, visible: false,
+  })
+
+  useEffect(() => {
+    // Sequence: appear → move to slider → zoom up → move to image → drag pan → release → reset
+    // Pan only happens AFTER zoom > 100%, so the image always fully covers the frame.
+    const LOOP = 12000
+    const t0 = Date.now()
+    const id = setInterval(() => {
+      const e = (Date.now() - t0) % LOOP
+
+      // ── Cursor ───────────────────────────────────────────
+      let cx = 60, cy = 44
+      if (e < 800)                     { cx = 60;  cy = 44 }                                                               // appear
+      else if (e < 1700)               { cx = lerp(60, 88, ep(e, 800, 1700));  cy = lerp(44, 86, ep(e, 800, 1700)) }      // arc to slider
+      else if (e < 6200)               { cx = 88;  cy = 86 }                                                               // hold on slider while zoom increases
+      else if (e < 7000)               { cx = lerp(88, 52, ep(e, 6200, 7000)); cy = lerp(86, 42, ep(e, 6200, 7000)) }     // arc back to image
+      else if (e < 9800)               { cx = lerp(52, 28, ep(e, 7000, 9800)); cy = lerp(42, 60, ep(e, 7000, 9800)) }     // drag left-down
+      else if (e < 10500)              { cx = lerp(28, 68, ep(e, 9800, 10500)); cy = lerp(60, 46, ep(e, 9800, 10500)) }   // drag back right
+      else if (e < 11200)              { cx = lerp(68, 88, ep(e, 10500, 11200)); cy = lerp(46, 86, ep(e, 10500, 11200)) } // arc to slider to reset
+      else                             { cx = 88;  cy = 86 }
+
+      // ── Pressing ─────────────────────────────────────────
+      const pressing = e >= 7000 && e < 10500
+
+      // ── Zoom: 100 → 175 → 100 ────────────────────────────
+      // Zoom happens FIRST so panning is always safe
+      let zoom = 100
+      if (e >= 1700 && e < 6200)       { zoom = lerp(100, 175, ep(e, 1700, 6200)) }
+      else if (e >= 6200 && e < 11200) { zoom = 175 }
+      else if (e >= 11200)             { zoom = lerp(175, 100, ep(e, 11200, 12000)) }
+
+      // ── Pan: only after zoom is up ────────────────────────
+      // maxSafePan(z) = (z-1)/(2z)*100 — the furthest % we can translate
+      // without revealing any background behind the image edge.
+      const z = zoom / 100
+      const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
+
+      let rawPanX = 0, rawPanY = 0
+      if (e >= 7000 && e < 9800)       { rawPanX = lerp(0, -14, ep(e, 7000, 9800));  rawPanY = lerp(0, 6, ep(e, 7000, 9800)) }
+      else if (e >= 9800 && e < 11200) { rawPanX = lerp(-14, 0, ep(e, 9800, 11200)); rawPanY = lerp(6, 0, ep(e, 9800, 11200)) }
+
+      // Hard clamp — image never reveals empty space regardless of float drift
+      const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
+      const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
+
+      setAnim({ cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom), pressing, visible: e > 300 && e < 11800 })
+    }, 33)
+    return () => clearInterval(id)
+  }, [])
+
+  const { cursorX, cursorY, panX, panY, zoom, pressing, visible } = anim
+  // 100→175 maps to 0→100% on the slider track
+  const sliderPct = Math.round(Math.max(0, Math.min(100, (zoom - 100) / 75 * 100)))
+
+  return (
+    <div className="flex flex-col items-center px-4 py-4">
+      {/* Crop viewport — 270×480 (9:16), overflow-hidden clips the image to frame at all times */}
+      <div className="relative rounded-lg overflow-hidden" style={{ width: 270, height: 480 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/Imag2.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ transform: `scale(${zoom / 100}) translate(${panX}%, ${panY}%)`, transformOrigin: 'center center' }}
+        />
+        {/* Crop border + handles */}
+        <div className="absolute inset-0 border-2 border-indigo-600 pointer-events-none">
+          {([['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']] as const).map(([t,l],i) => (
+            <div key={i} className={`absolute w-3 h-3 border-2 border-indigo-600 bg-white rounded-[2px] ${t} ${l}`} />
+          ))}
+        </div>
+        {/* Dimension badge */}
+        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded pointer-events-none">1080 × 1920</div>
+        {/* Cursor */}
+        {visible && (
+          <div className="absolute pointer-events-none z-10" style={{ left: `${cursorX}%`, top: `${cursorY}%`, transform: 'translate(-2px, -2px)' }}>
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M3.5 2.5l14.5 9-7 1.5L9 20 3.5 2.5z" fill={pressing ? '#6366f1' : 'white'} stroke={pressing ? '#3730a3' : '#1f2937'} strokeWidth="1.6" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        )}
+      </div>
+      {/* Zoom control */}
+      <div className="flex items-center gap-3 mt-3" style={{ width: 270 }}>
+        <span className="text-xs text-gray-400 flex-shrink-0">⊕</span>
+        <div className="flex-1 h-[5px] bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${sliderPct}%` }} />
+        </div>
+        <span className="text-[12px] font-mono font-bold text-indigo-600 min-w-[40px] text-right">{zoom}%</span>
+      </div>
+    </div>
+  )
+}
 
 const FAQ_ITEMS = [
   {
@@ -237,14 +339,90 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
         </div>
       </div>
 
-      {/* ── APP PREVIEW / INTERACTIVE DEMO ──────────────────── */}
+      {/* ── APP PREVIEW ─────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-4 sm:px-6 bg-gray-50">
-        <div className="max-w-[1100px] mx-auto">
+        <div className="max-w-[900px] mx-auto">
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">The Solution</p>
           <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-10">
             Built for the way campaigns actually work.
           </h2>
-          <DemoSlicer />
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            {/* Window chrome */}
+            <div className="h-9 sm:h-11 bg-gray-50 border-b border-gray-200 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FC625D] flex-shrink-0" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FDBC40] flex-shrink-0" />
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#34C749] flex-shrink-0" />
+              <div className="ml-2 sm:ml-3 flex-1 bg-gray-100 rounded-md h-[22px] sm:h-[26px] flex items-center px-2 sm:px-3 text-[10px] sm:text-xs text-gray-500 truncate">app.aspctratio.com / adjust</div>
+            </div>
+            {/* Mock UI */}
+            <div className="p-4 sm:p-8">
+              {/* Step pills */}
+              <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-5 sm:mb-7">
+                {[
+                  { label: '① Upload', state: 'done' },
+                  { label: '② Formats', state: 'done' },
+                  { label: '③ Adjust crops', state: 'active' },
+                  { label: '④ Export', state: 'todo' },
+                ].map(({ label, state }) => (
+                  <div key={label} className={[
+                    'h-6 sm:h-7 px-2.5 sm:px-3.5 rounded-md text-[10px] sm:text-xs font-semibold flex items-center flex-shrink-0',
+                    state === 'active' ? 'bg-indigo-600 text-white' :
+                    state === 'done' ? 'bg-gray-100 text-gray-400' :
+                    'bg-gray-50 border border-gray-200 text-gray-300',
+                  ].join(' ')}>{label}</div>
+                ))}
+              </div>
+
+              {/* Panels — stacked on mobile, side-by-side on md+ */}
+              <div className="flex flex-col md:grid gap-4 sm:gap-5" style={{ gridTemplateColumns: '1fr 280px', alignItems: 'start' }}>
+                {/* Left: mock crop card */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-3 sm:px-3.5 py-2 sm:py-2.5 bg-white border-b border-gray-100 flex items-center justify-between text-[10px] sm:text-xs font-semibold text-gray-700 gap-2">
+                    <span className="truncate">BrandName_SpringCampaign_Hero.jpg</span>
+                    <span className="text-gray-400 font-normal flex-shrink-0">1080 × 1920</span>
+                  </div>
+                  <MockupCropDemo />
+                </div>
+
+                {/* Right: mock sidebar — full width on mobile */}
+                <div className="w-full bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="px-3.5 py-2.5 bg-white border-b border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-700">
+                    <span>All formats</span><span className="text-indigo-600">12 selected</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 p-3">
+                    {[
+                      { label: 'Feed Sq', cls: 'aspect-square', pos: '50% 40%' },
+                      { label: 'Story', cls: 'aspect-[9/16]', pos: '50% 30%' },
+                      { label: 'YT Cover', cls: 'aspect-video', pos: '50% 35%' },
+                      { label: 'PDP Hero', cls: 'aspect-square', pos: '60% 40%' },
+                      { label: 'Banner', cls: 'aspect-video', pos: '50% 45%' },
+                      { label: 'TikTok', cls: 'aspect-[9/16]', pos: '45% 30%' },
+                    ].map(({ label, cls, pos }) => (
+                      <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/images/Imag2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold px-1.5 py-0.5">{label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="px-3.5 pb-3.5 flex flex-col gap-3">
+                    <div>
+                      <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.6px] mb-1.5">Channels</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-indigo-50 text-indigo-600">Social</span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-green-50 text-green-700">Ecomm</span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-amber-50 text-amber-600">Paid</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-9 bg-indigo-600 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9L2.5 5h3V1.5h2V5h3L6.5 9z" fill="white"/><rect x="1.5" y="10" width="10" height="1.5" rx="0.75" fill="white"/></svg>
+                      Export ZIP
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mt-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
         </div>
       </section>
