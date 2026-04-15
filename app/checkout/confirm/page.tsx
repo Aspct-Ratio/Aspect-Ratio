@@ -85,7 +85,7 @@ function CheckoutConfirmForm() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-6 h-[64px] flex items-center justify-between flex-shrink-0">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-10 h-[80px] flex items-center justify-between flex-shrink-0">
         <Link href="/" className="no-underline">
           <LogoMark height={75} />
         </Link>

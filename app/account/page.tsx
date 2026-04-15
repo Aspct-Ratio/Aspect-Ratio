@@ -44,7 +44,7 @@ export default async function AccountPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-7 h-[64px] flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-10 h-[80px] flex items-center justify-between">
         <Link href="/" className="no-underline">
           <LogoMark height={75} />
         </Link>

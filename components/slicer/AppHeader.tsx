@@ -28,7 +28,7 @@ export default function AppHeader({ step }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-50 h-[100px] flex items-center justify-between px-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
+    <header className="sticky top-0 z-50 h-[80px] flex items-center justify-between px-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
       {/* Logo — links back to landing page */}
       <Link href="/" className="no-underline">
         <LogoMark height={75} />
