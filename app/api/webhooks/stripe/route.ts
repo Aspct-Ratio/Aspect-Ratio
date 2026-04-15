@@ -43,12 +43,9 @@ async function updateSubscriptionStatus(subscriptionId: string, status: string) 
 
 async function getUserIdByEmail(email: string): Promise<string | null> {
   const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('auth.users')
-    .select('id')
-    .eq('email', email)
-    .single()
-  return data?.id ?? null
+  const { data } = await supabase.auth.admin.listUsers()
+  const user = data?.users?.find(u => u.email === email)
+  return user?.id ?? null
 }
 
 async function getUserIdByCustomer(customerId: string): Promise<string | null> {

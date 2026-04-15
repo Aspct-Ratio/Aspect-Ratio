@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
-  console.log('STRIPE KEY PREFIX:', process.env.STRIPE_SECRET_KEY?.slice(0, 8))
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
