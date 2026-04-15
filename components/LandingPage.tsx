@@ -342,7 +342,6 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-[900px] mx-auto">
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mb-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             {/* Window chrome */}
             <div className="h-9 sm:h-11 bg-gray-50 border-b border-gray-200 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4">
@@ -420,6 +419,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
             </div>
           </div>
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mx-auto text-center mt-10">Every decision was made by people who&apos;ve run asset production at global brands — not by engineers guessing at marketing workflows.</p>
         </div>
       </section>
 
