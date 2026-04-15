@@ -65,9 +65,8 @@ function SignupForm() {
   if (done) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <Link href="/" className="mb-8 flex items-center gap-3 no-underline">
-          <LogoMark height={45} />
-          <span className="font-bold text-[15px] tracking-tight text-gray-900">ASPCT RATIO</span>
+        <Link href="/" className="mb-8 no-underline">
+          <LogoMark height={100} />
         </Link>
         <div className="bg-white border border-gray-200 rounded-xl shadow p-8 w-full max-w-sm text-center">
           <div className="text-3xl mb-3">📬</div>
@@ -85,9 +84,8 @@ function SignupForm() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <Link href="/" className="mb-8 flex items-center gap-3 no-underline">
-        <LogoMark height={45} />
-        <span className="font-bold text-[15px] tracking-tight text-gray-900">ASPCT RATIO</span>
+      <Link href="/" className="mb-8 no-underline">
+        <LogoMark height={100} />
       </Link>
 
       <div className="bg-white border border-gray-200 rounded-xl shadow p-8 w-full max-w-sm">
