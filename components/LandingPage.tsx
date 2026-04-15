@@ -228,8 +228,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <div className="hidden md:flex items-center justify-end gap-2">
             {isLoggedIn ? (
               <>
-                <Link href="/app" className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
-                  START PROJECT →
+                <Link href={hasActiveSub ? '/app' : '/#pricing'} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
+                  {hasActiveSub ? 'START PROJECT →' : 'START FREE TRIAL'}
                 </Link>
                 <Link href="/account" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 no-underline tracking-wide">
                   ACCOUNT
@@ -285,8 +285,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             {/* Auth actions */}
             {isLoggedIn ? (
               <>
-                <Link href="/app" onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
-                  START PROJECT →
+                <Link href={hasActiveSub ? '/app' : '/#pricing'} onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
+                  {hasActiveSub ? 'START PROJECT →' : 'START FREE TRIAL'}
                 </Link>
                 <Link href="/account" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">
                   ACCOUNT
