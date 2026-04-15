@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 510" role="img" aria-label="Aspect Ratio logo">
+  <rect width="560" height="510" fill="white"/>
+
+  <!-- ── A — left diagonal stroke ──────────────────────────────
+       Outer-left : (0,390)→(230,0)
+       Inner-right: (80,390)→(264,0)  [flush with center bar left edge]
+  ───────────────────────────────────────────────────────────── -->
+  <polygon points="0,390 230,0 264,0 80,390" fill="black"/>
+
+  <!-- ── A — crossbar ──────────────────────────────────────────
+       At y=210: inner-right x = 264 − (210/390)×184 ≈ 165
+       At y=255: inner-right x = 264 − (255/390)×184 ≈ 144
+  ───────────────────────────────────────────────────────────── -->
+  <polygon points="165,210 264,210 264,255 144,255" fill="black"/>
+
+  <!-- ── Center vertical bar (shared A ↔ R) ────────────────────
+       Intentionally thinner (16 px) than the letter strokes
+  ───────────────────────────────────────────────────────────── -->
+  <rect x="264" y="0" width="16" height="390" fill="black"/>
+
+  <!-- ── R — bowl  (even-odd fill creates the counter as a hole)
+       Outer C-shape traces clockwise; inner counter traces
+       counter-clockwise so fill-rule=evenodd makes it white.
+       ·  Top cap    y=0–60
+       ·  Right col  x=495–560, y=0–195
+       ·  Counter    y=60–155, x=280–495  (white hole)
+       ·  Bowl floor y=155–215
+  ───────────────────────────────────────────────────────────── -->
+  <path fill-rule="evenodd" fill="black"
+    d="M 280,0 H 542 Q 560,0 560,58
+       V 192 Q 560,215 540,215
+       H 280
+       V 155 H 495 V 60 H 280
+       Z"/>
+
+  <!-- ── R — diagonal leg ──────────────────────────────────────
+       Sweeps from (400,215) upper-left to (560,390) lower-right
+  ───────────────────────────────────────────────────────────── -->
+  <polygon points="400,215 560,215 560,390 498,390" fill="black"/>
+
+  <!-- ── White circles on center bar ──────────────────────────
+       Represent crop / aspect-ratio frame markers.
+       Radius intentionally larger than the bar so they punch
+       into the adjacent letter counters.
+  ───────────────────────────────────────────────────────────── -->
+  <circle cx="272" cy="135" r="43" fill="white"/>
+  <circle cx="272" cy="258" r="45" fill="white"/>
+
+  <!-- ── Wordmark ───────────────────────────────────────────────
+  ───────────────────────────────────────────────────────────── -->
+  <text
+    x="280" y="478"
+    text-anchor="middle"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-weight="900"
+    font-size="60"
+    letter-spacing="8"
+    fill="black">ASPECT RATIO</text>
+</svg>

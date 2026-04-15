@@ -68,7 +68,7 @@ export default function AppHeader({ step }: Props) {
           HOME
         </Link>
         <Link
-          href="/dashboard"
+          href="/account"
           className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition no-underline tracking-wide"
         >
           ACCOUNT

@@ -60,11 +60,11 @@ export default function AccountDropdown({ email, initials }: Props) {
           {/* Links */}
           <div className="py-1">
             <Link
-              href="/dashboard"
+              href="/account"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors no-underline"
             >
-              <span className="text-base">⊞</span> Dashboard
+              <span className="text-base">⊞</span> Account
             </Link>
             <Link
               href="/app"
@@ -74,7 +74,7 @@ export default function AccountDropdown({ email, initials }: Props) {
               <span className="text-base">✂</span> Go to App
             </Link>
             <Link
-              href="/dashboard#billing"
+              href="/account#billing"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors no-underline"
             >
