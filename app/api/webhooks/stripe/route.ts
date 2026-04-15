@@ -24,6 +24,7 @@ async function upsertSubscription(data: {
   current_period_end: string | null
   trial_end: string | null
   user_id?: string
+  email?: string
 }) {
   const supabase = createAdminClient()
   const { error } = await supabase
@@ -93,6 +94,7 @@ async function handleCheckoutCompleted(event: Stripe.CheckoutSessionCompletedEve
     current_period_end: toIso(subscription.current_period_end),
     trial_end:          toIso(subscription.trial_end ?? null),
     ...(userId ? { user_id: userId } : {}),
+    ...(customerEmail ? { email: customerEmail } : {}),
   })
 
   // Stamp plan on user metadata for fast reads in the app
