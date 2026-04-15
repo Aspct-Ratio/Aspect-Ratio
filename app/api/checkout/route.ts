@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
       ...(email ? { customer_email: email } : {}),
-      success_url: `${baseUrl}/account`,
+      success_url: `${baseUrl}/app`,
       cancel_url:  `${baseUrl}/checkout/confirm?plan=${plan}&canceled=true`,
       allow_promotion_codes: true,
     })
