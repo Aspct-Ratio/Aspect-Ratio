@@ -37,11 +37,6 @@ function SignupForm() {
 
     if (error) { setError(error.message); setLoading(false); return }
 
-    // Add to waitlist if not already there
-    if (email) {
-      await supabase.from('waitlist').upsert({ email }, { onConflict: 'email', ignoreDuplicates: true })
-    }
-
     // If email confirmation is disabled, user is immediately active — redirect
     if (data.session) {
       router.push(redirectTo)

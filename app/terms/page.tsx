@@ -19,7 +19,7 @@ const sections = [
   {
     n: '3',
     title: 'Subscriptions and Billing',
-    body: 'The Service is offered on a subscription basis. Plans are billed monthly. A 14-day free trial is available for new users. After the trial period, your selected plan will be charged automatically. You may cancel at any time through your account settings. Cancellations take effect at the end of the current billing period. No refunds are issued for partial billing periods.',
+    body: 'The Service is offered on a subscription basis. Plans are billed monthly. A 7-day free trial is available for new users. After the trial period, your selected plan will be charged automatically. You may cancel at any time through your account settings. Cancellations take effect at the end of the current billing period. No refunds are issued for partial billing periods.',
   },
   {
     n: '4',

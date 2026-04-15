@@ -185,7 +185,7 @@ async function handleSubscriptionDeleted(event: Stripe.CustomerSubscriptionDelet
   if (userId) {
     const supabase = createAdminClient()
     await supabase.auth.admin.updateUserById(userId, {
-      user_metadata: { plan: 'freelancer' },
+      user_metadata: { plan: null },
     })
   }
 }

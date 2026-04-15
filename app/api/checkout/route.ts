@@ -18,6 +18,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Unknown plan: ${plan}` }, { status: 400 })
     }
 
+    // NOTE: NEXT_PUBLIC_APP_URL must be set to https://www.aspctratio.com (with www)
+    // in Vercel — the non-www domain issues a 307 redirect that breaks Stripe callbacks.
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
