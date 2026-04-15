@@ -311,10 +311,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section className="pt-24 pb-20 px-6 text-center bg-gradient-to-b from-white to-gray-50">
-        <p className="text-sm font-semibold text-gray-500 uppercase tracking-[1.5px] mb-4">The asset resizing platform for creative teams</p>
-        <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[900px] mx-auto mb-5">
-          BUILT FOR THE WAY<br />
-          <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">CAMPAIGNS ACTUALLY WORK.</em>
+        <h1 className="text-[clamp(36px,5.5vw,64px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[800px] mx-auto mb-5">
+          The asset resizing platform for creative teams.
         </h1>
         <p className="text-[18px] text-gray-500 max-w-[560px] mx-auto mb-11 leading-[1.7] font-normal">
           One upload. Every format. Ready in minutes.
@@ -343,6 +341,10 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── APP PREVIEW ─────────────────────────────────────── */}
       <section className="pt-20 pb-16 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-[900px] mx-auto">
+          <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">The Solution</p>
+          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-10">
+            Built for the way campaigns actually work.
+          </h2>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             {/* Window chrome */}
             <div className="h-9 sm:h-11 bg-gray-50 border-b border-gray-200 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4">
