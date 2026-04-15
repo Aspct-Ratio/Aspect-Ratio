@@ -174,25 +174,7 @@ function FAQ() {
 export default function LandingPage({ isLoggedIn = false, userEmail }: { isLoggedIn?: boolean; userEmail?: string }) {
   const [annual, setAnnual] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [hasActiveSub, setHasActiveSub] = useState(false)
   const router = useRouter()
-
-  // Check if the logged-in user has an active or trialing subscription
-  useEffect(() => {
-    if (!isLoggedIn) return
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'trialing'])
-        .limit(1)
-        .single()
-      setHasActiveSub(!!data)
-    })
-  }, [isLoggedIn])
 
   function goToConfirm(plan: string) {
     router.push(`/checkout/confirm?plan=${plan}`)
@@ -326,10 +308,10 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
-            href={hasActiveSub ? '/app' : isLoggedIn ? '/#pricing' : '/signup?redirectTo=%2F%23pricing'}
+            href={isLoggedIn ? '/app' : '/signup?redirectTo=%2F%23pricing'}
             className="h-12 px-7 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[15px] font-semibold rounded-[10px] transition-all whitespace-nowrap flex items-center no-underline"
           >
-            {hasActiveSub ? 'Start Project →' : 'Start free trial →'}
+            {isLoggedIn ? 'Start Project →' : 'Start free trial →'}
           </Link>
           <a href="#how-it-works" className="h-12 px-7 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 text-[15px] font-semibold rounded-[10px] transition-all whitespace-nowrap flex items-center no-underline">
             See how it works
