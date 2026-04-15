@@ -111,7 +111,7 @@ function SignupForm() {
           {error && <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
           <button type="submit" disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 text-sm transition disabled:opacity-50">
-            {loading ? 'Creating account…' : 'Get early access'}
+            {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 

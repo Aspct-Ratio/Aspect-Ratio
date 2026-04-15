@@ -25,7 +25,7 @@ export default async function AccountPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-7 h-[64px] flex items-center justify-between">
         <Link href="/" className="no-underline">
-          <LogoMark height={38} />
+          <LogoMark height={75} />
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/app" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition no-underline">

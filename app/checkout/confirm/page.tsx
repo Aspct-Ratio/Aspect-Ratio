@@ -49,6 +49,7 @@ function CheckoutConfirmForm() {
 
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Redirect if invalid plan
   useEffect(() => {
@@ -59,6 +60,7 @@ function CheckoutConfirmForm() {
 
   async function handleContinue() {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -69,11 +71,12 @@ function CheckoutConfirmForm() {
       if (data.url) {
         window.location.href = data.url
       } else {
-        // Redirect back to pricing silently on failure
-        router.replace('/#pricing')
+        setError(data.error || 'Failed to create checkout session')
+        setLoading(false)
       }
-    } catch {
-      router.replace('/#pricing')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Network error — please try again')
+      setLoading(false)
     }
   }
 
@@ -166,6 +169,14 @@ function CheckoutConfirmForm() {
               </Link>
             </span>
           </label>
+
+          {/* Error message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+              <p className="text-sm text-red-700 font-medium">Checkout error</p>
+              <p className="text-xs text-red-600 mt-1">{error}</p>
+            </div>
+          )}
 
           {/* CTA */}
           <button
