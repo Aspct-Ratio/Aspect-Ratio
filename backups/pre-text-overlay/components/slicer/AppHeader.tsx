@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2 | 3 | 4
 const STEPS: { n: Step; label: string }[] = [
   { n: 1, label: 'UPLOAD' },
   { n: 2, label: 'FORMATS' },
   { n: 3, label: 'ADJUST' },
-  { n: 4, label: 'COPY' },
-  { n: 5, label: 'EXPORT' },
+  { n: 4, label: 'EXPORT' },
 ]
 
 interface Props {

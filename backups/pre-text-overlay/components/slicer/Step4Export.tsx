@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { useSlicer } from './SlicerContext'
 import { getSelectedFormats } from '@/lib/formats'
-import { renderToCanvasWithText, canvasToBlob, buildFilename, getFolderParts } from '@/lib/crop'
+import { renderToCanvas, canvasToBlob, buildFilename, getFolderParts } from '@/lib/crop'
 import FolderStructure from './FolderStructure'
 import type { FormatDef } from '@/types/slicer'
 
@@ -93,7 +93,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
     const file = state.files.find(f => f.id === fileId)
     const fmt = fmts.find(f => f.id === fmtId)
     if (!file || !fmt || !canvasRef.current) return
-    const canvas = renderToCanvasWithText(canvasRef.current, fmt, file, state.crops[file.id][fmt.id], state.textLayers[file.id]?.[fmt.id] ?? [])
+    const canvas = renderToCanvas(canvasRef.current, fmt, file, state.crops[file.id][fmt.id])
     const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
     const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext
     if (ef === 'pdf') { await exportPDF(canvas, fn, fmt); return }
@@ -121,7 +121,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
       for (const fmt of fmts) {
         const crop = state.crops[file.id]?.[fmt.id]
         if (!crop) continue
-        const canvas = renderToCanvasWithText(canvasRef.current, fmt, file, crop, state.textLayers[file.id]?.[fmt.id] ?? [])
+        const canvas = renderToCanvas(canvasRef.current, fmt, file, crop)
         for (const ef of efArr) {
           const ext = ef === 'jpeg' ? 'jpg' : ef === 'tiff' ? 'png' : ef
           const fn = buildFilename({ pattern: state.namingPattern, clientName: state.clientName, campaignName: state.campaignName, fmt, assetName: file.name }) + '.' + ext

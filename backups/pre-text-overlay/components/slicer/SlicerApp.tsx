@@ -6,10 +6,9 @@ import AppHeader from './AppHeader'
 import Step1Upload, { type UserPlan } from './Step1Upload'
 import Step2Formats from './Step2Formats'
 import Step3Adjust from './Step3Adjust'
-import Step4Copy from './Step4Copy'
 import Step4Export from './Step4Export'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2 | 3 | 4
 
 function SlicerInner({ userPlan }: { userPlan?: UserPlan }) {
   const [step, setStep] = useState<Step>(1)
@@ -27,8 +26,7 @@ function SlicerInner({ userPlan }: { userPlan?: UserPlan }) {
         {step === 1 && <Step1Upload onNext={() => setStep(2)} userPlan={userPlan} />}
         {step === 2 && <Step2Formats onBack={() => setStep(1)} onNext={() => setStep(3)} />}
         {step === 3 && <Step3Adjust onBack={() => setStep(2)} onNext={() => setStep(4)} />}
-        {step === 4 && <Step4Copy onBack={() => setStep(3)} onNext={() => setStep(5)} onSkip={() => setStep(5)} />}
-        {step === 5 && <Step4Export onBack={() => setStep(4)} onReset={reset} />}
+        {step === 4 && <Step4Export onBack={() => setStep(3)} onReset={reset} />}
       </main>
     </div>
   )

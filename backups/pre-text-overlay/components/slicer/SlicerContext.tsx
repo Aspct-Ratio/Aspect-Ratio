@@ -4,7 +4,7 @@ import {
   createContext, useContext, useReducer, useCallback,
   type Dispatch, type ReactNode,
 } from 'react'
-import type { SlicerState, SlicerFile, FormatDef, FolderLevel, ExportFormat, CropState, TextLayer } from '@/types/slicer'
+import type { SlicerState, SlicerFile, FormatDef, FolderLevel, ExportFormat, CropState } from '@/types/slicer'
 import { DEFAULT_SELECTED, DEFAULT_FOLDER_LEVELS, getAllFormats } from '@/lib/formats'
 import { calcCrop } from '@/lib/crop'
 
@@ -33,11 +33,6 @@ type Action =
   | { type: 'UPDATE_CROP'; fileId: string; formatId: string; crop: CropState }
   | { type: 'UPDATE_FOLDER_LEVELS'; levels: FolderLevel[] }
   | { type: 'RESET' }
-  | { type: 'SET_TEXT_LAYERS';       fileId: string; formatId: string; layers: TextLayer[] }
-  | { type: 'CLEAR_TEXT_LAYERS';     fileId: string; formatId: string }
-  | { type: 'APPLY_TEXT_TO_FORMATS'; fileId: string; sourceFormatId: string;
-      sourceDims: { w: number; h: number };
-      targets: Array<{ formatId: string; w: number; h: number }> }
 
 // ── Initial state ──────────────────────────────────────────────
 
@@ -54,7 +49,6 @@ const initialState: SlicerState = {
   campaignName: '',
   rootFolderName: '',
   quality: 90,
-  textLayers: {},
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -90,14 +84,12 @@ function reducer(state: SlicerState, action: Action): SlicerState {
       const files = state.files.filter(f => f.id !== action.id)
       const crops = { ...state.crops }
       delete crops[action.id]
-      const tl = { ...state.textLayers }
-      delete tl[action.id]
       const activeFile = Math.min(state.activeFile, Math.max(0, files.length - 1))
-      return { ...state, files, crops, textLayers: tl, activeFile }
+      return { ...state, files, crops, activeFile }
     }
 
     case 'CLEAR_FILES':
-      return { ...state, files: [], crops: {}, textLayers: {}, activeFile: 0 }
+      return { ...state, files: [], crops: {}, activeFile: 0 }
 
     case 'SET_ACTIVE_FILE':
       return { ...state, activeFile: action.index }
@@ -219,47 +211,6 @@ function reducer(state: SlicerState, action: Action): SlicerState {
 
     case 'UPDATE_FOLDER_LEVELS':
       return { ...state, folderLevels: action.levels }
-
-    case 'SET_TEXT_LAYERS': {
-      return {
-        ...state,
-        textLayers: {
-          ...state.textLayers,
-          [action.fileId]: {
-            ...(state.textLayers[action.fileId] ?? {}),
-            [action.formatId]: action.layers,
-          },
-        },
-      }
-    }
-
-    case 'CLEAR_TEXT_LAYERS': {
-      const fileMap = { ...(state.textLayers[action.fileId] ?? {}) }
-      delete fileMap[action.formatId]
-      return { ...state, textLayers: { ...state.textLayers, [action.fileId]: fileMap } }
-    }
-
-    case 'APPLY_TEXT_TO_FORMATS': {
-      const sourceLayers = state.textLayers[action.fileId]?.[action.sourceFormatId] ?? []
-      if (sourceLayers.length === 0) return state
-      const { w: sw, h: sh } = action.sourceDims
-      const fileMap = { ...(state.textLayers[action.fileId] ?? {}) }
-      for (const { formatId, w: tw, h: th } of action.targets) {
-        if (formatId === action.sourceFormatId) continue
-        const fontScale = Math.min(tw / sw, th / sh)
-        const xScale    = tw / sw
-        const yScale    = th / sh
-        fileMap[formatId] = sourceLayers.map(l => ({
-          ...l,
-          id:       `${l.id}-${formatId}`,
-          fontSize: Math.round(l.fontSize * fontScale),
-          left:     Math.round(l.left  * xScale),
-          top:      Math.round(l.top   * yScale),
-          width:    Math.round(l.width * xScale),
-        }))
-      }
-      return { ...state, textLayers: { ...state.textLayers, [action.fileId]: fileMap } }
-    }
 
     case 'RESET':
       return {

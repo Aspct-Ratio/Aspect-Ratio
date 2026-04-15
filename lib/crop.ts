@@ -110,6 +110,124 @@ export function buildFilename(opts: {
     .replace(/{date}/g, dt)
 }
 
+// ── Text compositing ────────────────────────────────────────────
+
+/** Render a crop AND composite text layers on top using Canvas 2D. */
+export function renderToCanvasWithText(
+  canvas: HTMLCanvasElement,
+  fmt: FormatDef,
+  file: SlicerFile,
+  crop: CropState,
+  layers: import('@/types/slicer').TextLayer[],
+): HTMLCanvasElement {
+  renderToCanvas(canvas, fmt, file, crop)
+  if (!layers || layers.length === 0) return canvas
+
+  const ctx = canvas.getContext('2d')!
+
+  for (const layer of layers) {
+    if (!layer.text.trim() || layer.opacity <= 0) continue
+    if (layer.visible === false) continue
+
+    ctx.save()
+    ctx.globalAlpha = layer.opacity
+
+    const effectiveFontSize = layer.fontSize * (layer.scaleY ?? 1)
+    const effectiveWidth    = layer.width    * (layer.scaleX ?? 1)
+    const lineH = effectiveFontSize * (layer.lineHeight ?? 1.16)
+
+    // Rotate around the textbox centre
+    if (layer.angle) {
+      const cx = layer.left + effectiveWidth / 2
+      const cy = layer.top  + lineH / 2
+      ctx.translate(cx, cy)
+      ctx.rotate((layer.angle * Math.PI) / 180)
+      ctx.translate(-cx, -cy)
+    }
+
+    // Font
+    ctx.font         = `${layer.fontWeight} ${effectiveFontSize}px "${layer.fontFamily}", sans-serif`
+    ctx.fillStyle    = layer.fill
+    ctx.textAlign    = layer.textAlign as CanvasTextAlign
+    ctx.textBaseline = 'top'
+
+    // Letter spacing (modern browsers)
+    const lsCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string }
+    if ('letterSpacing' in ctx) {
+      lsCtx.letterSpacing = `${(layer.letterSpacing / 1000) * effectiveFontSize}px`
+    }
+
+    // Shadow
+    if (layer.shadow) {
+      ctx.shadowColor   = layer.shadow.color
+      ctx.shadowBlur    = layer.shadow.blur
+      ctx.shadowOffsetX = layer.shadow.offsetX
+      ctx.shadowOffsetY = layer.shadow.offsetY
+    }
+
+    const lines = _wrapText(ctx, layer.text, effectiveWidth)
+
+    // Background rect
+    if (layer.bgRect?.fill) {
+      const totalH = lines.length * lineH
+      const maxLineW = Math.max(...lines.map(l => ctx.measureText(l).width))
+      const { padding, rx, fill: bgFill } = layer.bgRect
+      ctx.save()
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+      ctx.fillStyle = bgFill
+      _roundRect(ctx, layer.left - padding, layer.top - padding,
+                 maxLineW + padding * 2, totalH + padding * 2, rx)
+      ctx.fill()
+      ctx.restore()
+      ctx.fillStyle = layer.fill
+    }
+
+    // Draw each line
+    const startX =
+      layer.textAlign === 'center' ? layer.left + effectiveWidth / 2 :
+      layer.textAlign === 'right'  ? layer.left + effectiveWidth :
+                                      layer.left
+
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], startX, layer.top + i * lineH)
+    }
+
+    ctx.restore()
+  }
+
+  return canvas
+}
+
+function _wrapText(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+  const result: string[] = []
+  for (const para of text.split('\n')) {
+    const words = para.split(' ')
+    let cur = ''
+    for (const word of words) {
+      const test = cur ? `${cur} ${word}` : word
+      if (ctx.measureText(test).width > maxW && cur) { result.push(cur); cur = word }
+      else cur = test
+    }
+    result.push(cur)
+  }
+  return result.length ? result : ['']
+}
+
+function _roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  if (typeof ctx.roundRect === 'function') {
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r)
+  } else {
+    const rr = Math.min(r, w / 2, h / 2)
+    ctx.beginPath()
+    ctx.moveTo(x + rr, y)
+    ctx.lineTo(x + w - rr, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rr)
+    ctx.lineTo(x + w, y + h - rr); ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h)
+    ctx.lineTo(x + rr, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - rr)
+    ctx.lineTo(x, y + rr); ctx.quadraticCurveTo(x, y, x + rr, y)
+    ctx.closePath()
+  }
+}
+
 /** Get ordered folder path parts for a given format */
 export function getFolderParts(
   fmt: FormatDef,

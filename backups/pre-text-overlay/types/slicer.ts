@@ -84,36 +84,7 @@ export interface SlicerState {
   campaignName: string
   rootFolderName: string
   quality: number                // 60–100
-  textLayers: TextLayersMap
 }
-
-// ── Text layers ────────────────────────────────────────────────
-
-export interface TextLayer {
-  id: string
-  text: string
-  fontFamily: string
-  fontSize: number          // output pixels
-  fontWeight: number
-  fill: string
-  textAlign: 'left' | 'center' | 'right'
-  left: number              // x in output pixels (top-left origin)
-  top: number               // y in output pixels
-  width: number             // textbox wrap width in output pixels
-  scaleX: number
-  scaleY: number
-  angle: number
-  opacity: number           // 0–1
-  letterSpacing: number     // Fabric.js charSpacing (1/1000 em)
-  lineHeight: number
-  shadow?: { color: string; blur: number; offsetX: number; offsetY: number } | null
-  bgRect?: { fill: string; padding: number; rx: number } | null
-  preset?: 'headline' | 'subheader' | 'eyebrow' | 'body' | 'cta'
-  visible?: boolean
-}
-
-// textLayers[fileId][formatId] = TextLayer[]
-export type TextLayersMap = Record<string, Record<string, TextLayer[]>>
 
 // ── Sharp API ──────────────────────────────────────────────────
 
