@@ -22,7 +22,7 @@ function SlicerInner({ userPlan }: { userPlan?: UserPlan }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <AppHeader step={step} />
-      <main className="max-w-[1100px] mx-auto px-6 py-8 pb-20">
+      <main className="max-w-[1100px] mx-auto px-6 py-16 pb-24">
         {step === 1 && <Step1Upload onNext={() => setStep(2)} userPlan={userPlan} />}
         {step === 2 && <Step2Formats onBack={() => setStep(1)} onNext={() => setStep(3)} />}
         {step === 3 && <Step3Adjust onBack={() => setStep(2)} onNext={() => setStep(4)} />}

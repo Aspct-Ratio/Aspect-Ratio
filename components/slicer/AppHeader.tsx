@@ -28,14 +28,14 @@ export default function AppHeader({ step }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-50 h-[80px] flex items-center justify-between px-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
+    <header className="sticky top-0 z-50 h-[80px] grid items-center px-10 bg-white/90 backdrop-blur-md border-b border-gray-200" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
       {/* Logo — links back to landing page */}
-      <Link href="/" className="no-underline">
+      <Link href="/" className="no-underline justify-self-start">
         <LogoMark height={75} />
       </Link>
 
-      {/* Step nav */}
-      <nav className="flex items-center gap-0.5">
+      {/* Step nav — always centered */}
+      <nav className="flex items-center gap-0.5 justify-self-center">
         {STEPS.map((s, i) => {
           const done = s.n < step
           const active = s.n === step
@@ -60,7 +60,7 @@ export default function AppHeader({ step }: Props) {
       </nav>
 
       {/* Right: nav actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-self-end">
         <Link
           href="/"
           className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition no-underline tracking-wide"
