@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import LogoMark from '@/components/LogoMark'
 import BillingSettings from '@/components/BillingSettings'
+import DeleteAccount from '@/components/DeleteAccount'
 
 export default async function AccountPage() {
   const supabase = await createClient()
@@ -43,6 +44,8 @@ export default async function AccountPage() {
           subscription={subscription ?? null}
           userEmail={user.email ?? ''}
         />
+
+        <DeleteAccount />
       </main>
     </div>
   )

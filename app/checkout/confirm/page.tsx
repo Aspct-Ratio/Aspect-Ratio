@@ -47,6 +47,8 @@ function CheckoutConfirmForm() {
   const planKey = searchParams.get('plan') ?? ''
   const plan = PLAN_INFO[planKey]
 
+  const wasCanceled = searchParams.get('canceled') === 'true'
+
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -95,6 +97,19 @@ function CheckoutConfirmForm() {
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-[480px]">
+
+          {/* Canceled banner */}
+          {wasCanceled && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 flex items-start gap-2.5">
+              <svg className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Payment was not completed</p>
+                <p className="text-xs text-amber-700 mt-0.5">No charge was made. Please try again when you're ready.</p>
+              </div>
+            </div>
+          )}
 
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Almost there</p>
           <h1 className="text-[26px] font-extrabold text-gray-900 tracking-tight mb-1">
