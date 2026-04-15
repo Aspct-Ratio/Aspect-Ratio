@@ -11,20 +11,20 @@ const PLANS = [
   {
     key: 'freelancer',
     label: 'Freelancer',
-    price: '$29',
-    description: '1 user · 50 exports/mo',
+    price: '$59',
+    description: '1 user · 50 files per project',
   },
   {
     key: 'studio',
     label: 'Studio',
-    price: '$79',
-    description: '5 users · unlimited exports',
+    price: '$199',
+    description: '5 team seats · 150 files per project',
   },
   {
     key: 'agency',
     label: 'Agency',
-    price: '$199',
-    description: 'Unlimited · white-label',
+    price: '$599',
+    description: '20 team seats · unlimited',
   },
 ]
 
@@ -61,7 +61,7 @@ export default async function AppPage() {
             Start your free trial to get started
           </h1>
           <p className="text-gray-500 text-base mb-10 max-w-md">
-            Get 7 days free, then pick the plan that fits your workflow. No credit card required to start.
+            Start with a 7-day free trial, then pick the plan that fits your workflow.
           </p>
 
           {/* Plan cards */}
