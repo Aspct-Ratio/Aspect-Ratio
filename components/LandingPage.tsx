@@ -311,6 +311,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section className="pt-24 pb-20 px-6 text-center bg-gradient-to-b from-white to-gray-50">
+        <p className="text-sm font-semibold text-gray-500 uppercase tracking-[1.5px] mb-4">The asset resizing platform for creative teams</p>
         <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] text-gray-900 max-w-[900px] mx-auto mb-5">
           BUILT FOR THE WAY<br />
           <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">CAMPAIGNS ACTUALLY WORK.</em>
