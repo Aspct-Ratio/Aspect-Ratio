@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
     const PRICE_MAP: Record<string, string | undefined> = {
       freelancer: process.env.STRIPE_FREELANCER_PRICE_ID,

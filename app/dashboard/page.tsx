@@ -11,7 +11,7 @@ export const metadata = { title: 'Account — ASPCT RATIO' }
 async function getCardLast4(customerId: string | undefined): Promise<string | null> {
   if (!customerId) return null
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-02-24.acacia' })
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customerId,
       type: 'card',
