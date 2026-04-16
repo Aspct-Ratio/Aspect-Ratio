@@ -144,9 +144,10 @@ function patchFabricRoundedBg(F: any) {
     if (rx <= 0 && typeof originalRender === 'function') {
       return originalRender.call(self, ctx)
     }
+    const pad = self.data?.bgRect?.padding ?? self.padding ?? 0
     const dim = self._getNonTransformedDimensions()
-    const x = -dim.x / 2, y = -dim.y / 2
-    const w = dim.x, h = dim.y
+    const x = -dim.x / 2 - pad, y = -dim.y / 2 - pad
+    const w = dim.x + pad * 2, h = dim.y + pad * 2
     const r = Math.min(rx, w / 2, h / 2)
     ctx.fillStyle = self.backgroundColor
     ctx.beginPath()
