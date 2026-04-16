@@ -206,6 +206,102 @@ function ApplyDropdown({ fmts, sourceFmt, fileId, onClose }: ApplyDropdownProps)
   )
 }
 
+// ── Remove-from dropdown (stackable filters) ───────────────────
+
+interface RemoveDropdownProps {
+  fmts: FormatDef[]
+  fileId: string
+  onClose: () => void
+}
+
+function RemoveDropdown({ fmts, fileId, onClose }: RemoveDropdownProps) {
+  const { state, dispatch } = useSlicer()
+  const [orientations, setOrientations] = useState<Set<string>>(new Set())
+  const [channels, setChannels] = useState<Set<string>>(new Set())
+
+  function toggleOrientation(key: string) {
+    setOrientations(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  function toggleChannel(key: string) {
+    setChannels(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  // Only show formats that have text
+  const withText = fmts.filter(f => (state.textLayers[fileId]?.[f.id] ?? []).length > 0)
+  const targets = applyFilters(withText, '', orientations, channels)
+
+  function remove() {
+    if (targets.length === 0) { onClose(); return }
+    dispatch({
+      type: 'CLEAR_TEXT_LAYERS_BATCH',
+      fileId,
+      formatIds: targets.map(f => f.id),
+    })
+    onClose()
+  }
+
+  return (
+    <div className="absolute left-0 top-full mt-1 z-40 bg-white border border-gray-200 rounded-xl shadow-xl w-64 p-3 space-y-3">
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Orientation</p>
+        <div className="flex flex-wrap gap-1.5">
+          {ORIENTATION_FILTERS.map(f => (
+            <button key={f.key} onClick={() => toggleOrientation(f.key)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                orientations.has(f.key)
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-red-200 hover:text-red-600'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Channel</p>
+        <div className="flex flex-wrap gap-1.5">
+          {CHANNEL_FILTERS.map(f => (
+            <button key={f.key} onClick={() => toggleChannel(f.key)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                channels.has(f.key)
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-red-200 hover:text-red-600'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <span className="text-[11px] text-gray-400">
+          {orientations.size === 0 && channels.size === 0
+            ? `${targets.length} with text`
+            : `${targets.length} matched`}
+        </span>
+        <div className="flex gap-1.5">
+          <button onClick={onClose}
+            className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition">
+            Cancel
+          </button>
+          <button onClick={remove} disabled={targets.length === 0}
+            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold rounded-lg transition disabled:opacity-40">
+            Remove from {targets.length}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Format card ─────────────────────────────────────────────────
 
 function CopyCard({
@@ -296,6 +392,7 @@ function CopyCard({
 export default function Step4Copy({ onBack, onNext, onSkip }: Props) {
   const { state } = useSlicer()
   const [editingFmt, setEditingFmt] = useState<FormatDef | null>(null)
+  const [removeOpen, setRemoveOpen] = useState(false)
 
   const fmts = getSelectedFormats(state.selected, state.custom)
   const file = state.files[state.activeFile]
@@ -331,9 +428,26 @@ export default function Step4Copy({ onBack, onNext, onSkip }: Props) {
           </div>
           <div className="flex items-center gap-2 mt-1">
             {totalWithText > 0 && (
-              <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-2.5 py-1">
-                {totalWithText} format{totalWithText !== 1 ? 's' : ''} with copy
-              </span>
+              <>
+                <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-2.5 py-1">
+                  {totalWithText} format{totalWithText !== 1 ? 's' : ''} with copy
+                </span>
+                <div className="relative">
+                  <button
+                    onClick={() => setRemoveOpen(o => !o)}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition"
+                  >
+                    Remove from… ▾
+                  </button>
+                  {removeOpen && (
+                    <RemoveDropdown
+                      fmts={fmts}
+                      fileId={file.id}
+                      onClose={() => setRemoveOpen(false)}
+                    />
+                  )}
+                </div>
+              </>
             )}
             <button
               onClick={onSkip}

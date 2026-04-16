@@ -42,6 +42,7 @@ type Action =
   | { type: 'RESET' }
   | { type: 'SET_TEXT_LAYERS';       fileId: string; formatId: string; layers: TextLayer[] }
   | { type: 'CLEAR_TEXT_LAYERS';     fileId: string; formatId: string }
+  | { type: 'CLEAR_TEXT_LAYERS_BATCH'; fileId: string; formatIds: string[] }
   | { type: 'APPLY_TEXT_TO_FORMATS'; fileId: string; sourceFormatId: string;
       sourceDims: { w: number; h: number };
       targets: Array<{ formatId: string; w: number; h: number }> }
@@ -246,6 +247,12 @@ function reducer(state: SlicerState, action: Action): SlicerState {
     case 'CLEAR_TEXT_LAYERS': {
       const fileMap = { ...(state.textLayers[action.fileId] ?? {}) }
       delete fileMap[action.formatId]
+      return { ...state, textLayers: { ...state.textLayers, [action.fileId]: fileMap } }
+    }
+
+    case 'CLEAR_TEXT_LAYERS_BATCH': {
+      const fileMap = { ...(state.textLayers[action.fileId] ?? {}) }
+      for (const fid of action.formatIds) delete fileMap[fid]
       return { ...state, textLayers: { ...state.textLayers, [action.fileId]: fileMap } }
     }
 

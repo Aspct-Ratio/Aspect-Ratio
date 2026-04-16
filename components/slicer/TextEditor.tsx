@@ -289,6 +289,9 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
   const [applyOpen, setApplyOpen] = useState(false)
   const [applyOrientations, setApplyOrientations] = useState<Set<string>>(new Set())
   const [applyChannels, setApplyChannels] = useState<Set<string>>(new Set())
+  const [removeOpen, setRemoveOpen] = useState(false)
+  const [removeOrientations, setRemoveOrientations] = useState<Set<string>>(new Set())
+  const [removeChannels, setRemoveChannels] = useState<Set<string>>(new Set())
   const [customFonts, setCustomFonts] = useState<string[]>([])
   const [ready, setReady]     = useState(false)
   const [initError, setInitError] = useState<string | null>(null)
@@ -807,6 +810,40 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
     setApplyChannels(new Set())
   }
 
+  // ── Remove-from (stackable filters) ────────────────────────────
+
+  // Only show formats that actually have text layers
+  const removableFmts = allFmts.filter(f => f.id !== fmt.id && (state.textLayers[fileId]?.[f.id] ?? []).length > 0)
+  const removeTargets = applyFilters(removableFmts, fmt.id, removeOrientations, removeChannels)
+
+  function toggleRemoveOrientation(key: string) {
+    setRemoveOrientations(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  function toggleRemoveChannel(key: string) {
+    setRemoveChannels(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  function handleRemoveFrom() {
+    if (removeTargets.length === 0) { setRemoveOpen(false); return }
+    dispatch({
+      type: 'CLEAR_TEXT_LAYERS_BATCH',
+      fileId,
+      formatIds: removeTargets.map(f => f.id),
+    })
+    setRemoveOpen(false)
+    setRemoveOrientations(new Set())
+    setRemoveChannels(new Set())
+  }
+
   // ── Done ──────────────────────────────────────────────────────
 
   function handleDone() {
@@ -847,7 +884,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
             {/* Apply to... */}
             <div className="relative">
               <button
-                onClick={() => setApplyOpen(o => !o)}
+                onClick={() => { setApplyOpen(o => !o); setRemoveOpen(false) }}
                 disabled={layerList.length === 0}
                 className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
               >
@@ -902,6 +939,70 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
                       <button onClick={handleApplyTo} disabled={applyTargets.length === 0}
                         className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold rounded-lg transition disabled:opacity-40">
                         Apply to {applyTargets.length}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Remove from... */}
+            <div className="relative">
+              <button
+                onClick={() => { setRemoveOpen(o => !o); setApplyOpen(false) }}
+                disabled={removableFmts.length === 0}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
+              >
+                Remove from… ▾
+              </button>
+              {removeOpen && (
+                <div className="absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-xl shadow-xl w-64 p-3 space-y-3">
+                  {/* Orientation */}
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Orientation</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ORIENTATION_FILTERS.map(f => (
+                        <button key={f.key} onClick={() => toggleRemoveOrientation(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                            removeOrientations.has(f.key)
+                              ? 'bg-red-600 text-white border-red-600'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-red-200 hover:text-red-600'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Channel */}
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Channel</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {CHANNEL_FILTERS.map(f => (
+                        <button key={f.key} onClick={() => toggleRemoveChannel(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                            removeChannels.has(f.key)
+                              ? 'bg-red-600 text-white border-red-600'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-red-200 hover:text-red-600'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Remove bar */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <span className="text-[11px] text-gray-400">
+                      {removeOrientations.size === 0 && removeChannels.size === 0
+                        ? `${removeTargets.length} with text`
+                        : `${removeTargets.length} matched`}
+                    </span>
+                    <div className="flex gap-1.5">
+                      <button onClick={() => setRemoveOpen(false)}
+                        className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition">
+                        Cancel
+                      </button>
+                      <button onClick={handleRemoveFrom} disabled={removeTargets.length === 0}
+                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold rounded-lg transition disabled:opacity-40">
+                        Remove from {removeTargets.length}
                       </button>
                     </div>
                   </div>
