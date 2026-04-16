@@ -5,7 +5,15 @@ import { useSlicer } from './SlicerContext'
 import { getSelectedFormats } from '@/lib/formats'
 import { renderToCanvasWithText, canvasToBlob, buildFilename, getFolderParts } from '@/lib/crop'
 import FolderStructure from './FolderStructure'
-import type { FormatDef } from '@/types/slicer'
+import type { FormatDef, ExportFormat } from '@/types/slicer'
+
+const EXPORT_FORMATS: { f: ExportFormat; label: string }[] = [
+  { f: 'jpeg', label: 'JPG' },
+  { f: 'png',  label: 'PNG' },
+  { f: 'webp', label: 'WebP' },
+  { f: 'pdf',  label: 'PDF' },
+  { f: 'tiff', label: 'TIFF*' },
+]
 
 const TAG_CLASSES: Record<string, string> = {
   't-soc': 'bg-indigo-50 text-indigo-600',
@@ -27,7 +35,7 @@ interface Props {
 }
 
 export default function Step4Export({ onBack, onReset }: Props) {
-  const { state } = useSlicer()
+  const { state, dispatch } = useSlicer()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [progress, setProgress] = useState(0)
   const [progressLabel, setProgressLabel] = useState('')
@@ -225,8 +233,43 @@ export default function Step4Export({ onBack, onReset }: Props) {
           </div>
         </div>
 
-        {/* Right: folder config + output preview + download */}
+        {/* Right: export settings + folder config + output preview + download */}
         <div>
+          {/* Export file formats */}
+          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.7px] mb-2">Export File Formats</div>
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-3.5">
+            <p className="text-xs text-gray-500 mb-2">All selected types export for every slice.</p>
+            <div className="flex flex-wrap gap-1.5">
+              {EXPORT_FORMATS.map(({ f, label }) => {
+                const on = state.exportFormats.has(f)
+                return (
+                  <button
+                    key={f}
+                    onClick={() => dispatch({ type: 'TOGGLE_EXPORT_FORMAT', fmt: f })}
+                    className={`px-3.5 py-1 rounded-full border-[1.5px] text-xs font-semibold transition ${on ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'}`}
+                  >{label}</button>
+                )
+              })}
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2">*TIFF exports as PNG (browser limitation).</p>
+          </div>
+
+          {/* Quality */}
+          <div className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.7px] mb-2">Quality</div>
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-3.5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600 font-medium">JPG / WebP Quality</span>
+              <span className="text-sm font-bold text-indigo-600">{state.quality}%</span>
+            </div>
+            <input
+              type="range" min={60} max={100} value={state.quality}
+              onChange={e => dispatch({ type: 'SET_QUALITY', value: parseInt(e.target.value) })}
+            />
+            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+              <span>Smaller file</span><span>Higher quality</span>
+            </div>
+          </div>
+
           <FolderStructure />
 
           {/* Output Preview — collapsible */}
