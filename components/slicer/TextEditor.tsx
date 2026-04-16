@@ -24,9 +24,15 @@ const PRESETS = {
 }
 
 const WEIGHT_OPTIONS = [
-  { value: 300, label: 'Light 300' }, { value: 400, label: 'Regular 400' },
-  { value: 500, label: 'Medium 500' }, { value: 600, label: 'Semibold 600' },
-  { value: 700, label: 'Bold 700' },  { value: 900, label: 'Black 900' },
+  { value: 100, label: 'Thin 100' },
+  { value: 200, label: 'Extra Light 200' },
+  { value: 300, label: 'Light 300' },
+  { value: 400, label: 'Regular 400' },
+  { value: 500, label: 'Medium 500' },
+  { value: 600, label: 'Semibold 600' },
+  { value: 700, label: 'Bold 700' },
+  { value: 800, label: 'Extra Bold 800' },
+  { value: 900, label: 'Black 900' },
 ]
 
 const APPLY_OPTIONS = [
@@ -74,7 +80,7 @@ function loadGoogleFont(family: string): Promise<void> {
     const link = document.createElement('link')
     link.id   = id
     link.rel  = 'stylesheet'
-    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@300;400;500;600;700;900&display=swap`
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@100;200;300;400;500;600;700;800;900&display=swap`
     link.onload = () => resolve()
     link.onerror = () => resolve()
     document.head.appendChild(link)
@@ -217,7 +223,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
 
   useEffect(() => {
     if (!canvasElRef.current) return
-    let canvas: typeof fabricRef.current = null
+    let disposed = false
 
     // Load Google Fonts in background
     GOOGLE_FONTS.forEach(f => loadGoogleFont(f))
@@ -225,8 +231,13 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     async function init() {
       const { Canvas, Textbox, FabricImage, Shadow } = await import('fabric')
 
-      canvas = new Canvas(canvasElRef.current!, { width: dw, height: dh, selection: true })
+      // If cleanup already ran (StrictMode), abort
+      if (disposed) return
+
+      // Internal coordinate space = full output resolution; CSS display = scaled down
+      const canvas = new Canvas(canvasElRef.current!, { width: fmt.w, height: fmt.h, selection: true })
       canvas.setZoom(scale)
+      canvas.setDimensions({ width: dw, height: dh }, { cssOnly: true })
       fabricRef.current = canvas
       scaleRef.current  = scale
 
@@ -235,7 +246,18 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       renderToCanvas(offscreen, fmt, file, crop)
       const dataUrl = offscreen.toDataURL('image/jpeg', 0.92)
       const bgImg   = await FabricImage.fromURL(dataUrl)
-      bgImg.set({ selectable: false, evented: false, hoverCursor: 'default' })
+
+      // Check again after await
+      if (disposed) { canvas.dispose(); return }
+
+      bgImg.set({
+        selectable: false,
+        evented: false,
+        hoverCursor: 'default',
+        // Scale so the image fills the full output coordinate space (fmt.w × fmt.h)
+        scaleX: fmt.w / bgImg.width!,
+        scaleY: fmt.h / bgImg.height!,
+      })
       canvas.backgroundImage = bgImg
       canvas.requestRenderAll()
 
@@ -259,6 +281,13 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
           visible:     layer.visible ?? true,
           originX:     'left',
           originY:     'top',
+          selectable:  true,
+          evented:     true,
+          editable:    true,
+          hasControls: true,
+          hasBorders:  true,
+          lockUniScaling: false,
+          ...(layer.bgRect ? { backgroundColor: layer.bgRect.fill, padding: layer.bgRect.padding } : {}),
         })
         if (layer.shadow) {
           tb.shadow = new Shadow({
@@ -273,6 +302,9 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
           await loadGoogleFont(layer.fontFamily)
         }
       }
+
+      if (disposed) { canvas.dispose(); return }
+
       canvas.requestRenderAll()
 
       // Events
@@ -291,7 +323,13 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     }
 
     init()
-    return () => { canvas?.dispose(); fabricRef.current = null }
+    return () => {
+      disposed = true
+      if (fabricRef.current) {
+        fabricRef.current.dispose()
+        fabricRef.current = null
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -310,9 +348,10 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const { Textbox, Shadow } = await import('fabric')
     const p = PRESETS[presetKey]
     const id = uid()
-    const tbW  = Math.round(fmt.w * 0.8)
-    const tbX  = Math.round((fmt.w - tbW) / 2)
-    const tbY  = Math.round(fmt.h * 0.65)
+    const tbW    = Math.round(fmt.w * 0.8)
+    const tbX    = Math.round((fmt.w - tbW) / 2)
+    const tbY    = Math.round(fmt.h * 0.65)
+    const bgRect = 'bgRect' in p ? (p as { bgRect: TextLayer['bgRect'] }).bgRect ?? null : null
     const tb = new Textbox(p.text, {
       left:        tbX,
       top:         tbY,
@@ -326,10 +365,16 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       lineHeight:  1.16,
       originX:     'left',
       originY:     'top',
+      selectable:  true,
+      evented:     true,
+      editable:    true,
+      hasControls: true,
+      hasBorders:  true,
+      lockUniScaling: false,
+      ...(bgRect ? { backgroundColor: bgRect.fill, padding: bgRect.padding } : {}),
     })
     // Eye-catch shadow for legibility
     tb.shadow = new Shadow({ color: 'rgba(0,0,0,0.55)', blur: 12, offsetX: 0, offsetY: 2 })
-    const bgRect = 'bgRect' in p ? (p as { bgRect: TextLayer['bgRect'] }).bgRect ?? null : null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(tb as any).data = { id, bgRect }
     canvas.add(tb)
@@ -454,6 +499,13 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       rx:      updates?.bgRx      ?? current.bgRx      ?? 8,
     } : null
     obj.data = { ...obj.data, bgRect }
+    // Sync to Fabric's native backgroundColor + padding so it renders in the editor
+    if (bgRect) {
+      obj.set({ backgroundColor: bgRect.fill, padding: bgRect.padding })
+    } else {
+      obj.set({ backgroundColor: '', padding: 0 })
+    }
+    canvas.requestRenderAll()
     readSel(obj)
     saveToState()
   }

@@ -172,10 +172,19 @@ export function renderToCanvasWithText(
       const totalH = lines.length * lineH
       const maxLineW = Math.max(...lines.map(l => ctx.measureText(l).width))
       const { padding, rx, fill: bgFill } = layer.bgRect
+      // Align bgRect x to match text alignment so it wraps the text properly
+      let bgX: number
+      if (layer.textAlign === 'center') {
+        bgX = layer.left + effectiveWidth / 2 - maxLineW / 2 - padding
+      } else if (layer.textAlign === 'right') {
+        bgX = layer.left + effectiveWidth - maxLineW - padding
+      } else {
+        bgX = layer.left - padding
+      }
       ctx.save()
       ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
       ctx.fillStyle = bgFill
-      _roundRect(ctx, layer.left - padding, layer.top - padding,
+      _roundRect(ctx, bgX, layer.top - padding,
                  maxLineW + padding * 2, totalH + padding * 2, rx)
       ctx.fill()
       ctx.restore()
