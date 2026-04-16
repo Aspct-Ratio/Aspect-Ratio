@@ -229,23 +229,25 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     GOOGLE_FONTS.forEach(f => loadGoogleFont(f))
 
     async function init() {
-      const { Canvas, Textbox, FabricImage, Shadow } = await import('fabric')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const F: any = ((await import('fabric')) as any).fabric
 
       // If cleanup already ran (StrictMode), abort
       if (disposed) return
 
       // Internal coordinate space = full output resolution; CSS display = scaled down
-      const canvas = new Canvas(canvasElRef.current!, { width: fmt.w, height: fmt.h, selection: true })
+      const canvas = new F.Canvas(canvasElRef.current!, { width: fmt.w, height: fmt.h, selection: true })
       canvas.setZoom(scale)
       canvas.setDimensions({ width: dw, height: dh }, { cssOnly: true })
       fabricRef.current = canvas
       scaleRef.current  = scale
 
-      // Background: render crop → data URL → Fabric image
+      // Background: render crop → data URL → Fabric image (v6 uses callback style)
       const offscreen = document.createElement('canvas')
       renderToCanvas(offscreen, fmt, file, crop)
       const dataUrl = offscreen.toDataURL('image/jpeg', 0.92)
-      const bgImg   = await FabricImage.fromURL(dataUrl)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bgImg   = await new Promise<any>(resolve => F.Image.fromURL(dataUrl, resolve))
 
       // Check again after await
       if (disposed) { canvas.dispose(); return }
@@ -263,7 +265,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
 
       // Restore existing layers
       for (const layer of initialLayers) {
-        const tb = new Textbox(layer.text, {
+        const tb = new F.Textbox(layer.text, {
           left:        layer.left,
           top:         layer.top,
           width:       layer.width,
@@ -290,7 +292,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
           ...(layer.bgRect ? { backgroundColor: layer.bgRect.fill, padding: layer.bgRect.padding } : {}),
         })
         if (layer.shadow) {
-          tb.shadow = new Shadow({
+          tb.shadow = new F.Shadow({
             color: layer.shadow.color, blur: layer.shadow.blur,
             offsetX: layer.shadow.offsetX, offsetY: layer.shadow.offsetY,
           })
@@ -345,14 +347,15 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
   async function addPreset(presetKey: keyof typeof PRESETS) {
     const canvas = fabricRef.current
     if (!canvas) return
-    const { Textbox, Shadow } = await import('fabric')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const F: any = ((await import('fabric')) as any).fabric
     const p = PRESETS[presetKey]
     const id = uid()
     const tbW    = Math.round(fmt.w * 0.8)
     const tbX    = Math.round((fmt.w - tbW) / 2)
     const tbY    = Math.round(fmt.h * 0.65)
     const bgRect = 'bgRect' in p ? (p as { bgRect: TextLayer['bgRect'] }).bgRect ?? null : null
-    const tb = new Textbox(p.text, {
+    const tb = new F.Textbox(p.text, {
       left:        tbX,
       top:         tbY,
       width:       tbW,
@@ -374,7 +377,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       ...(bgRect ? { backgroundColor: bgRect.fill, padding: bgRect.padding } : {}),
     })
     // Eye-catch shadow for legibility
-    tb.shadow = new Shadow({ color: 'rgba(0,0,0,0.55)', blur: 12, offsetX: 0, offsetY: 2 })
+    tb.shadow = new F.Shadow({ color: 'rgba(0,0,0,0.55)', blur: 12, offsetX: 0, offsetY: 2 })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(tb as any).data = { id, bgRect }
     canvas.add(tb)
@@ -422,7 +425,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj) return
-    canvas.bringObjectForward(obj)
+    canvas.bringForward(obj)
     canvas.requestRenderAll()
   }
 
@@ -430,7 +433,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj) return
-    canvas.sendObjectBackwards(obj)
+    canvas.sendBackwards(obj)
     canvas.requestRenderAll()
   }
 
@@ -469,10 +472,11 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj || obj.type !== 'textbox') return
-    const { Shadow } = await import('fabric')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const F: any = ((await import('fabric')) as any).fabric
     const current = sel ?? ({} as SelProps)
     if (enabled) {
-      obj.shadow = new Shadow({
+      obj.shadow = new F.Shadow({
         color:   updates?.shadowColor   ?? current.shadowColor   ?? '#000000',
         blur:    updates?.shadowBlur    ?? current.shadowBlur    ?? 10,
         offsetX: updates?.shadowOffsetX ?? current.shadowOffsetX ?? 2,
