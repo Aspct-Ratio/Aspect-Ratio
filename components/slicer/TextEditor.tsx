@@ -253,10 +253,11 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       if (disposed) return
 
       console.log('[TextEditor] creating canvas', fmt.w, 'x', fmt.h, 'scale:', scale, 'display:', dw, 'x', dh)
-      // Internal coordinate space = full output resolution; CSS display = scaled down
-      const canvas = new F.Canvas(canvasElRef.current!, { width: fmt.w, height: fmt.h, selection: true })
+      // Canvas buffer = display size; setZoom maps fmt-space coords into the buffer.
+      // This keeps a clean coord system: objects are positioned in fmt-space (0..fmt.w, 0..fmt.h)
+      // and fabric handles the scale-to-display transform for rendering AND hit-testing.
+      const canvas = new F.Canvas(canvasElRef.current!, { width: dw, height: dh, selection: true })
       canvas.setZoom(scale)
-      canvas.setDimensions({ width: dw, height: dh }, { cssOnly: true })
       fabricRef.current = canvas
       scaleRef.current  = scale
 
