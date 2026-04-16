@@ -2,7 +2,9 @@ import Link from 'next/link'
 import LogoMark from '@/components/LogoMark'
 
 export const metadata = {
-  title: 'Privacy Policy — ASPCT RATIO',
+  title: 'Privacy Policy',
+  description: 'How ASPCT RATIO collects, uses, and protects your data. Read our full privacy policy.',
+  alternates: { canonical: 'https://aspctratio.com/privacy' },
 }
 
 const sections = [

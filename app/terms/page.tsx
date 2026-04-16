@@ -2,7 +2,9 @@ import Link from 'next/link'
 import LogoMark from '@/components/LogoMark'
 
 export const metadata = {
-  title: 'Terms of Service — ASPCT RATIO',
+  title: 'Terms of Service',
+  description: 'Terms of service for using ASPCT RATIO, the bulk image resizing and asset slicing platform.',
+  alternates: { canonical: 'https://aspctratio.com/terms' },
 }
 
 const sections = [
