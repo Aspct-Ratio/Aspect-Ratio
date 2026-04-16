@@ -49,15 +49,43 @@ const WEIGHT_OPTIONS = [
   { value: 900, label: 'Black 900' },
 ]
 
-const APPLY_OPTIONS = [
-  { key: 'all',        label: 'All formats' },
-  { key: 'vertical',   label: 'All vertical formats' },
-  { key: 'horizontal', label: 'All horizontal formats' },
-  { key: 'social',     label: 'Social Media only' },
-  { key: 'ecomm',      label: 'Ecommerce only' },
-  { key: 'paid',       label: 'Paid Media only' },
-  { key: 'retail',     label: 'Retail / OOH only' },
+const ORIENTATION_FILTERS = [
+  { key: 'vertical',   label: 'Vertical' },
+  { key: 'horizontal', label: 'Horizontal' },
+  { key: 'square',     label: 'Square' },
 ]
+
+const CHANNEL_FILTERS = [
+  { key: 'social', label: 'Social' },
+  { key: 'ecomm',  label: 'Ecomm' },
+  { key: 'paid',   label: 'Paid' },
+  { key: 'retail', label: 'Retail' },
+]
+
+function applyFilters(
+  fmts: FormatDef[],
+  sourceId: string,
+  orientations: Set<string>,
+  channels: Set<string>,
+): FormatDef[] {
+  return fmts.filter(f => {
+    if (f.id === sourceId) return false
+    if (orientations.size > 0) {
+      const isV = f.h > f.w
+      const isH = f.w > f.h
+      const isS = f.w === f.h
+      const match =
+        (orientations.has('vertical') && isV) ||
+        (orientations.has('horizontal') && isH) ||
+        (orientations.has('square') && isS)
+      if (!match) return false
+    }
+    if (channels.size > 0) {
+      if (!channels.has(f.ck ?? '')) return false
+    }
+    return true
+  })
+}
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -259,6 +287,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
   const [sel, setSel]         = useState<SelProps | null>(null)
   const [layerList, setLayerList] = useState<LayerItem[]>([])
   const [applyOpen, setApplyOpen] = useState(false)
+  const [applyOrientations, setApplyOrientations] = useState<Set<string>>(new Set())
+  const [applyChannels, setApplyChannels] = useState<Set<string>>(new Set())
   const [customFonts, setCustomFonts] = useState<string[]>([])
   const [ready, setReady]     = useState(false)
   const [initError, setInitError] = useState<string | null>(null)
@@ -742,28 +772,39 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
     saveToState()
   }
 
-  // ── Apply-to ──────────────────────────────────────────────────
+  // ── Apply-to (stackable filters) ───────────────────────────────
 
-  function handleApplyTo(filterKey: string) {
-    saveToState()
-    const targets = allFmts.filter(f => {
-      if (f.id === fmt.id) return false
-      if (filterKey === 'vertical')   return f.h > f.w
-      if (filterKey === 'horizontal') return f.w >= f.h
-      if (filterKey === 'social')     return f.ck === 'social'
-      if (filterKey === 'ecomm')      return f.ck === 'ecomm'
-      if (filterKey === 'paid')       return f.ck === 'paid'
-      if (filterKey === 'retail')     return f.ck === 'retail'
-      return true
+  const applyTargets = applyFilters(allFmts, fmt.id, applyOrientations, applyChannels)
+
+  function toggleApplyOrientation(key: string) {
+    setApplyOrientations(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
     })
+  }
+
+  function toggleApplyChannel(key: string) {
+    setApplyChannels(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  function handleApplyTo() {
+    saveToState()
+    if (applyTargets.length === 0) { setApplyOpen(false); return }
     dispatch({
       type: 'APPLY_TEXT_TO_FORMATS',
       fileId,
       sourceFormatId: fmt.id,
       sourceDims: { w: fmt.w, h: fmt.h },
-      targets: targets.map(f => ({ formatId: f.id, w: f.w, h: f.h })),
+      targets: applyTargets.map(f => ({ formatId: f.id, w: f.w, h: f.h })),
     })
     setApplyOpen(false)
+    setApplyOrientations(new Set())
+    setApplyChannels(new Set())
   }
 
   // ── Done ──────────────────────────────────────────────────────
@@ -813,13 +854,57 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
                 Apply to… ▾
               </button>
               {applyOpen && (
-                <div className="absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-52">
-                  {APPLY_OPTIONS.map(opt => (
-                    <button key={opt.key} onClick={() => handleApplyTo(opt.key)}
-                      className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
-                      {opt.label}
-                    </button>
-                  ))}
+                <div className="absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-xl shadow-xl w-64 p-3 space-y-3">
+                  {/* Orientation */}
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Orientation</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {ORIENTATION_FILTERS.map(f => (
+                        <button key={f.key} onClick={() => toggleApplyOrientation(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                            applyOrientations.has(f.key)
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-200 hover:text-indigo-600'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Channel */}
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Channel</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {CHANNEL_FILTERS.map(f => (
+                        <button key={f.key} onClick={() => toggleApplyChannel(f.key)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                            applyChannels.has(f.key)
+                              ? 'bg-indigo-600 text-white border-indigo-600'
+                              : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-200 hover:text-indigo-600'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Apply bar */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                    <span className="text-[11px] text-gray-400">
+                      {applyOrientations.size === 0 && applyChannels.size === 0
+                        ? `${applyTargets.length} formats (all)`
+                        : `${applyTargets.length} format${applyTargets.length !== 1 ? 's' : ''} matched`}
+                    </span>
+                    <div className="flex gap-1.5">
+                      <button onClick={() => setApplyOpen(false)}
+                        className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition">
+                        Cancel
+                      </button>
+                      <button onClick={handleApplyTo} disabled={applyTargets.length === 0}
+                        className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold rounded-lg transition disabled:opacity-40">
+                        Apply to {applyTargets.length}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

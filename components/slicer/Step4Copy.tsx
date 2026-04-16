@@ -67,7 +67,7 @@ function TextPreviewCard({ fmt }: { fmt: FormatDef }) {
   )
 }
 
-// ── Apply-to dropdown ───────────────────────────────────────────
+// ── Apply-to dropdown (stackable filters) ──────────────────────
 
 interface ApplyDropdownProps {
   fmts: FormatDef[]
@@ -76,34 +76,70 @@ interface ApplyDropdownProps {
   onClose: () => void
 }
 
-const APPLY_OPTIONS = [
-  { key: 'all',        label: 'All formats' },
-  { key: 'vertical',   label: 'All vertical formats' },
-  { key: 'horizontal', label: 'All horizontal formats' },
-  { key: 'social',     label: 'Social Media only' },
-  { key: 'ecomm',      label: 'Ecommerce only' },
-  { key: 'paid',       label: 'Paid Media only' },
-  { key: 'retail',     label: 'Retail / OOH only' },
+const ORIENTATION_FILTERS = [
+  { key: 'vertical',   label: 'Vertical' },
+  { key: 'horizontal', label: 'Horizontal' },
+  { key: 'square',     label: 'Square' },
 ]
+
+const CHANNEL_FILTERS = [
+  { key: 'social', label: 'Social' },
+  { key: 'ecomm',  label: 'Ecomm' },
+  { key: 'paid',   label: 'Paid' },
+  { key: 'retail', label: 'Retail' },
+]
+
+function applyFilters(
+  fmts: FormatDef[],
+  sourceId: string,
+  orientations: Set<string>,
+  channels: Set<string>,
+): FormatDef[] {
+  return fmts.filter(f => {
+    if (f.id === sourceId) return false
+    if (orientations.size > 0) {
+      const isV = f.h > f.w
+      const isH = f.w > f.h
+      const isS = f.w === f.h
+      const match =
+        (orientations.has('vertical') && isV) ||
+        (orientations.has('horizontal') && isH) ||
+        (orientations.has('square') && isS)
+      if (!match) return false
+    }
+    if (channels.size > 0) {
+      if (!channels.has(f.ck ?? '')) return false
+    }
+    return true
+  })
+}
 
 function ApplyDropdown({ fmts, sourceFmt, fileId, onClose }: ApplyDropdownProps) {
   const { state, dispatch } = useSlicer()
+  const [orientations, setOrientations] = useState<Set<string>>(new Set())
+  const [channels, setChannels] = useState<Set<string>>(new Set())
 
-  function apply(key: string) {
-    const sourceLayers = state.textLayers[fileId]?.[sourceFmt.id] ?? []
-    if (sourceLayers.length === 0) { onClose(); return }
-
-    const targets = fmts.filter(f => {
-      if (f.id === sourceFmt.id) return false
-      if (key === 'vertical')   return f.h > f.w
-      if (key === 'horizontal') return f.w >= f.h
-      if (key === 'social')     return f.ck === 'social'
-      if (key === 'ecomm')      return f.ck === 'ecomm'
-      if (key === 'paid')       return f.ck === 'paid'
-      if (key === 'retail')     return f.ck === 'retail'
-      return true // 'all'
+  function toggleOrientation(key: string) {
+    setOrientations(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
     })
+  }
 
+  function toggleChannel(key: string) {
+    setChannels(prev => {
+      const next = new Set(prev)
+      next.has(key) ? next.delete(key) : next.add(key)
+      return next
+    })
+  }
+
+  const targets = applyFilters(fmts, sourceFmt.id, orientations, channels)
+
+  function apply() {
+    const sourceLayers = state.textLayers[fileId]?.[sourceFmt.id] ?? []
+    if (sourceLayers.length === 0 || targets.length === 0) { onClose(); return }
     dispatch({
       type: 'APPLY_TEXT_TO_FORMATS',
       fileId,
@@ -115,16 +151,57 @@ function ApplyDropdown({ fmts, sourceFmt, fileId, onClose }: ApplyDropdownProps)
   }
 
   return (
-    <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-52">
-      {APPLY_OPTIONS.map(opt => (
-        <button
-          key={opt.key}
-          onClick={() => apply(opt.key)}
-          className="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition"
-        >
-          {opt.label}
-        </button>
-      ))}
+    <div className="absolute left-0 bottom-full mb-1 z-40 bg-white border border-gray-200 rounded-xl shadow-xl w-64 p-3 space-y-3">
+      {/* Orientation filters */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Orientation</p>
+        <div className="flex flex-wrap gap-1.5">
+          {ORIENTATION_FILTERS.map(f => (
+            <button key={f.key} onClick={() => toggleOrientation(f.key)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                orientations.has(f.key)
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-200 hover:text-indigo-600'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Channel filters */}
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Channel</p>
+        <div className="flex flex-wrap gap-1.5">
+          {CHANNEL_FILTERS.map(f => (
+            <button key={f.key} onClick={() => toggleChannel(f.key)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                channels.has(f.key)
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-200 hover:text-indigo-600'
+              }`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Apply bar */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <span className="text-[11px] text-gray-400">
+          {orientations.size === 0 && channels.size === 0
+            ? `${targets.length} formats (all)`
+            : `${targets.length} format${targets.length !== 1 ? 's' : ''} matched`}
+        </span>
+        <div className="flex gap-1.5">
+          <button onClick={onClose}
+            className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition">
+            Cancel
+          </button>
+          <button onClick={apply} disabled={targets.length === 0}
+            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold rounded-lg transition disabled:opacity-40">
+            Apply to {targets.length}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -152,9 +229,9 @@ function CopyCard({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-xl shadow hover:shadow-md transition-shadow relative">
       {/* Header */}
-      <div className="px-3.5 py-2.5 border-b border-gray-100 flex items-start justify-between gap-2">
+      <div className="px-3.5 py-2.5 border-b border-gray-100 flex items-start justify-between gap-2 rounded-t-xl">
         <div>
           <div className="text-sm font-bold text-gray-800 leading-tight">{fmt.n}</div>
           <div className="text-xs text-gray-400 mt-0.5">{fmt.w}×{fmt.h}</div>
