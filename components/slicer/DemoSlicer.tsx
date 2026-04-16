@@ -343,27 +343,19 @@ function AdjustCard({
 }) {
   const ratio = fmt.h / fmt.w
   const cardH = Math.round(cardW * Math.min(ratio, 1.8))
+  // Calculate background-size % needed to achieve "cover" at zoom 1
+  const imgAspect = image.w / image.h
+  const cardAspect = cardW / cardH
+  const coverPct = Math.max(100, (imgAspect / cardAspect) * 100)
   const [crop, setCrop] = useState<CropState>({ x: 0, y: 0, zoom: 1 })
   const [dragging, setDragging] = useState(false)
   const startRef = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null)
 
   // Clamp pan so image edges stay within the container.
-  // background-size: zoom*100% means the image is zoom times the container's
-  // covering dimension. Extra pixels on each axis = (renderedDim - containerDim) / 2.
   function clampPan(x: number, y: number, zoom: number) {
-    // Figure out the rendered image dimensions at this zoom
-    const imgAspect = image.w / image.h
-    const cardAspect = cardW / cardH
-    let renderedW: number, renderedH: number
-    if (imgAspect > cardAspect) {
-      // Image wider than card → height-fit at 100%, so rendered height = cardH * zoom
-      renderedH = cardH * zoom
-      renderedW = renderedH * imgAspect
-    } else {
-      // Image taller than card → width-fit at 100%, so rendered width = cardW * zoom
-      renderedW = cardW * zoom
-      renderedH = renderedW / imgAspect
-    }
+    // background-size is coverPct * zoom % of container width
+    const renderedW = cardW * (coverPct * zoom) / 100
+    const renderedH = renderedW / imgAspect
     const maxX = Math.max(0, (renderedW - cardW) / 2)
     const maxY = Math.max(0, (renderedH - cardH) / 2)
     return {
@@ -414,7 +406,7 @@ function AdjustCard({
           height: cardH,
           touchAction: 'none',
           backgroundImage: `url(${image.src})`,
-          backgroundSize: `${crop.zoom * 100}%`,
+          backgroundSize: `${coverPct * crop.zoom}%`,
           backgroundPosition: `calc(50% + ${crop.x}px) calc(50% + ${crop.y}px)`,
           backgroundRepeat: 'no-repeat',
           transition: dragging ? 'none' : 'background-size 0.15s ease, background-position 0.15s ease',
