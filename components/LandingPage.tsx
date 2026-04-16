@@ -70,8 +70,8 @@ function FAQ() {
 }
 
 const RESOURCE_LINKS = [
-  { label: 'Asset Resizing Tool', href: '/tools/asset-resizing' },
-  { label: 'Image Cropping Tool', href: '/tools/image-cropping' },
+  { label: 'Asset Resizing', href: '/tools/asset-resizing' },
+  { label: 'Image Cropping', href: '/tools/image-cropping' },
   { label: 'Social Media Resizer', href: '/tools/social-media-image-resizer' },
   { label: 'How to Resize for Social', href: '/guides/how-to-resize-images-for-social-media' },
   { label: 'Image Sizes Reference', href: '/guides/image-sizes-for-every-social-platform' },
