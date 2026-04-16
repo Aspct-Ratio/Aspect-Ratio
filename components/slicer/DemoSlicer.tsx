@@ -36,7 +36,7 @@ interface LoadedImage {
 
 // ── Step indicator ──────────────────────────────────────────────────────
 
-const STEP_LABELS = ['Upload', 'Formats', 'Preview', 'Export']
+const STEP_LABELS = ['Upload', 'Formats', 'Preview', 'Copy', 'Export']
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -379,12 +379,245 @@ function PreviewStep({
         })}
       </div>
 
+      <NavBar onBack={onBack} onNext={onNext} nextLabel="Add Copy →" />
+    </div>
+  )
+}
+
+// ── Step 4: Add Copy (simplified) ───────────────────────────────────────
+
+interface DemoTextLayer {
+  text: string
+  fontSize: number
+  fontWeight: number
+  color: string
+  yPct: number  // vertical position as percentage (0-100)
+}
+
+const DEMO_PRESETS: { label: string; layer: DemoTextLayer }[] = [
+  { label: '+ Headline',  layer: { text: 'Your Headline', fontSize: 32, fontWeight: 700, color: '#ffffff', yPct: 70 } },
+  { label: '+ Subheader', layer: { text: 'Subheader goes here', fontSize: 18, fontWeight: 500, color: '#ffffff', yPct: 82 } },
+  { label: '+ CTA',       layer: { text: 'Shop Now', fontSize: 16, fontWeight: 700, color: '#ffffff', yPct: 92 } },
+]
+
+function CopyStep({
+  image,
+  selected,
+  onBack,
+  onNext,
+}: {
+  image: LoadedImage
+  selected: Set<string>
+  onBack: () => void
+  onNext: () => void
+}) {
+  const formats = DEMO_FORMATS.filter(f => selected.has(f.id))
+  const [activeFmt, setActiveFmt] = useState(formats[0]?.id ?? '')
+  const [layers, setLayers] = useState<DemoTextLayer[]>([])
+  const [editIdx, setEditIdx] = useState<number | null>(null)
+
+  const fmt = formats.find(f => f.id === activeFmt) ?? formats[0]
+  const PREVIEW_W = 320
+  const ratio = fmt ? fmt.h / fmt.w : 1
+  const previewH = Math.round(PREVIEW_W * Math.min(ratio, 1.6))
+
+  function addPreset(preset: DemoTextLayer) {
+    setLayers(prev => [...prev, { ...preset }])
+    setEditIdx(layers.length)
+  }
+
+  function updateLayer(idx: number, updates: Partial<DemoTextLayer>) {
+    setLayers(prev => prev.map((l, i) => i === idx ? { ...l, ...updates } : l))
+  }
+
+  function removeLayer(idx: number) {
+    setLayers(prev => prev.filter((_, i) => i !== idx))
+    setEditIdx(null)
+  }
+
+  return (
+    <div className="flex flex-col min-h-0">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-[0.6px] mb-4 flex-shrink-0">
+        Add text to your assets
+      </p>
+
+      <div className="flex gap-4 min-h-0" style={{ maxHeight: 360 }}>
+        {/* Left: format thumbnails */}
+        <div className="flex flex-col gap-1.5 overflow-y-auto flex-shrink-0 w-16">
+          {formats.map(f => {
+            const ar = f.h / f.w
+            const th = Math.round(48 * Math.min(ar, 1.5))
+            return (
+              <button
+                key={f.id}
+                onClick={() => setActiveFmt(f.id)}
+                className={[
+                  'flex flex-col items-center gap-0.5 p-1 rounded-lg border transition',
+                  f.id === activeFmt
+                    ? 'border-indigo-400 bg-indigo-50'
+                    : 'border-transparent hover:bg-gray-50',
+                ].join(' ')}
+              >
+                <div
+                  className="w-12 rounded overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0"
+                  style={{ height: th }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={image.src} alt="" className="w-full h-full object-cover" />
+                </div>
+                <span className="text-[8px] text-gray-500 font-medium">{f.w}×{f.h}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Center: preview with text overlays */}
+        <div className="flex-1 flex flex-col items-center min-w-0">
+          <div
+            className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0"
+            style={{ width: PREVIEW_W, height: previewH }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.src}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ objectPosition: 'center 30%' }}
+            />
+            {/* Text overlays */}
+            {layers.map((layer, i) => (
+              <div
+                key={i}
+                onClick={() => setEditIdx(i)}
+                className={[
+                  'absolute left-1/2 -translate-x-1/2 text-center cursor-pointer px-2 py-0.5 rounded transition-all',
+                  editIdx === i ? 'ring-2 ring-indigo-400 ring-offset-1' : 'hover:ring-1 hover:ring-white/50',
+                ].join(' ')}
+                style={{
+                  top: `${layer.yPct}%`,
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: layer.fontSize,
+                  fontWeight: layer.fontWeight,
+                  color: layer.color,
+                  textShadow: '0 1px 8px rgba(0,0,0,0.5)',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}
+              >
+                {layer.text}
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-400 mt-1.5">Click text to edit</p>
+        </div>
+
+        {/* Right: controls */}
+        <div className="w-44 flex-shrink-0 overflow-y-auto">
+          {/* Presets */}
+          <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Add Text</p>
+          <div className="flex flex-wrap gap-1 mb-3">
+            {DEMO_PRESETS.map(p => (
+              <button
+                key={p.label}
+                onClick={() => addPreset(p.layer)}
+                className="px-2 py-1 border border-gray-200 rounded-lg text-[10px] font-semibold text-gray-600 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Layer list */}
+          {layers.length > 0 && (
+            <>
+              <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Layers</p>
+              <div className="space-y-1 mb-3">
+                {layers.map((l, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setEditIdx(i)}
+                    className={[
+                      'flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer border text-[10px] transition',
+                      editIdx === i ? 'border-indigo-300 bg-indigo-50' : 'border-transparent hover:bg-gray-50',
+                    ].join(' ')}
+                  >
+                    <span className="text-gray-700 truncate flex-1">{l.text}</span>
+                    <button
+                      onClick={e => { e.stopPropagation(); removeLayer(i) }}
+                      className="text-gray-300 hover:text-red-500 flex-shrink-0"
+                    >
+                      <svg width="8" height="8" viewBox="0 0 8 8"><path d="M1 1l6 6M7 1L1 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Edit selected layer */}
+          {editIdx !== null && layers[editIdx] && (
+            <>
+              <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Edit</p>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={layers[editIdx].text}
+                  onChange={e => updateLayer(editIdx, { text: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] outline-none focus:border-indigo-400"
+                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-[9px] text-gray-400 block mb-0.5">Size</label>
+                    <input
+                      type="number"
+                      min={10}
+                      max={72}
+                      value={layers[editIdx].fontSize}
+                      onChange={e => updateLayer(editIdx, { fontSize: parseInt(e.target.value) || 16 })}
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] outline-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-[9px] text-gray-400 block mb-0.5">Color</label>
+                    <input
+                      type="color"
+                      value={layers[editIdx].color}
+                      onChange={e => updateLayer(editIdx, { color: e.target.value })}
+                      className="w-full h-7 border border-gray-200 rounded p-0.5 cursor-pointer"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[9px] text-gray-400 block mb-0.5">Weight</label>
+                  <select
+                    value={layers[editIdx].fontWeight}
+                    onChange={e => updateLayer(editIdx, { fontWeight: parseInt(e.target.value) })}
+                    className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] outline-none"
+                  >
+                    <option value={400}>Regular</option>
+                    <option value={500}>Medium</option>
+                    <option value={600}>Semibold</option>
+                    <option value={700}>Bold</option>
+                    <option value={900}>Black</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {layers.length === 0 && (
+            <p className="text-[10px] text-gray-400 text-center py-2">
+              Add text using presets above
+            </p>
+          )}
+        </div>
+      </div>
+
       <NavBar onBack={onBack} onNext={onNext} nextLabel="Export →" />
     </div>
   )
 }
 
-// ── Step 4: Export CTA ──────────────────────────────────────────────────
+// ── Step 5: Export CTA ──────────────────────────────────────────────────
 
 function ExportCTA({ onBack }: { onBack: () => void }) {
   return (
@@ -463,7 +696,7 @@ export default function DemoSlicer() {
   }
 
   function goBack() { setStep(s => Math.max(1, s - 1)) }
-  function goNext() { setStep(s => Math.min(4, s + 1)) }
+  function goNext() { setStep(s => Math.min(5, s + 1)) }
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
@@ -506,7 +739,15 @@ export default function DemoSlicer() {
               onNext={goNext}
             />
           )}
-          {step === 4 && (
+          {step === 4 && image && (
+            <CopyStep
+              image={image}
+              selected={selected}
+              onBack={goBack}
+              onNext={goNext}
+            />
+          )}
+          {step === 5 && (
             <ExportCTA onBack={goBack} />
           )}
         </FadeStep>
