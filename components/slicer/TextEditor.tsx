@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useSlicer } from './SlicerContext'
-import { renderToCanvas } from '@/lib/crop'
+import { renderToCanvas, calcCrop } from '@/lib/crop'
 import type { FormatDef, SlicerFile, CropState, TextLayer } from '@/types/slicer'
 
 // ── Constants ───────────────────────────────────────────────────
@@ -115,6 +115,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
   const [applyOpen, setApplyOpen] = useState(false)
   const [customFonts, setCustomFonts] = useState<string[]>([])
   const [ready, setReady]     = useState(false)
+  const [initError, setInitError] = useState<string | null>(null)
 
   // Compute display dimensions
   const ar    = fmt.w / fmt.h
@@ -229,12 +230,29 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     GOOGLE_FONTS.forEach(f => loadGoogleFont(f))
 
     async function init() {
+      try {
+      // ── Resolve Fabric namespace (handles CJS, ESM, and bundler variations) ──
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const F: any = ((await import('fabric')) as any).fabric
+      const fabricModule: any = await import('fabric')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const F: any = fabricModule.fabric ?? fabricModule.default?.fabric ?? fabricModule.default ?? fabricModule
+      console.log('[TextEditor] fabric loaded, type:', typeof F, 'keys:', Object.keys(F ?? {}).slice(0, 8))
+
+      // Guard: make sure the classes we need actually exist
+      // fabric v6 exports FabricImage (canonical) and Image (alias) at the top level
+      const ImageClass = F?.FabricImage ?? F?.Image
+      const missing = ['Canvas', 'Textbox', 'Shadow'].filter(k => !F?.[k])
+      if (missing.length || !ImageClass) {
+        const msg = `Fabric classes missing: ${[...missing, ...(!ImageClass ? ['FabricImage/Image'] : [])].join(', ')}. Keys: ${Object.keys(F ?? {}).slice(0, 12).join(', ')}`
+        console.error('[TextEditor]', msg)
+        setInitError(msg)
+        return
+      }
 
       // If cleanup already ran (StrictMode), abort
       if (disposed) return
 
+      console.log('[TextEditor] creating canvas', fmt.w, 'x', fmt.h, 'scale:', scale, 'display:', dw, 'x', dh)
       // Internal coordinate space = full output resolution; CSS display = scaled down
       const canvas = new F.Canvas(canvasElRef.current!, { width: fmt.w, height: fmt.h, selection: true })
       canvas.setZoom(scale)
@@ -242,12 +260,23 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       fabricRef.current = canvas
       scaleRef.current  = scale
 
-      // Background: render crop → data URL → Fabric image (v6 uses callback style)
+      // Background: render crop → data URL → HTMLImageElement → FabricImage
       const offscreen = document.createElement('canvas')
-      renderToCanvas(offscreen, fmt, file, crop)
+      // Guard: if crop state is missing, use a default fit-to-cover crop
+      const safeCrop = crop ?? calcCrop(fmt, file)
+      renderToCanvas(offscreen, fmt, file, safeCrop)
       const dataUrl = offscreen.toDataURL('image/jpeg', 0.92)
+
+      // Load image manually to avoid fromURL hanging issues
+      const htmlImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image()
+        const timeout = setTimeout(() => reject(new Error('Background image load timed out')), 10000)
+        img.onload = () => { clearTimeout(timeout); resolve(img) }
+        img.onerror = () => { clearTimeout(timeout); reject(new Error('Background image failed to load')) }
+        img.src = dataUrl
+      })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const bgImg   = await new Promise<any>(resolve => F.Image.fromURL(dataUrl, resolve))
+      const bgImg: any = new ImageClass(htmlImg)
 
       // Check again after await
       if (disposed) { canvas.dispose(); return }
@@ -260,6 +289,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         scaleX: fmt.w / bgImg.width!,
         scaleY: fmt.h / bgImg.height!,
       })
+      console.log('[TextEditor] bg image loaded, size:', htmlImg.naturalWidth, 'x', htmlImg.naturalHeight)
       canvas.backgroundImage = bgImg
       canvas.requestRenderAll()
 
@@ -321,7 +351,13 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       canvas.on('object:removed',   refreshLayerList)
 
       refreshLayerList()
+      console.log('[TextEditor] init complete, setting ready')
       setReady(true)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error('[TextEditor] init failed:', err)
+        setInitError(msg)
+      }
     }
 
     init()
@@ -348,7 +384,9 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const canvas = fabricRef.current
     if (!canvas) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const F: any = ((await import('fabric')) as any).fabric
+    const fabricModule: any = await import('fabric')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const F: any = fabricModule.fabric ?? fabricModule.default?.fabric ?? fabricModule.default ?? fabricModule
     const p = PRESETS[presetKey]
     const id = uid()
     const tbW    = Math.round(fmt.w * 0.8)
@@ -473,7 +511,9 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const obj = canvas?.getActiveObject()
     if (!obj || obj.type !== 'textbox') return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const F: any = ((await import('fabric')) as any).fabric
+    const fabricModule: any = await import('fabric')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const F: any = fabricModule.fabric ?? fabricModule.default?.fabric ?? fabricModule.default ?? fabricModule
     const current = sel ?? ({} as SelProps)
     if (enabled) {
       obj.shadow = new F.Shadow({
@@ -603,13 +643,20 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Canvas area */}
           <div className="flex flex-col items-center justify-center bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200">
-            {!ready && (
+            {!ready && !initError && (
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <svg className="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
                 </svg>
                 Loading…
+              </div>
+            )}
+            {initError && (
+              <div className="text-xs text-red-500 text-center p-4 max-w-xs">
+                <p className="font-semibold mb-1">Failed to load editor</p>
+                <p className="text-red-400 break-all">{initError}</p>
+                <p className="text-gray-400 mt-2">Check the browser console for details.</p>
               </div>
             )}
             <canvas ref={canvasElRef} style={{ display: ready ? 'block' : 'none', border: '1px solid #e5e7eb', borderRadius: 8 }} />
