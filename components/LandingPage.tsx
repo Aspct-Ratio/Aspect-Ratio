@@ -69,10 +69,19 @@ function FAQ() {
   )
 }
 
+const RESOURCE_LINKS = [
+  { label: 'Asset Resizing Tool', href: '/tools/asset-resizing' },
+  { label: 'Image Cropping Tool', href: '/tools/image-cropping' },
+  { label: 'Social Media Resizer', href: '/tools/social-media-image-resizer' },
+  { label: 'How to Resize for Social', href: '/guides/how-to-resize-images-for-social-media' },
+  { label: 'Image Sizes Reference', href: '/guides/image-sizes-for-every-social-platform' },
+]
+
 export default function LandingPage({ isLoggedIn = false, userEmail }: { isLoggedIn?: boolean; userEmail?: string }) {
   const [annual, setAnnual] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [hasActiveSub, setHasActiveSub] = useState(false)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
   const router = useRouter()
 
   // Read plan from user_metadata — stamped by the Stripe webhook on subscription events.
@@ -120,6 +129,45 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             <a href="#features" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">FEATURES</a>
             <a href="#channels" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">CHANNELS</a>
             <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">SEE PLANS</a>
+            <div
+              className="relative"
+              onMouseEnter={() => setResourcesOpen(true)}
+              onMouseLeave={() => setResourcesOpen(false)}
+            >
+              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+                RESOURCES
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${resourcesOpen ? 'rotate-180' : ''}`}>
+                  <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {resourcesOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-lg py-2 min-w-[220px]">
+                    <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Tools</p>
+                    {RESOURCE_LINKS.slice(0, 3).map(link => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                    <div className="my-1.5 border-t border-gray-100" />
+                    <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Guides</p>
+                    {RESOURCE_LINKS.slice(3).map(link => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: auth actions — desktop only */}
@@ -176,6 +224,20 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             <a href="#features" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">FEATURES</a>
             <a href="#channels" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">CHANNELS</a>
             <a href="#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">SEE PLANS</a>
+
+            {/* Resources sub-links */}
+            <div className="my-2 border-t border-gray-100" />
+            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Resources</p>
+            {RESOURCE_LINKS.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline px-3 py-2.5 rounded-lg block"
+              >
+                {link.label}
+              </Link>
+            ))}
 
             {/* Divider */}
             <div className="my-2 border-t border-gray-100" />
@@ -557,16 +619,51 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       <FAQ />
 
       {/* ── FOOTER ───────────────────────────────────────────── */}
-      <footer className="bg-gray-900 border-t border-white/[0.06] py-8 px-6">
-        <div className="max-w-[1100px] mx-auto flex items-center justify-between flex-wrap gap-4">
-          <Link href="/" className="no-underline">
-            <LogoMark height={75} dark />
-          </Link>
-          <span className="text-[13px] text-gray-600">© 2026 ASPCT RATIO LLC. All rights reserved.</span>
-          <div className="flex gap-5">
-            <Link href="/privacy" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Privacy</Link>
-            <Link href="/terms" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Terms</Link>
-            <a href="mailto:hello@aspctratio.com" className="text-[13px] text-gray-600 hover:text-gray-400 transition-colors no-underline">Contact</a>
+      <footer className="bg-gray-900 border-t border-white/[0.06] py-14 px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+            {/* Brand */}
+            <div>
+              <Link href="/" className="no-underline">
+                <LogoMark height={75} dark />
+              </Link>
+              <p className="text-[13px] text-gray-500 mt-3 leading-relaxed">
+                Upload once. Export every format, named and sorted, in minutes.
+              </p>
+            </div>
+
+            {/* Tools */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Tools</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/tools/asset-resizing" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Asset Resizing</Link>
+                <Link href="/tools/image-cropping" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Image Cropping</Link>
+                <Link href="/tools/social-media-image-resizer" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Social Media Resizer</Link>
+              </div>
+            </div>
+
+            {/* Guides */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Guides</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/guides/how-to-resize-images-for-social-media" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">How to Resize for Social</Link>
+                <Link href="/guides/image-sizes-for-every-social-platform" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Image Sizes Reference</Link>
+              </div>
+            </div>
+
+            {/* Company */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Company</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/privacy" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Privacy Policy</Link>
+                <Link href="/terms" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Terms of Service</Link>
+                <a href="mailto:hello@aspctratio.com" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Contact</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-white/[0.06] pt-6">
+            <span className="text-[12px] text-gray-600">© 2026 ASPCT RATIO LLC. All rights reserved.</span>
           </div>
         </div>
       </footer>
