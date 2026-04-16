@@ -644,20 +644,16 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Canvas area */}
           <div className="flex flex-col items-center justify-center bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200">
-            {/* Canvas must stay laid out so fabric can measure dimensions during init.
-                We toggle visibility/opacity, never display:none. */}
+            {/* Canvas stays in a stable visual state from mount — fabric's event
+                layer (upper-canvas) is attached during init, so any visibility toggles
+                would break hit-testing. The loader overlays the canvas instead. */}
             <div className="relative" style={{ width: dw, height: dh }}>
               <canvas
                 ref={canvasElRef}
-                style={{
-                  visibility: ready ? 'visible' : 'hidden',
-                  opacity: ready ? 1 : 0,
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 8,
-                }}
+                style={{ border: '1px solid #e5e7eb', borderRadius: 8 }}
               />
               {!ready && !initError && (
-                <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-gray-400">
+                <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-gray-400 bg-gray-100 rounded-lg">
                   <svg className="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -666,7 +662,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
                 </div>
               )}
               {initError && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
                   <div className="text-xs text-red-500 text-center p-4 max-w-xs">
                     <p className="font-semibold mb-1">Failed to load editor</p>
                     <p className="text-red-400 break-all">{initError}</p>
