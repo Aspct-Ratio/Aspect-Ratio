@@ -347,13 +347,25 @@ function AdjustCard({
   const [dragging, setDragging] = useState(false)
   const startRef = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null)
 
-  // Clamp pan so image edges don't go past container edges
+  // Clamp pan so image edges stay within the container.
+  // background-size: zoom*100% means the image is zoom times the container's
+  // covering dimension. Extra pixels on each axis = (renderedDim - containerDim) / 2.
   function clampPan(x: number, y: number, zoom: number) {
-    // At zoom 1, image exactly covers container (object-fit:cover), so no pan allowed.
-    // At zoom > 1, the extra pixels on each axis allow panning.
-    // Max pan = (zoom - 1) * containerDim / 2
-    const maxX = (zoom - 1) * cardW / 2
-    const maxY = (zoom - 1) * cardH / 2
+    // Figure out the rendered image dimensions at this zoom
+    const imgAspect = image.w / image.h
+    const cardAspect = cardW / cardH
+    let renderedW: number, renderedH: number
+    if (imgAspect > cardAspect) {
+      // Image wider than card → height-fit at 100%, so rendered height = cardH * zoom
+      renderedH = cardH * zoom
+      renderedW = renderedH * imgAspect
+    } else {
+      // Image taller than card → width-fit at 100%, so rendered width = cardW * zoom
+      renderedW = cardW * zoom
+      renderedH = renderedW / imgAspect
+    }
+    const maxX = Math.max(0, (renderedW - cardW) / 2)
+    const maxY = Math.max(0, (renderedH - cardH) / 2)
     return {
       x: Math.max(-maxX, Math.min(maxX, x)),
       y: Math.max(-maxY, Math.min(maxY, y)),
@@ -398,21 +410,16 @@ function AdjustCard({
           'w-full rounded-xl overflow-hidden border shadow-sm bg-gray-100 flex-shrink-0 select-none',
           dragging ? 'cursor-grabbing border-indigo-300' : 'cursor-grab border-gray-200 hover:border-indigo-200',
         ].join(' ')}
-        style={{ height: cardH, touchAction: 'none' }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image.src}
-          alt={fmt.name}
-          className="w-full h-full pointer-events-none"
-          draggable={false}
-          style={{
-            objectFit: 'cover',
-            transform: `scale(${crop.zoom}) translate(${crop.x / crop.zoom}px, ${crop.y / crop.zoom}px)`,
-            transition: dragging ? 'none' : 'transform 0.15s ease',
-          }}
-        />
-      </div>
+        style={{
+          height: cardH,
+          touchAction: 'none',
+          backgroundImage: `url(${image.src})`,
+          backgroundSize: `${crop.zoom * 100}%`,
+          backgroundPosition: `calc(50% + ${crop.x}px) calc(50% + ${crop.y}px)`,
+          backgroundRepeat: 'no-repeat',
+          transition: dragging ? 'none' : 'background-size 0.15s ease, background-position 0.15s ease',
+        }}
+      />
       {/* Zoom controls */}
       <div className="flex items-center gap-1 mt-1.5">
         <button
