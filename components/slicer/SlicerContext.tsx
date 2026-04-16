@@ -1,16 +1,23 @@
 'use client'
 
 import {
-  createContext, useContext, useReducer, useCallback,
+  createContext, useContext, useReducer, useCallback, useEffect, useRef, useState,
   type Dispatch, type ReactNode,
 } from 'react'
 import type { SlicerState, SlicerFile, FormatDef, FolderLevel, ExportFormat, CropState, TextLayer } from '@/types/slicer'
 import { DEFAULT_SELECTED, DEFAULT_FOLDER_LEVELS, getAllFormats } from '@/lib/formats'
 import { calcCrop } from '@/lib/crop'
+import {
+  loadState as idbLoadState, saveState as idbSaveState,
+  loadAllFiles as idbLoadAllFiles, deleteFile as idbDeleteFile,
+  clearAll as idbClearAll, rehydrateFile,
+  type PersistedState,
+} from '@/lib/slicer-persist'
 
 // ── Actions ────────────────────────────────────────────────────
 
 type Action =
+  | { type: 'HYDRATE'; state: SlicerState }
   | { type: 'ADD_FILES';     files: SlicerFile[] }
   | { type: 'REMOVE_FILE';   id: string }
   | { type: 'CLEAR_FILES' }
@@ -75,6 +82,9 @@ function initCropsForFile(
 
 function reducer(state: SlicerState, action: Action): SlicerState {
   switch (action.type) {
+    case 'HYDRATE':
+      return action.state
+
     case 'ADD_FILES': {
       const newFiles = action.files.filter(f =>
         !state.files.some(existing => existing.id === f.id),
@@ -279,7 +289,33 @@ function reducer(state: SlicerState, action: Action): SlicerState {
 const SlicerContext = createContext<{
   state: SlicerState
   dispatch: Dispatch<Action>
+  hydrating: boolean
+  /** Wipe IndexedDB + reset in-memory state. */
+  resetAll: () => Promise<void>
 } | null>(null)
+
+// ── Hydration ──────────────────────────────────────────────────
+// Merge persisted JSON state + rehydrated SlicerFile[] back into a SlicerState
+// shape the reducer can consume via HYDRATE.
+function mergePersisted(persisted: PersistedState, files: SlicerFile[]): SlicerState {
+  return {
+    files,
+    activeFile: Math.min(persisted.activeFile ?? 0, Math.max(0, files.length - 1)),
+    selected: new Set(persisted.selected ?? DEFAULT_SELECTED),
+    custom: persisted.custom ?? [],
+    crops: persisted.crops ?? {},
+    namingPattern: persisted.namingPattern ?? '{client}_{dimension}',
+    exportFormats: new Set(persisted.exportFormats ?? ['jpeg']),
+    folderLevels: (persisted.folderLevels && persisted.folderLevels.length > 0)
+      ? persisted.folderLevels
+      : DEFAULT_FOLDER_LEVELS.map(l => ({ ...l })),
+    clientName: persisted.clientName ?? '',
+    campaignName: persisted.campaignName ?? '',
+    rootFolderName: persisted.rootFolderName ?? '',
+    quality: persisted.quality ?? 90,
+    textLayers: persisted.textLayers ?? {},
+  }
+}
 
 export function SlicerProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, {
@@ -288,8 +324,51 @@ export function SlicerProvider({ children }: { children: ReactNode }) {
     folderLevels: DEFAULT_FOLDER_LEVELS.map(l => ({ ...l })),
     exportFormats: new Set(['jpeg'] as ExportFormat[]),
   })
+  const [hydrating, setHydrating] = useState(true)
+  const hasHydratedRef = useRef(false)
+
+  // ── Hydrate from IndexedDB on first mount ─────────────────────
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const persisted = await idbLoadState()
+        if (!persisted) return
+        const fileRecs = await idbLoadAllFiles()
+        // Preserve file order from persisted state
+        const byId = new Map(fileRecs.map(r => [r.id, r]))
+        const ordered = persisted.fileOrder
+          .map(id => byId.get(id))
+          .filter((r): r is NonNullable<typeof r> => !!r)
+        const files = (await Promise.all(ordered.map(rehydrateFile)))
+          .filter((f): f is SlicerFile => !!f)
+        if (cancelled) return
+        dispatch({ type: 'HYDRATE', state: mergePersisted(persisted, files) })
+      } catch { /* ignore — fall back to fresh state */ }
+      finally {
+        if (!cancelled) {
+          hasHydratedRef.current = true
+          setHydrating(false)
+        }
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  // ── Autosave state (debounced) ────────────────────────────────
+  useEffect(() => {
+    if (!hasHydratedRef.current) return
+    const t = setTimeout(() => { idbSaveState(state).catch(() => { /* ignore */ }) }, 400)
+    return () => clearTimeout(t)
+  }, [state])
+
+  const resetAll = useCallback(async () => {
+    try { await idbClearAll() } catch { /* ignore */ }
+    dispatch({ type: 'RESET' })
+  }, [])
+
   return (
-    <SlicerContext.Provider value={{ state, dispatch }}>
+    <SlicerContext.Provider value={{ state, dispatch, hydrating, resetAll }}>
       {children}
     </SlicerContext.Provider>
   )
@@ -300,6 +379,10 @@ export function useSlicer() {
   if (!ctx) throw new Error('useSlicer must be used within SlicerProvider')
   return ctx
 }
+
+// Re-exported for callers (Step1Upload wants to persist file blobs directly
+// when the user drops new files, and remove them when files are deleted).
+export { idbDeleteFile as persistDeleteFile }
 
 /** Convenience: getRootName computed from state */
 export function useRootName(state: SlicerState) {

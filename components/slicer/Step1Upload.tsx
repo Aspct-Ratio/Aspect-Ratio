@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useCallback, useState } from 'react'
-import { useSlicer } from './SlicerContext'
+import { useSlicer, persistDeleteFile } from './SlicerContext'
+import { saveFile as persistSaveFile } from '@/lib/slicer-persist'
 import type { SlicerFile } from '@/types/slicer'
 
 export type UserPlan = 'freelancer' | 'studio' | 'agency' | 'enterprise'
@@ -93,7 +94,14 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
       const isV = f.type.startsWith('video/')
       try {
         const { img, w, h } = isV ? await captureVideo(f) : await loadImg(f)
-        loaded.push({ id: uid(), name: f.name, img, thumb: img.src, w, h, isV })
+        const id = uid()
+        loaded.push({ id, name: f.name, img, thumb: img.src, w, h, isV })
+        // Persist the raw Blob so images survive a page reload.
+        // File extends Blob, so we can store it directly.
+        persistSaveFile({
+          id, blob: f, name: f.name, w, h, isV,
+          mime: f.type || (isV ? 'video/mp4' : 'image/jpeg'),
+        }).catch(() => { /* non-fatal: autosave best-effort */ })
       } catch { /* skip bad files */ }
     }
     if (loaded.length) dispatch({ type: 'ADD_FILES', files: loaded })
@@ -107,6 +115,12 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
   const imgs = state.files.filter(f => !f.isV).length
   const vids = state.files.filter(f => f.isV).length
   const atLimit = limit !== Infinity && state.files.length >= limit
+
+  const clearAllFiles = () => {
+    const ids = state.files.map(f => f.id)
+    dispatch({ type: 'CLEAR_FILES' })
+    Promise.all(ids.map(id => persistDeleteFile(id))).catch(() => { /* ignore */ })
+  }
 
   return (
     <div className="animate-fade-up">
@@ -188,7 +202,11 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
                 <div className="text-[9px] text-gray-400 mt-0.5">{f.w}×{f.h}</div>
               </div>
               <button
-                onClick={e => { e.stopPropagation(); dispatch({ type: 'REMOVE_FILE', id: f.id }) }}
+                onClick={e => {
+                  e.stopPropagation()
+                  dispatch({ type: 'REMOVE_FILE', id: f.id })
+                  persistDeleteFile(f.id).catch(() => { /* ignore */ })
+                }}
                 className="absolute top-1 right-1 w-[18px] h-[18px] rounded-full bg-black/50 text-white text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
               >✕</button>
             </div>
@@ -223,7 +241,7 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
             </span>
           )}
           <button
-            onClick={() => dispatch({ type: 'CLEAR_FILES' })}
+            onClick={clearAllFiles}
             className="ml-auto text-xs text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded transition"
           >Clear all</button>
         </div>

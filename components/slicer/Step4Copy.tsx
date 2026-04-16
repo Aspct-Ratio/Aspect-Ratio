@@ -327,13 +327,16 @@ export default function Step4Copy({ onBack, onNext, onSkip }: Props) {
       {/* Text editor modal */}
       {editingFmt && (
         <TextEditor
+          key={editingFmt.id}
           fmt={editingFmt}
           file={file}
           crop={state.crops[file.id]?.[editingFmt.id]}
           initialLayers={state.textLayers[file.id]?.[editingFmt.id] ?? []}
           allFmts={fmts}
+          selectedFmts={fmts}
           fileId={file.id}
           onClose={closeEditor}
+          onSwitchFormat={setEditingFmt}
         />
       )}
     </>

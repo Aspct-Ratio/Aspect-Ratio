@@ -7,8 +7,8 @@ import type { FormatDef, SlicerFile, CropState, TextLayer } from '@/types/slicer
 
 // ── Constants ───────────────────────────────────────────────────
 
-const MODAL_MAX_W = 600
-const MODAL_MAX_H = 520
+const MODAL_MAX_W = 640
+const MODAL_MAX_H = 560
 
 const SYSTEM_FONTS = ['Arial', 'Helvetica', 'Georgia', 'Times New Roman', 'Courier New', 'Impact', 'Verdana']
 // Curated Google Fonts, organised by weight coverage.
@@ -121,19 +121,34 @@ function uid() { return `tl-${Date.now()}-${Math.random().toString(36).slice(2, 
 
 // ── Rounded background box renderer ─────────────────────────────
 // Fabric's native `backgroundColor` paints a plain rectangle. To get rounded
-// corners (matching preview/export), we monkey-patch each Textbox's
-// `_renderBackground` to draw a rounded path using its stored rx value.
+// corners (matching preview/export), we patch the prototype chain so any
+// Textbox with `data.bgRect.rx > 0` renders a rounded path instead.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function installRoundedBg(tb: any) {
+function patchFabricRoundedBg(F: any) {
+  // Walk up from Textbox.prototype to find the class that actually owns
+  // `_renderBackground` (it lives on FabricObject.prototype by default).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tb._renderBackground = function (ctx: CanvasRenderingContext2D) {
-    if (!this.backgroundColor) return
-    const dim = this._getNonTransformedDimensions()
+  let proto: any = F?.Textbox?.prototype
+  while (proto && !Object.prototype.hasOwnProperty.call(proto, '_renderBackground')) {
+    proto = Object.getPrototypeOf(proto)
+  }
+  if (!proto || proto.__aspctRoundedBgPatched) return
+  proto.__aspctRoundedBgPatched = true
+  const originalRender = proto._renderBackground
+  proto._renderBackground = function (ctx: CanvasRenderingContext2D) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const self = this as any
+    if (!self.backgroundColor) return
+    const rx = Math.max(0, self.data?.bgRect?.rx ?? 0)
+    // Non-rounded: delegate to the original renderer to preserve default behaviour
+    if (rx <= 0 && typeof originalRender === 'function') {
+      return originalRender.call(self, ctx)
+    }
+    const dim = self._getNonTransformedDimensions()
     const x = -dim.x / 2, y = -dim.y / 2
     const w = dim.x, h = dim.y
-    const rx = Math.max(0, this.data?.bgRect?.rx ?? 0)
     const r = Math.min(rx, w / 2, h / 2)
-    ctx.fillStyle = this.backgroundColor as string
+    ctx.fillStyle = self.backgroundColor
     ctx.beginPath()
     if (r > 0) {
       ctx.moveTo(x + r, y)
@@ -146,9 +161,6 @@ function installRoundedBg(tb: any) {
     } else {
       ctx.fillRect(x, y, w, h)
     }
-    // Match fabric's default behaviour: drop shadow on stroke only
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const self = this as any
     if (self.shadow && !self.shadow.affectStroke && typeof self._removeShadow === 'function') {
       self._removeShadow(ctx)
     }
@@ -163,14 +175,81 @@ interface Props {
   crop: CropState
   initialLayers: TextLayer[]
   allFmts: FormatDef[]
+  /** The subset of formats shown as clickable thumbnails in the left rail. */
+  selectedFmts?: FormatDef[]
   fileId: string
   onClose: () => void
+  /** Called when the user clicks a different format thumbnail. */
+  onSwitchFormat?: (fmt: FormatDef) => void
+}
+
+// ── Format thumbnail component ──────────────────────────────────
+
+function FormatThumb({
+  fmt: thumbFmt,
+  file: thumbFile,
+  crop: thumbCrop,
+  isActive,
+  hasText,
+  onClick,
+}: {
+  fmt: FormatDef
+  file: SlicerFile
+  crop: CropState | undefined
+  isActive: boolean
+  hasText: boolean
+  onClick: () => void
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const ar = thumbFmt.w / thumbFmt.h
+  const THUMB_MAX = 80
+  let tw: number, th: number
+  if (ar >= 1) { tw = THUMB_MAX; th = Math.round(tw / ar) }
+  else         { th = THUMB_MAX; tw = Math.round(th * ar) }
+  tw = Math.max(tw, 30); th = Math.max(th, 20)
+
+  useEffect(() => {
+    if (!canvasRef.current || !thumbFile || !thumbCrop) return
+    const offscreen = document.createElement('canvas')
+    renderToCanvas(offscreen, thumbFmt, thumbFile, thumbCrop)
+    const c = canvasRef.current
+    c.width = tw; c.height = th
+    c.getContext('2d')?.drawImage(offscreen, 0, 0, tw, th)
+  }, [thumbFmt, thumbFile, thumbCrop, tw, th])
+
+  return (
+    <button
+      onClick={onClick}
+      className={[
+        'flex flex-col items-center gap-1 p-1.5 rounded-lg border transition-all w-full',
+        isActive
+          ? 'border-indigo-400 bg-indigo-50 shadow-sm'
+          : 'border-transparent hover:bg-gray-50 hover:border-gray-200',
+      ].join(' ')}
+      title={`${thumbFmt.n} (${thumbFmt.w}×${thumbFmt.h})`}
+    >
+      <canvas
+        ref={canvasRef}
+        width={tw}
+        height={th}
+        className="block rounded"
+        style={{ width: tw, height: th }}
+      />
+      <span className="text-[9px] font-semibold text-gray-600 truncate max-w-full leading-tight">
+        {thumbFmt.w}×{thumbFmt.h}
+      </span>
+      {hasText && (
+        <span className="text-[8px] font-bold px-1 py-0 rounded bg-indigo-100 text-indigo-600">Aa</span>
+      )}
+    </button>
+  )
 }
 
 // ── Main TextEditor modal ────────────────────────────────────────
 
-export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fileId, onClose }: Props) {
-  const { dispatch } = useSlicer()
+export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, selectedFmts, fileId, onClose, onSwitchFormat }: Props) {
+  const { state, dispatch } = useSlicer()
   const canvasElRef = useRef<HTMLCanvasElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fabricRef   = useRef<any>(null)   // Fabric.Canvas instance
@@ -324,6 +403,11 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         return
       }
 
+      // Patch fabric's Textbox rendering pipeline so background boxes render
+      // with rounded corners (matching preview/export). Idempotent — safe to call
+      // on every TextEditor mount.
+      patchFabricRoundedBg(F)
+
       // If cleanup already ran (StrictMode), abort
       if (disposed) return
 
@@ -411,7 +495,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(tb as any).data = { id: layer.id, bgRect: layer.bgRect ?? null }
-        installRoundedBg(tb)
         canvas.add(tb)
       }
 
@@ -467,20 +550,29 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const fabricModule: any = await import('fabric')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const F: any = fabricModule.fabric ?? fabricModule.default?.fabric ?? fabricModule.default ?? fabricModule
+    // Ensure the Textbox prototype has the rounded-bg patch (idempotent).
+    // addPreset runs via a separate fabric import path in Next.js dynamic chunks,
+    // so we patch here too in case init hasn't run or didn't resolve the same F.
+    patchFabricRoundedBg(F)
+
     const p = PRESETS[presetKey]
     const id = uid()
     const tbW    = Math.round(fmt.w * 0.8)
     const tbX    = Math.round((fmt.w - tbW) / 2)
     const tbY    = Math.round(fmt.h * 0.65)
     const bgRect = 'bgRect' in p ? (p as { bgRect: TextLayer['bgRect'] }).bgRect ?? null : null
-    // Pre-load Arial at the preset weight (Arial is system, fonts.load is still safe)
-    await ensureFontLoaded('Arial', p.fontWeight)
+    // Default new text to Inter (full variable weight 100–900) so weight changes
+    // in the sidebar produce visible thickness changes. System fonts like Arial
+    // typically only ship 400 and 700, making mid-weights look identical.
+    const defaultFamily = 'Inter'
+    await loadGoogleFont(defaultFamily)
+    await ensureFontLoaded(defaultFamily, p.fontWeight)
     const tb = new F.Textbox(p.text, {
       left:        tbX,
       top:         tbY,
       width:       tbW,
       fontSize:    p.fontSize,
-      fontFamily:  'Arial',
+      fontFamily:  defaultFamily,
       fontWeight:  p.fontWeight,
       fill:        '#ffffff',
       textAlign:   p.textAlign,
@@ -500,7 +592,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     tb.shadow = new F.Shadow({ color: 'rgba(0,0,0,0.55)', blur: 12, offsetX: 0, offsetY: 2 })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(tb as any).data = { id, bgRect }
-    installRoundedBg(tb)
     canvas.add(tb)
     canvas.setActiveObject(tb)
     canvas.requestRenderAll()
@@ -638,10 +729,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       rx:      updates?.bgRx      ?? current.bgRx      ?? 8,
     } : null
     obj.data = { ...obj.data, bgRect }
-    // Ensure the rounded-corner renderer is installed on this textbox
-    installRoundedBg(obj)
     // Sync to Fabric's native backgroundColor + padding so it renders in the editor.
-    // Our patched _renderBackground picks up the rx from obj.data.bgRect.
+    // Our prototype-patched _renderBackground picks up the rx from obj.data.bgRect.
     if (bgRect) {
       obj.set({ backgroundColor: bgRect.fill, padding: bgRect.padding })
     } else {
@@ -683,9 +772,16 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     onClose()
   }
 
+  function handleSwitchFormat(target: FormatDef) {
+    if (target.id === fmt.id) return
+    saveToState()
+    onSwitchFormat?.(target)
+  }
+
   // ── Render ────────────────────────────────────────────────────
 
   const allFontOptions = [...ALL_FONTS, ...customFonts]
+  const showThumbnails = selectedFmts && selectedFmts.length > 1 && onSwitchFormat
 
   return (
     <div
@@ -695,9 +791,9 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
-      {/* Panel */}
+      {/* Panel — wider when showing format thumbnails */}
       <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[95vh]"
-           style={{ width: 'min(95vw, 1040px)' }}>
+           style={{ width: showThumbnails ? 'min(95vw, 1240px)' : 'min(95vw, 1040px)' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 flex-shrink-0">
@@ -737,13 +833,31 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
           </div>
         </div>
 
-        {/* Body */}
+        {/* Body: 3-column layout */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* Canvas area */}
-          <div className="flex flex-col items-center justify-center bg-gray-100 p-4 flex-shrink-0 border-r border-gray-200">
-            {/* Canvas stays in a stable visual state from mount — fabric's event
-                layer (upper-canvas) is attached during init, so any visibility toggles
-                would break hit-testing. The loader overlays the canvas instead. */}
+
+          {/* Left rail — format thumbnails */}
+          {showThumbnails && (
+            <div className="w-[110px] flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto">
+              <div className="p-2 space-y-1">
+                <p className="text-[9px] font-bold uppercase tracking-[0.8px] text-gray-400 px-1 mb-1">Formats</p>
+                {selectedFmts.map(sf => (
+                  <FormatThumb
+                    key={sf.id}
+                    fmt={sf}
+                    file={file}
+                    crop={state.crops[file.id]?.[sf.id]}
+                    isActive={sf.id === fmt.id}
+                    hasText={(state.textLayers[file.id]?.[sf.id] ?? []).length > 0}
+                    onClick={() => handleSwitchFormat(sf)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Center — canvas area (flex-1 so it fills remaining space) */}
+          <div className="flex-1 flex flex-col items-center justify-center bg-gray-100 p-4 min-w-0">
             <div className="relative" style={{ width: dw, height: dh }}>
               <canvas
                 ref={canvasElRef}
@@ -773,8 +887,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
             </p>
           </div>
 
-          {/* Sidebar */}
-          <div className="w-72 flex-shrink-0 overflow-y-auto bg-white">
+          {/* Right — property sidebar */}
+          <div className="w-72 flex-shrink-0 overflow-y-auto bg-white border-l border-gray-200">
             <div className="p-4 space-y-5">
 
               {/* Add Text presets */}
@@ -1018,7 +1132,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
                       </button>
                       <button onClick={deleteSelected}
                         className="text-xs font-semibold border border-red-200 rounded-lg px-3 py-1.5 text-red-600 hover:bg-red-50 transition">
-                        🗑 Delete
+                        Delete
                       </button>
                     </div>
                   </div>
