@@ -601,16 +601,13 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="py-24 px-6 text-center bg-gray-900">
-        <div className="inline-flex items-center gap-1.5 bg-indigo-600/20 text-indigo-300 text-xs font-semibold tracking-[0.5px] uppercase px-3 py-1.5 rounded-full mb-7">
-          <span>✦</span> Free to start
-        </div>
         <h2 className="text-[clamp(32px,5vw,52px)] font-extrabold tracking-[-1.5px] text-white mb-4 leading-[1.1]">Start slicing in minutes.</h2>
         <p className="text-lg text-gray-400 max-w-[480px] mx-auto mb-10 leading-[1.7]">
-          No agency. No waiting. Upload your first asset and see every format ready to download.
+          Upload your assets, pick your formats, and export everything — cropped, named, and sorted — in one session.
         </p>
         <div className="flex justify-center mb-5">
           <Link href="/signup" className="h-12 px-8 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[15px] font-semibold rounded-[10px] transition-all whitespace-nowrap flex items-center no-underline">
-            Get started free →
+            Get started for free →
           </Link>
         </div>
       </section>
