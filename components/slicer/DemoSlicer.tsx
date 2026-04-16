@@ -36,7 +36,7 @@ interface LoadedImage {
 
 // ── Step indicator ──────────────────────────────────────────────────────
 
-const STEP_LABELS = ['Upload', 'Formats', 'Preview', 'Copy', 'Export']
+const STEP_LABELS = ['Upload', 'Formats', 'Adjust', 'Copy', 'Export']
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -324,9 +324,118 @@ function FormatsStep({
   )
 }
 
-// ── Step 3: Preview Crops ───────────────────────────────────────────────
+// ── Step 3: Adjust Crops ────────────────────────────────────────────────
 
-function PreviewStep({
+interface CropState {
+  x: number   // pan offset in % (-50 to 50)
+  y: number
+  zoom: number // 1 = fit, up to 2
+}
+
+function AdjustCard({
+  image,
+  fmt,
+  cardW,
+}: {
+  image: LoadedImage
+  fmt: DemoFormat
+  cardW: number
+}) {
+  const ratio = fmt.h / fmt.w
+  const cardH = Math.round(cardW * Math.min(ratio, 1.8))
+  const [crop, setCrop] = useState<CropState>({ x: 0, y: 0, zoom: 1 })
+  const [dragging, setDragging] = useState(false)
+  const startRef = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null)
+
+  function handlePointerDown(e: React.PointerEvent) {
+    e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    setDragging(true)
+    startRef.current = { x: e.clientX, y: e.clientY, cx: crop.x, cy: crop.y }
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    if (!dragging || !startRef.current) return
+    const dx = ((e.clientX - startRef.current.x) / cardW) * 100
+    const dy = ((e.clientY - startRef.current.y) / cardH) * 100
+    const limit = (crop.zoom - 1) * 50
+    setCrop(c => ({
+      ...c,
+      x: Math.max(-limit, Math.min(limit, startRef.current!.cx + dx)),
+      y: Math.max(-limit, Math.min(limit, startRef.current!.cy + dy)),
+    }))
+  }
+
+  function handlePointerUp() {
+    setDragging(false)
+    startRef.current = null
+  }
+
+  function handleZoom(delta: number) {
+    setCrop(c => {
+      const zoom = Math.max(1, Math.min(2, c.zoom + delta))
+      const limit = (zoom - 1) * 50
+      return {
+        zoom,
+        x: Math.max(-limit, Math.min(limit, c.x)),
+        y: Math.max(-limit, Math.min(limit, c.y)),
+      }
+    })
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className={[
+          'w-full rounded-xl overflow-hidden border shadow-sm bg-gray-100 flex-shrink-0 select-none',
+          dragging ? 'cursor-grabbing border-indigo-300' : 'cursor-grab border-gray-200 hover:border-indigo-200',
+        ].join(' ')}
+        style={{ height: cardH, touchAction: 'none' }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.src}
+          alt={fmt.name}
+          className="w-full h-full pointer-events-none"
+          draggable={false}
+          style={{
+            objectFit: 'cover',
+            objectPosition: `calc(50% + ${crop.x}%) calc(50% + ${crop.y}%)`,
+            transform: `scale(${crop.zoom})`,
+            transition: dragging ? 'none' : 'transform 0.15s ease',
+          }}
+        />
+      </div>
+      {/* Zoom controls */}
+      <div className="flex items-center gap-1 mt-1.5">
+        <button
+          onClick={() => handleZoom(-0.2)}
+          disabled={crop.zoom <= 1}
+          className="w-5 h-5 flex items-center justify-center rounded border border-gray-200 text-[10px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition"
+        >
+          −
+        </button>
+        <span className="text-[9px] text-gray-400 font-medium w-8 text-center">{Math.round(crop.zoom * 100)}%</span>
+        <button
+          onClick={() => handleZoom(0.2)}
+          disabled={crop.zoom >= 2}
+          className="w-5 h-5 flex items-center justify-center rounded border border-gray-200 text-[10px] font-bold text-gray-500 hover:bg-gray-50 disabled:opacity-30 transition"
+        >
+          +
+        </button>
+      </div>
+      <p className="text-[11px] font-semibold text-gray-700 mt-1 text-center leading-tight">
+        {fmt.name}
+      </p>
+      <p className="text-[10px] text-gray-400">{fmt.w}×{fmt.h}</p>
+    </div>
+  )
+}
+
+function AdjustStep({
   image,
   selected,
   onBack,
@@ -343,40 +452,19 @@ function PreviewStep({
   return (
     <div className="flex flex-col min-h-0">
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-[0.6px] mb-4 flex-shrink-0">
-        Here&apos;s how your image fills each format
+        Drag to reposition · zoom to refine each crop
       </p>
 
       <div
         className="grid gap-3 overflow-y-auto pb-1"
         style={{
           gridTemplateColumns: `repeat(auto-fill, minmax(${CARD_W}px, 1fr))`,
-          maxHeight: 320,
+          maxHeight: 360,
         }}
       >
-        {formats.map(fmt => {
-          const ratio = fmt.h / fmt.w
-          const previewH = Math.round(CARD_W * Math.min(ratio, 1.8))
-          return (
-            <div key={fmt.id} className="flex flex-col items-center">
-              <div
-                className="w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0"
-                style={{ height: previewH }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={image.src}
-                  alt={fmt.name}
-                  className="w-full h-full"
-                  style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
-                />
-              </div>
-              <p className="text-[11px] font-semibold text-gray-700 mt-1.5 text-center leading-tight">
-                {fmt.name}
-              </p>
-              <p className="text-[10px] text-gray-400">{fmt.w}×{fmt.h}</p>
-            </div>
-          )
-        })}
+        {formats.map(fmt => (
+          <AdjustCard key={fmt.id} image={image} fmt={fmt} cardW={CARD_W} />
+        ))}
       </div>
 
       <NavBar onBack={onBack} onNext={onNext} nextLabel="Add Copy →" />
@@ -765,7 +853,7 @@ export default function DemoSlicer() {
             />
           )}
           {step === 3 && image && (
-            <PreviewStep
+            <AdjustStep
               image={image}
               selected={selected}
               onBack={goBack}
