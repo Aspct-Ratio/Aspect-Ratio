@@ -327,7 +327,7 @@ function FormatsStep({
 // ── Step 3: Adjust Crops ────────────────────────────────────────────────
 
 interface CropState {
-  x: number   // pan offset in % (-50 to 50)
+  x: number   // pan offset in px
   y: number
   zoom: number // 1 = fit, up to 2
 }
@@ -347,6 +347,19 @@ function AdjustCard({
   const [dragging, setDragging] = useState(false)
   const startRef = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null)
 
+  // Clamp pan so image edges don't go past container edges
+  function clampPan(x: number, y: number, zoom: number) {
+    // At zoom 1, image exactly covers container (object-fit:cover), so no pan allowed.
+    // At zoom > 1, the extra pixels on each axis allow panning.
+    // Max pan = (zoom - 1) * containerDim / 2
+    const maxX = (zoom - 1) * cardW / 2
+    const maxY = (zoom - 1) * cardH / 2
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    }
+  }
+
   function handlePointerDown(e: React.PointerEvent) {
     e.preventDefault()
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
@@ -356,14 +369,10 @@ function AdjustCard({
 
   function handlePointerMove(e: React.PointerEvent) {
     if (!dragging || !startRef.current) return
-    const dx = ((e.clientX - startRef.current.x) / cardW) * 100
-    const dy = ((e.clientY - startRef.current.y) / cardH) * 100
-    const limit = (crop.zoom - 1) * 50
-    setCrop(c => ({
-      ...c,
-      x: Math.max(-limit, Math.min(limit, startRef.current!.cx + dx)),
-      y: Math.max(-limit, Math.min(limit, startRef.current!.cy + dy)),
-    }))
+    const dx = e.clientX - startRef.current.x
+    const dy = e.clientY - startRef.current.y
+    const { x, y } = clampPan(startRef.current.cx + dx, startRef.current.cy + dy, crop.zoom)
+    setCrop(c => ({ ...c, x, y }))
   }
 
   function handlePointerUp() {
@@ -373,13 +382,9 @@ function AdjustCard({
 
   function handleZoom(delta: number) {
     setCrop(c => {
-      const zoom = Math.max(1, Math.min(2, c.zoom + delta))
-      const limit = (zoom - 1) * 50
-      return {
-        zoom,
-        x: Math.max(-limit, Math.min(limit, c.x)),
-        y: Math.max(-limit, Math.min(limit, c.y)),
-      }
+      const zoom = Math.max(1, Math.min(2, +(c.zoom + delta).toFixed(1)))
+      const { x, y } = clampPan(c.x, c.y, zoom)
+      return { zoom, x, y }
     })
   }
 
@@ -403,8 +408,7 @@ function AdjustCard({
           draggable={false}
           style={{
             objectFit: 'cover',
-            objectPosition: `calc(50% + ${crop.x}%) calc(50% + ${crop.y}%)`,
-            transform: `scale(${crop.zoom})`,
+            transform: `scale(${crop.zoom}) translate(${crop.x / crop.zoom}px, ${crop.y / crop.zoom}px)`,
             transition: dragging ? 'none' : 'transform 0.15s ease',
           }}
         />
