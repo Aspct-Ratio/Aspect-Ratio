@@ -253,7 +253,7 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
         <button
           onClick={onNext}
           disabled={state.files.length === 0}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-wide"
         >Continue to Formats →</button>
       </div>
     </div>

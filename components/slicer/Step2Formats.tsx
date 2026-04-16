@@ -46,8 +46,8 @@ export default function Step2Formats({ onBack, onNext }: Props) {
       </div>
 
       <div className="flex justify-between items-center mt-9 pt-5 border-t border-gray-200">
-        <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition">← Back</button>
-        <button onClick={handleNext} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition">Adjust Crops →</button>
+        <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition uppercase tracking-wide">← Back</button>
+        <button onClick={handleNext} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition uppercase tracking-wide">Adjust Crops →</button>
       </div>
     </div>
   )

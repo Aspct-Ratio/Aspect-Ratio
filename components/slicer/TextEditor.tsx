@@ -1347,7 +1347,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
           </p>
           <button
             onClick={handleDone}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition"
+            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition uppercase tracking-wide"
           >
             Done
           </button>

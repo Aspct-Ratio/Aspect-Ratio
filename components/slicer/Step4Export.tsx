@@ -187,7 +187,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
         <button
           onClick={dlAll}
           disabled={exporting}
-          className={`flex items-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-xl transition flex-shrink-0 ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
+          className={`flex items-center gap-2 px-5 py-2.5 font-semibold text-sm rounded-xl transition flex-shrink-0 uppercase tracking-wide ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
         >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 10.5L3 6h3V1.5h3V6h3L7.5 10.5z" fill="currentColor"/><rect x="1.5" y="12" width="12" height="1.5" rx="0.75" fill="currentColor"/></svg>
           {done ? 'Downloaded ✓' : exporting ? 'Building ZIP…' : 'Download all as ZIP'}
@@ -331,7 +331,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
           <button
             onClick={dlAll}
             disabled={exporting}
-            className={`w-full py-3 font-semibold text-sm rounded-xl transition flex items-center justify-center gap-2 ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
+            className={`w-full py-3 font-semibold text-sm rounded-xl transition flex items-center justify-center gap-2 uppercase tracking-wide ${done ? 'bg-green-600 text-white' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} disabled:opacity-50`}
           >
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 10.5L3 6h3V1.5h3V6h3L7.5 10.5z" fill="currentColor"/><rect x="1.5" y="12" width="12" height="1.5" rx="0.75" fill="currentColor"/></svg>
             {done ? 'Downloaded ✓' : exporting ? 'Building ZIP…' : 'Download all as ZIP'}
@@ -340,8 +340,8 @@ export default function Step4Export({ onBack, onReset }: Props) {
       </div>
 
       <div className="flex justify-between items-center mt-9 pt-5 border-t border-gray-200">
-        <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition">← Back</button>
-        <button onClick={onReset} className="text-sm text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg transition">+ New Project</button>
+        <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition uppercase tracking-wide">← Back</button>
+        <button onClick={onReset} className="text-sm text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg transition uppercase tracking-wide">+ New Project</button>
       </div>
 
       {/* Hidden canvas for rendering */}

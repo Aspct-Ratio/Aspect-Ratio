@@ -252,7 +252,7 @@ function CropModal({ fmt, file, crop, cropRef, onCropChange, onClose }: ModalPro
             </button>
             <button
               onClick={onClose}
-              className="flex-1 h-8 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
+              className="flex-1 h-8 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition uppercase tracking-wide"
             >
               Done
             </button>

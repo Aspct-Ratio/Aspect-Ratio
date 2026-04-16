@@ -98,7 +98,7 @@ function NavBar({
       {onBack ? (
         <button
           onClick={onBack}
-          className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 transition"
+          className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 transition uppercase tracking-wide"
         >
           {backLabel}
         </button>
@@ -113,7 +113,7 @@ function NavBar({
           <button
             onClick={onNext}
             disabled={nextDisabled}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition uppercase tracking-wide"
           >
             {nextLabel}
           </button>
