@@ -391,13 +391,14 @@ interface DemoTextLayer {
   fontSize: number
   fontWeight: number
   color: string
+  xPct: number  // horizontal position as percentage (0-100)
   yPct: number  // vertical position as percentage (0-100)
 }
 
 const DEMO_PRESETS: { label: string; layer: DemoTextLayer }[] = [
-  { label: '+ Headline',  layer: { text: 'Your Headline', fontSize: 32, fontWeight: 700, color: '#ffffff', yPct: 70 } },
-  { label: '+ Subheader', layer: { text: 'Subheader goes here', fontSize: 18, fontWeight: 500, color: '#ffffff', yPct: 82 } },
-  { label: '+ CTA',       layer: { text: 'Shop Now', fontSize: 16, fontWeight: 700, color: '#ffffff', yPct: 92 } },
+  { label: '+ Headline',  layer: { text: 'Your Headline', fontSize: 32, fontWeight: 700, color: '#ffffff', xPct: 50, yPct: 70 } },
+  { label: '+ Subheader', layer: { text: 'Subheader goes here', fontSize: 18, fontWeight: 500, color: '#ffffff', xPct: 50, yPct: 82 } },
+  { label: '+ CTA',       layer: { text: 'Shop Now', fontSize: 16, fontWeight: 700, color: '#ffffff', xPct: 50, yPct: 92 } },
 ]
 
 function CopyStep({
@@ -415,6 +416,8 @@ function CopyStep({
   const [activeFmt, setActiveFmt] = useState(formats[0]?.id ?? '')
   const [layers, setLayers] = useState<DemoTextLayer[]>([])
   const [editIdx, setEditIdx] = useState<number | null>(null)
+  const [dragging, setDragging] = useState<number | null>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
 
   const fmt = formats.find(f => f.id === activeFmt) ?? formats[0]
   const PREVIEW_W = 320
@@ -424,6 +427,28 @@ function CopyStep({
   function addPreset(preset: DemoTextLayer) {
     setLayers(prev => [...prev, { ...preset }])
     setEditIdx(layers.length)
+  }
+
+  // Drag-to-move handler
+  function handlePointerDown(e: React.PointerEvent, idx: number) {
+    e.preventDefault()
+    e.stopPropagation()
+    setEditIdx(idx)
+    setDragging(idx)
+    const el = e.currentTarget as HTMLElement
+    el.setPointerCapture(e.pointerId)
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    if (dragging === null || !previewRef.current) return
+    const rect = previewRef.current.getBoundingClientRect()
+    const xPct = Math.max(5, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100))
+    const yPct = Math.max(5, Math.min(95, ((e.clientY - rect.top) / rect.height) * 100))
+    updateLayer(dragging, { xPct, yPct })
+  }
+
+  function handlePointerUp() {
+    setDragging(null)
   }
 
   function updateLayer(idx: number, updates: Partial<DemoTextLayer>) {
@@ -474,26 +499,33 @@ function CopyStep({
         {/* Center: preview with text overlays */}
         <div className="flex-1 flex flex-col items-center min-w-0">
           <div
-            className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0"
-            style={{ width: PREVIEW_W, height: previewH }}
+            ref={previewRef}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0 select-none"
+            style={{ width: PREVIEW_W, height: previewH, touchAction: 'none' }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={image.src}
               alt=""
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover pointer-events-none"
               style={{ objectPosition: 'center 30%' }}
+              draggable={false}
             />
             {/* Text overlays */}
             {layers.map((layer, i) => (
               <div
                 key={i}
-                onClick={() => setEditIdx(i)}
+                onPointerDown={e => handlePointerDown(e, i)}
                 className={[
-                  'absolute left-1/2 -translate-x-1/2 text-center cursor-pointer px-2 py-0.5 rounded transition-all',
-                  editIdx === i ? 'ring-2 ring-indigo-400 ring-offset-1' : 'hover:ring-1 hover:ring-white/50',
+                  'absolute text-center px-2 py-0.5 rounded',
+                  dragging === i ? 'cursor-grabbing ring-2 ring-indigo-400 ring-offset-1' :
+                  editIdx === i ? 'cursor-grab ring-2 ring-indigo-400 ring-offset-1' :
+                  'cursor-grab hover:ring-1 hover:ring-white/50',
                 ].join(' ')}
                 style={{
+                  left: `${layer.xPct}%`,
                   top: `${layer.yPct}%`,
                   transform: 'translate(-50%, -50%)',
                   fontSize: layer.fontSize,
@@ -501,13 +533,14 @@ function CopyStep({
                   color: layer.color,
                   textShadow: '0 1px 8px rgba(0,0,0,0.5)',
                   fontFamily: 'Inter, system-ui, sans-serif',
+                  userSelect: 'none',
                 }}
               >
                 {layer.text}
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-gray-400 mt-1.5">Click text to edit</p>
+          <p className="text-[10px] text-gray-400 mt-1.5">Click to edit · drag to move</p>
         </div>
 
         {/* Right: controls */}
