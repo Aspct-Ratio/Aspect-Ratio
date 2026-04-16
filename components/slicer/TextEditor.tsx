@@ -11,7 +11,21 @@ const MODAL_MAX_W = 600
 const MODAL_MAX_H = 520
 
 const SYSTEM_FONTS = ['Arial', 'Helvetica', 'Georgia', 'Times New Roman', 'Courier New', 'Impact', 'Verdana']
-const GOOGLE_FONTS = ['Inter', 'Montserrat', 'Playfair Display', 'Oswald', 'Roboto', 'Bebas Neue', 'Poppins', 'Raleway', 'Open Sans', 'Lato']
+// Curated Google Fonts, organised by weight coverage.
+// Fonts marked "full" support every weight from 100–900 (or close).
+// Others are included for their style but have limited weight ranges.
+const GOOGLE_FONTS = [
+  // Full weight range (100–900)
+  'Inter', 'Roboto', 'Poppins', 'Montserrat', 'Raleway', 'Lato',
+  'Work Sans', 'DM Sans', 'Archivo', 'Mulish', 'Urbanist',
+  // Wide range (200–900 or 300–800)
+  'Nunito', 'Nunito Sans', 'Manrope', 'Source Sans 3', 'Rubik',
+  'Plus Jakarta Sans', 'Barlow', 'Kanit', 'Open Sans', 'Oswald',
+  // Serif / display
+  'Playfair Display', 'Merriweather', 'Lora', 'PT Serif',
+  // Single-weight display
+  'Bebas Neue', 'Anton', 'Archivo Black',
+]
 const ALL_FONTS    = [...SYSTEM_FONTS, ...GOOGLE_FONTS]
 
 const PRESETS = {
@@ -73,6 +87,7 @@ interface LayerItem { id: string; preview: string; visible: boolean }
 
 // ── Google Font loader ──────────────────────────────────────────
 
+/** Inject the Google Fonts stylesheet for a family (all weights 100–900). */
 function loadGoogleFont(family: string): Promise<void> {
   const id = `gf-${family.replace(/\s+/g, '-')}`
   if (document.getElementById(id)) return Promise.resolve()
@@ -80,14 +95,65 @@ function loadGoogleFont(family: string): Promise<void> {
     const link = document.createElement('link')
     link.id   = id
     link.rel  = 'stylesheet'
-    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@100;200;300;400;500;600;700;800;900&display=swap`
+    // Request the full weight range. Google serves the variable axis (wght@100..900)
+    // where supported; for static fonts it maps to the closest available weights.
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:ital,wght@0,100..900;1,100..900&display=swap`
     link.onload = () => resolve()
     link.onerror = () => resolve()
     document.head.appendChild(link)
   })
 }
 
+/**
+ * Ensure a specific (family, weight) combo is fully loaded.
+ * Browsers lazily download font weights even after the CSS is loaded,
+ * so we explicitly ask the FontFace API to fetch them before rendering.
+ */
+async function ensureFontLoaded(family: string, weight: number): Promise<void> {
+  if (typeof document === 'undefined' || !document.fonts) return
+  try {
+    // CSS font shorthand: weight size family
+    await document.fonts.load(`${weight} 32px "${family}"`)
+  } catch { /* ignore load errors */ }
+}
+
 function uid() { return `tl-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }
+
+// ── Rounded background box renderer ─────────────────────────────
+// Fabric's native `backgroundColor` paints a plain rectangle. To get rounded
+// corners (matching preview/export), we monkey-patch each Textbox's
+// `_renderBackground` to draw a rounded path using its stored rx value.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function installRoundedBg(tb: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tb._renderBackground = function (ctx: CanvasRenderingContext2D) {
+    if (!this.backgroundColor) return
+    const dim = this._getNonTransformedDimensions()
+    const x = -dim.x / 2, y = -dim.y / 2
+    const w = dim.x, h = dim.y
+    const rx = Math.max(0, this.data?.bgRect?.rx ?? 0)
+    const r = Math.min(rx, w / 2, h / 2)
+    ctx.fillStyle = this.backgroundColor as string
+    ctx.beginPath()
+    if (r > 0) {
+      ctx.moveTo(x + r, y)
+      ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+      ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+      ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y)
+      ctx.closePath()
+      ctx.fill()
+    } else {
+      ctx.fillRect(x, y, w, h)
+    }
+    // Match fabric's default behaviour: drop shadow on stroke only
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const self = this as any
+    if (self.shadow && !self.shadow.affectStroke && typeof self._removeShadow === 'function') {
+      self._removeShadow(ctx)
+    }
+  }
+}
 
 // ── Props ────────────────────────────────────────────────────────
 
@@ -209,11 +275,20 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
   // ── Update active object property ─────────────────────────────
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateObj = useCallback((props: Record<string, any>) => {
+  const updateObj = useCallback(async (props: Record<string, any>) => {
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj || obj.type !== 'textbox') return
+    // If weight or family is being changed, pre-load the exact (family, weight)
+    // combo so the browser has the glyphs ready before the next paint.
+    if ('fontWeight' in props || 'fontFamily' in props) {
+      const family = (props.fontFamily ?? obj.fontFamily) as string
+      const weight = (props.fontWeight ?? obj.fontWeight) as number
+      if (family && GOOGLE_FONTS.includes(family)) await loadGoogleFont(family)
+      await ensureFontLoaded(family, weight)
+    }
     obj.set(props)
+    obj.initDimensions?.()       // re-measure after weight/size/family change
     canvas.requestRenderAll()
     readSel(obj)
     saveToState()
@@ -296,6 +371,12 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
 
       // Restore existing layers
       for (const layer of initialLayers) {
+        // Pre-load the exact (family, weight) combo before building the textbox
+        if (layer.fontFamily && GOOGLE_FONTS.includes(layer.fontFamily)) {
+          await loadGoogleFont(layer.fontFamily)
+        }
+        await ensureFontLoaded(layer.fontFamily ?? 'Arial', layer.fontWeight as number)
+
         const tb = new F.Textbox(layer.text, {
           left:        layer.left,
           top:         layer.top,
@@ -330,10 +411,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(tb as any).data = { id: layer.id, bgRect: layer.bgRect ?? null }
+        installRoundedBg(tb)
         canvas.add(tb)
-        if (layer.fontFamily && GOOGLE_FONTS.includes(layer.fontFamily)) {
-          await loadGoogleFont(layer.fontFamily)
-        }
       }
 
       if (disposed) { canvas.dispose(); return }
@@ -394,6 +473,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const tbX    = Math.round((fmt.w - tbW) / 2)
     const tbY    = Math.round(fmt.h * 0.65)
     const bgRect = 'bgRect' in p ? (p as { bgRect: TextLayer['bgRect'] }).bgRect ?? null : null
+    // Pre-load Arial at the preset weight (Arial is system, fonts.load is still safe)
+    await ensureFontLoaded('Arial', p.fontWeight)
     const tb = new F.Textbox(p.text, {
       left:        tbX,
       top:         tbY,
@@ -419,6 +500,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     tb.shadow = new F.Shadow({ color: 'rgba(0,0,0,0.55)', blur: 12, offsetX: 0, offsetY: 2 })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(tb as any).data = { id, bgRect }
+    installRoundedBg(tb)
     canvas.add(tb)
     canvas.setActiveObject(tb)
     canvas.requestRenderAll()
@@ -429,7 +511,11 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
 
   async function changeFont(family: string) {
     if (GOOGLE_FONTS.includes(family)) await loadGoogleFont(family)
-    updateObj({ fontFamily: family })
+    // Also preload the current weight for the new family so the editor renders
+    // the change immediately instead of falling back to 400.
+    const currentWeight = sel?.fontWeight ?? 400
+    await ensureFontLoaded(family, currentWeight)
+    await updateObj({ fontFamily: family })
     setSel(s => s ? { ...s, fontFamily: family } : s)
   }
 
@@ -464,16 +550,24 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj) return
-    canvas.bringForward(obj)
+    // Fabric v6: bringObjectForward replaces v5's bringForward
+    if (typeof canvas.bringObjectForward === 'function') canvas.bringObjectForward(obj)
+    else if (typeof canvas.bringForward === 'function')  canvas.bringForward(obj)
     canvas.requestRenderAll()
+    saveToState()
+    refreshLayerList()
   }
 
   function sendBack() {
     const canvas = fabricRef.current
     const obj = canvas?.getActiveObject()
     if (!obj) return
-    canvas.sendBackwards(obj)
+    // Fabric v6: sendObjectBackwards replaces v5's sendBackwards
+    if (typeof canvas.sendObjectBackwards === 'function') canvas.sendObjectBackwards(obj)
+    else if (typeof canvas.sendBackwards === 'function')  canvas.sendBackwards(obj)
     canvas.requestRenderAll()
+    saveToState()
+    refreshLayerList()
   }
 
   function selectById(id: string) {
@@ -544,7 +638,10 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
       rx:      updates?.bgRx      ?? current.bgRx      ?? 8,
     } : null
     obj.data = { ...obj.data, bgRect }
-    // Sync to Fabric's native backgroundColor + padding so it renders in the editor
+    // Ensure the rounded-corner renderer is installed on this textbox
+    installRoundedBg(obj)
+    // Sync to Fabric's native backgroundColor + padding so it renders in the editor.
+    // Our patched _renderBackground picks up the rx from obj.data.bgRect.
     if (bgRect) {
       obj.set({ backgroundColor: bgRect.fill, padding: bgRect.padding })
     } else {
@@ -906,15 +1003,18 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, fi
 
                   {/* Layer order + Delete */}
                   <div className="border-t border-gray-100 pt-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Actions</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-1">Layer order</p>
+                    <p className="text-[10px] text-gray-400 mb-2">Move this text in front of or behind other text layers.</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       <button onClick={bringForward}
+                        title="Bring layer forward (in front of other text)"
                         className="text-xs font-semibold border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 hover:bg-gray-100 transition">
-                        ↑ Forward
+                        ↑ Bring Forward
                       </button>
                       <button onClick={sendBack}
+                        title="Send layer backward (behind other text)"
                         className="text-xs font-semibold border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 hover:bg-gray-100 transition">
-                        ↓ Back
+                        ↓ Send Back
                       </button>
                       <button onClick={deleteSelected}
                         className="text-xs font-semibold border border-red-200 rounded-lg px-3 py-1.5 text-red-600 hover:bg-red-50 transition">
