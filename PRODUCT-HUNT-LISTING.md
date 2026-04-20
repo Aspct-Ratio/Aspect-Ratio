@@ -51,7 +51,7 @@ https://aspctratio.com
 
 ## Pricing
 
-Free forever plan available. Paid plans from $29/month (Creator), $59/month (Freelancer), $199/month (Studio), $599/month (Agency). Annual billing saves ~17%.
+Free forever plan (10 exports/month). Paid plans from $29/month (Creator, 200 exports), $59/month (Freelancer, 750 exports), $199/month (Studio, 3,000 exports), $599/month (Agency, unlimited). Annual billing saves ~17%. One export = one image at one format size.
 
 ---
 

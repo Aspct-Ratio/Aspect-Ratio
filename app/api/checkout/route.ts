@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
     const PRICE_MAP: Record<string, string | undefined> = {
+      creator:    process.env.STRIPE_CREATOR_PRICE_ID,
       freelancer: process.env.STRIPE_FREELANCER_PRICE_ID,
       studio:     process.env.STRIPE_STUDIO_PRICE_ID,
       agency:     process.env.STRIPE_AGENCY_PRICE_ID,

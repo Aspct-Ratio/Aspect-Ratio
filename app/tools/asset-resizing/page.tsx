@@ -111,8 +111,8 @@ export default function AssetResizingPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">How It Works — Step by Step</h2>
             <p className="text-gray-600 leading-[1.8] mb-4">
               First, upload one or more source images by dragging them into the browser or clicking to browse your file
-              system. ASPCT RATIO accepts JPG, PNG, and WebP files. You can upload up to 50 images per session
-              depending on your plan.
+              system. ASPCT RATIO accepts JPG, PNG, and WebP files. Upload limits scale with your plan — from
+              2 images per session on Free up to unlimited on Agency.
             </p>
             <p className="text-gray-600 leading-[1.8] mb-4">
               Second, choose the output formats you need. Browse by platform or search by dimension. Select as many as

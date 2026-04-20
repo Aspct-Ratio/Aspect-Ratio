@@ -14,26 +14,33 @@ const PLAN_INFO: Record<string, {
   description: string
   features: string[]
 }> = {
+  creator: {
+    label: 'Creator',
+    monthlyPrice: '$29 / month',
+    annualPrice: '$290 / year',
+    description: 'For content creators posting across multiple platforms.',
+    features: ['200 exports / month', '10 images per session', 'All platform formats', 'Text overlays', 'JPG, PNG, WebP export'],
+  },
   freelancer: {
     label: 'Freelancer',
     monthlyPrice: '$59 / month',
     annualPrice: '$590 / year',
     description: 'For independent creatives running campaigns solo.',
-    features: ['3 projects / month', 'Up to 50 files per project', 'All platform formats', 'JPG, PNG, WebP export', 'Custom naming conventions'],
+    features: ['750 exports / month', '50 images per session', 'All platform formats', 'JPG, PNG, WebP export', 'Custom naming conventions'],
   },
   studio: {
     label: 'Studio',
     monthlyPrice: '$199 / month',
     annualPrice: '$1,990 / year',
     description: 'For small studios and in-house teams with regular campaign output.',
-    features: ['15 projects / month', 'Up to 150 files per project', 'All export types — JPG, PNG, WebP, PDF, TIFF', 'Custom naming & folder structure', '5 team seats'],
+    features: ['3,000 exports / month', '150 images per session', 'All export types — JPG, PNG, WebP, PDF, TIFF', 'Custom naming & folder structure', '5 team seats'],
   },
   agency: {
     label: 'Agency',
     monthlyPrice: '$599 / month',
     annualPrice: '$5,990 / year',
     description: 'For agencies running production at volume across multiple clients.',
-    features: ['Unlimited projects', 'Unlimited files per project', 'All export types', 'API access', '20 team seats', 'Priority support'],
+    features: ['Unlimited exports', 'Unlimited images per session', 'All export types', 'API access', '20 team seats', 'Priority support'],
   },
 }
 

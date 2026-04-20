@@ -59,8 +59,8 @@ export default async function AppPage() {
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  '3 projects / month',
-                  'Up to 50 files per project',
+                  '750 exports / month',
+                  '50 images per session',
                   'All platform formats',
                   'JPG, PNG, WebP export',
                   'Custom naming conventions',
@@ -93,8 +93,8 @@ export default async function AppPage() {
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  '15 projects / month',
-                  'Up to 150 files per project',
+                  '3,000 exports / month',
+                  '150 images per session',
                   'All export types — JPG, PNG, WebP, PDF, TIFF',
                   'Custom naming & folder structure',
                   '5 team seats',
@@ -124,8 +124,8 @@ export default async function AppPage() {
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  'Unlimited projects',
-                  'Unlimited files per project',
+                  'Unlimited exports',
+                  'Unlimited images per session',
                   'All export types',
                   'API access',
                   '20 team seats',

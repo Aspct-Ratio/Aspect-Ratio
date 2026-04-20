@@ -14,21 +14,21 @@ const PLAN_LABELS: Record<string, string> = {
   enterprise: 'Enterprise',
 }
 
-const PLAN_PROJECTS: Record<string, string> = {
-  free:       'Unlimited sessions',
-  creator:    'Unlimited sessions',
-  freelancer: '3 / month',
-  studio:     '15 / month',
+const PLAN_EXPORTS: Record<string, string> = {
+  free:       '10 / month',
+  creator:    '200 / month',
+  freelancer: '750 / month',
+  studio:     '3,000 / month',
   agency:     'Unlimited',
   enterprise: 'Unlimited',
 }
 
-const PLAN_FILES: Record<string, string> = {
+const PLAN_IMAGES: Record<string, string> = {
   free:       '2 per session',
   creator:    '10 per session',
   freelancer: '50 per session',
   studio:     '150 per session',
-  agency:     '300 per session',
+  agency:     'Unlimited',
   enterprise: 'Unlimited',
 }
 
@@ -281,8 +281,8 @@ export default function DashboardClient({ userEmail, userName, subscription, car
                   {isCanceling ? 'Canceling' : meta.label}
                 </span>
               </Row>
-              <Row label="Projects">{PLAN_PROJECTS[plan!] ?? '—'}</Row>
-              <Row label="Files / session">{PLAN_FILES[plan!] ?? '—'}</Row>
+              <Row label="Exports">{PLAN_EXPORTS[plan!] ?? '—'}</Row>
+              <Row label="Images / session">{PLAN_IMAGES[plan!] ?? '—'}</Row>
               <Row label="Team seats">{PLAN_SEATS[plan!] ?? '—'}</Row>
               <Row label="Exports">{plan === 'free' ? 'JPG (watermarked)' : plan === 'creator' || plan === 'freelancer' ? 'JPG, PNG, WebP' : 'All types'}</Row>
               {isTrialing && trialEnd && (

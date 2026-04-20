@@ -88,9 +88,9 @@ const softwareJsonLd = {
   offers: {
     '@type': 'AggregateOffer',
     priceCurrency: 'USD',
-    lowPrice: '29',
-    highPrice: '149',
-    offerCount: '3',
+    lowPrice: '0',
+    highPrice: '599',
+    offerCount: '5',
   },
   featureList: [
     'Bulk image resizing for 60+ ad and social formats',
@@ -110,7 +110,7 @@ const faqJsonLd = {
       name: 'How does the free trial work?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'You get 7 days free with full access to all features. No credit card required to start. Cancel anytime before the trial ends and you won\'t be charged.',
+        text: 'Paid plans include a 7-day free trial with full access to all features. Cancel anytime before the trial ends and you won\'t be charged. There is also a free-forever plan with 10 exports per month.',
       },
     },
     {
@@ -118,7 +118,7 @@ const faqJsonLd = {
       name: 'What file types can I upload?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'We support JPG, PNG, WebP, GIF, MP4, MOV, and WebM. Upload up to 50 files per session depending on your plan.',
+        text: 'We support JPG, PNG, WebP, GIF, MP4, MOV, and WebM. Upload limits vary by plan — from 2 images per session on Free up to unlimited on Agency.',
       },
     },
     {

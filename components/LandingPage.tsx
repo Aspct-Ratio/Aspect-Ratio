@@ -12,11 +12,11 @@ import FeedbackWidget from '@/components/FeedbackWidget'
 const FAQ_ITEMS = [
   {
     q: 'How does the free trial work?',
-    a: 'You get 7 days free with full access to all features. No credit card required to start. Cancel anytime before the trial ends and you won\'t be charged.',
+    a: 'Paid plans include a 7-day free trial with full access. Cancel anytime before the trial ends and you won\'t be charged. There\'s also a free-forever plan with 10 exports per month.',
   },
   {
     q: 'What file types can I upload?',
-    a: 'We support JPG, PNG, WebP, GIF, MP4, MOV, and WebM. Upload up to 50 files per session depending on your plan.',
+    a: 'We support JPG, PNG, WebP, GIF, MP4, MOV, and WebM. Upload limits vary by plan — from 2 images per session on Free up to unlimited on Agency.',
   },
   {
     q: 'Do I need design skills to use Aspct Ratio?',
@@ -388,7 +388,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             {[
               { title: '60+ platform formats', body: 'Instagram, TikTok, YouTube, X, Snapchat, Pinterest, LinkedIn, PDP, homepage, email, IAB display, in-store, OOH, and more — all preloaded.' },
               { title: 'Custom naming conventions', body: 'Build tokens from client name, channel, dimension, platform, asset name, and date. Your file naming system — your rules.' },
-              { title: 'Batch multi-asset upload', body: 'Upload up to 50 images and videos at once. Apply a crop adjustment to one file, or fine-tune every asset individually.' },
+              { title: 'Batch multi-asset upload', body: 'Upload multiple images and videos at once — limits scale with your plan. Apply a crop adjustment to one file, or fine-tune every asset individually.' },
               { title: 'Interactive crop adjustment', body: 'Pan and zoom each crop independently. Smart upper-center bias gets you 80% of the way there on hero product imagery.' },
               { title: 'Multi-format export', body: 'Export as JPG, PNG, WebP, PDF, or TIFF. Select multiple simultaneously. Full-resolution output in every format.' },
               { title: 'Nested folder structure', body: 'Every ZIP is organized by Channel → Platform → Section. The right person gets the right files instantly, no guesswork.' },
@@ -515,8 +515,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       <section id="pricing" className="py-20 px-6 bg-gray-50">
         <div className="max-w-[1100px] mx-auto">
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Pricing</p>
-          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Plans for every workflow</h2>
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-8">From individual creators to enterprise teams — pick the plan that fits how you work.</p>
+          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Simple, export-based pricing</h2>
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-8">One export = one image at one format size. Pay for what you actually produce.</p>
 
           {/* Toggle */}
           <div className="flex items-center gap-3 mb-12">
@@ -548,8 +548,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
+                  '10 exports / month',
                   '2 images per session',
-                  '5 format exports',
+                  '5 formats per session',
                   'Smart crop & adjust',
                   'Watermarked exports',
                   'JPG export only',
@@ -579,7 +580,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  'Unlimited sessions',
+                  '200 exports / month',
                   '10 images per session',
                   'All platform formats',
                   'Text overlays',
@@ -611,8 +612,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  '3 projects / month',
-                  'Up to 50 files per project',
+                  '750 exports / month',
+                  '50 images per session',
                   'All platform formats',
                   'Text overlays',
                   'JPG, PNG, WebP export',
@@ -646,8 +647,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  '15 projects / month',
-                  'Up to 150 files per project',
+                  '3,000 exports / month',
+                  '150 images per session',
                   'All export types — JPG, PNG, WebP, PDF, TIFF',
                   'Custom naming & folder structure',
                   '5 team seats',
@@ -677,8 +678,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  'Unlimited projects',
-                  'Unlimited files per project',
+                  'Unlimited exports',
+                  'Unlimited images per session',
                   'All export types',
                   'API access',
                   '20 team seats',
