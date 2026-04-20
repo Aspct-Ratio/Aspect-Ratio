@@ -10,6 +10,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/login`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    // Product pages
+    { url: `${base}/product/how-it-works`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/product/features`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/product/supported-channels`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    // Use case pages
+    { url: `${base}/use-cases/agencies`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/use-cases/brands`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/use-cases/studios`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/use-cases/freelancers`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/use-cases/content-creators`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     // SEO content pages
     { url: `${base}/tools/asset-resizing`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/tools/image-cropping`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },

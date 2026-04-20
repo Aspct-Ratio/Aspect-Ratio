@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
 import DemoSlicer from '@/components/slicer/DemoSlicer'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 
 const FAQ_ITEMS = [
@@ -69,19 +70,35 @@ function FAQ() {
   )
 }
 
+const PRODUCT_LINKS = [
+  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Features', href: '#features' },
+  { label: 'Supported Channels', href: '#channels' },
+]
+
+const USE_CASE_LINKS = [
+  { label: 'For Agencies', href: '/use-cases/agencies' },
+  { label: 'For Brands', href: '/use-cases/brands' },
+  { label: 'For Studios', href: '/use-cases/studios' },
+  { label: 'For Freelancers', href: '/use-cases/freelancers' },
+  { label: 'For Content Creators', href: '/use-cases/content-creators' },
+]
+
 const RESOURCE_LINKS = [
-  { label: 'Asset Resizing', href: '/tools/asset-resizing' },
-  { label: 'Image Cropping', href: '/tools/image-cropping' },
-  { label: 'Social Media Resizer', href: '/tools/social-media-image-resizer' },
-  { label: 'Content Creator Resizer', href: '/tools/content-creator-image-resizer' },
-  { label: 'How to Resize for Social', href: '/guides/how-to-resize-images-for-social-media' },
-  { label: 'Image Sizes Reference', href: '/guides/image-sizes-for-every-social-platform' },
+  { label: 'Asset Resizing', href: '/tools/asset-resizing', group: 'Tools' },
+  { label: 'Image Cropping', href: '/tools/image-cropping', group: 'Tools' },
+  { label: 'Social Media Resizer', href: '/tools/social-media-image-resizer', group: 'Tools' },
+  { label: 'Content Creator Resizer', href: '/tools/content-creator-image-resizer', group: 'Tools' },
+  { label: 'How to Resize for Social', href: '/guides/how-to-resize-images-for-social-media', group: 'Guides' },
+  { label: 'Image Sizes Reference', href: '/guides/image-sizes-for-every-social-platform', group: 'Guides' },
 ]
 
 export default function LandingPage({ isLoggedIn = false, userEmail }: { isLoggedIn?: boolean; userEmail?: string }) {
   const [annual, setAnnual] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [hasActiveSub, setHasActiveSub] = useState(false)
+  const [productOpen, setProductOpen] = useState(false)
+  const [useCasesOpen, setUseCasesOpen] = useState(false)
   const [resourcesOpen, setResourcesOpen] = useState(false)
   const router = useRouter()
 
@@ -126,15 +143,51 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
           {/* Center nav links — desktop only, truly centered */}
           <div className="hidden md:flex items-center gap-7">
-            <a href="#how-it-works" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">HOW IT WORKS</a>
-            <a href="#features" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">FEATURES</a>
-            <a href="#channels" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">CHANNELS</a>
-            <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">SEE PLANS</a>
-            <div
-              className="relative"
-              onMouseEnter={() => setResourcesOpen(true)}
-              onMouseLeave={() => setResourcesOpen(false)}
-            >
+
+            {/* Product dropdown — anchor links on homepage */}
+            <div className="relative" onMouseEnter={() => setProductOpen(true)} onMouseLeave={() => setProductOpen(false)}>
+              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+                PRODUCT
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${productOpen ? 'rotate-180' : ''}`}>
+                  <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {productOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-lg py-2 min-w-[220px]">
+                    {PRODUCT_LINKS.map(link => (
+                      <a key={link.href} href={link.href} className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline">
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Use Cases dropdown */}
+            <div className="relative" onMouseEnter={() => setUseCasesOpen(true)} onMouseLeave={() => setUseCasesOpen(false)}>
+              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+                USE CASES
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${useCasesOpen ? 'rotate-180' : ''}`}>
+                  <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {useCasesOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-lg py-2 min-w-[220px]">
+                    {USE_CASE_LINKS.map(link => (
+                      <Link key={link.href} href={link.href} className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline">
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Resources dropdown */}
+            <div className="relative" onMouseEnter={() => setResourcesOpen(true)} onMouseLeave={() => setResourcesOpen(false)}>
               <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
                 RESOURCES
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${resourcesOpen ? 'rotate-180' : ''}`}>
@@ -145,23 +198,15 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50">
                   <div className="bg-white border border-gray-200 rounded-xl shadow-lg py-2 min-w-[220px]">
                     <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Tools</p>
-                    {RESOURCE_LINKS.slice(0, 3).map(link => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline"
-                      >
+                    {RESOURCE_LINKS.filter(l => l.group === 'Tools').map(link => (
+                      <Link key={link.href} href={link.href} className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline">
                         {link.label}
                       </Link>
                     ))}
                     <div className="my-1.5 border-t border-gray-100" />
                     <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Guides</p>
-                    {RESOURCE_LINKS.slice(3).map(link => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline"
-                      >
+                    {RESOURCE_LINKS.filter(l => l.group === 'Guides').map(link => (
+                      <Link key={link.href} href={link.href} className="block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline">
                         {link.label}
                       </Link>
                     ))}
@@ -169,6 +214,9 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 </div>
               )}
             </div>
+
+            {/* Pricing — direct link */}
+            <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">PRICING</a>
           </div>
 
           {/* Right: auth actions — desktop only */}
@@ -219,28 +267,44 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
         {/* ── Mobile dropdown menu ── */}
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-5 py-4 flex flex-col gap-1">
-            {/* Nav links */}
-            <a href="#how-it-works" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">HOW IT WORKS</a>
-            <a href="#features" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">FEATURES</a>
-            <a href="#channels" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">CHANNELS</a>
-            <a href="#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">SEE PLANS</a>
+          <div className="md:hidden border-t border-gray-100 bg-white px-5 py-4 flex flex-col gap-1 max-h-[80vh] overflow-y-auto">
 
-            {/* Resources sub-links */}
+            {/* Product */}
+            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400 mt-1">Product</p>
+            {PRODUCT_LINKS.map(link => (
+              <a key={link.href} href={link.href} onClick={closeMenu}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline px-3 py-2.5 rounded-lg block">
+                {link.label}
+              </a>
+            ))}
+
             <div className="my-2 border-t border-gray-100" />
-            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Resources</p>
-            {RESOURCE_LINKS.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline px-3 py-2.5 rounded-lg block"
-              >
+
+            {/* Use Cases */}
+            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Use Cases</p>
+            {USE_CASE_LINKS.map(link => (
+              <Link key={link.href} href={link.href} onClick={closeMenu}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline px-3 py-2.5 rounded-lg block">
                 {link.label}
               </Link>
             ))}
 
-            {/* Divider */}
+            <div className="my-2 border-t border-gray-100" />
+
+            {/* Resources */}
+            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Resources</p>
+            {RESOURCE_LINKS.map(link => (
+              <Link key={link.href} href={link.href} onClick={closeMenu}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline px-3 py-2.5 rounded-lg block">
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="my-2 border-t border-gray-100" />
+
+            {/* Pricing */}
+            <a href="#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">PRICING</a>
+
             <div className="my-2 border-t border-gray-100" />
 
             {/* Auth actions */}
@@ -619,7 +683,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── FOOTER ───────────────────────────────────────────── */}
       <footer className="bg-gray-900 border-t border-white/[0.06] py-14 px-6">
         <div className="max-w-[1100px] mx-auto">
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 mb-10">
             {/* Brand */}
             <div>
               <Link href="/" className="no-underline">
@@ -630,9 +694,21 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </p>
             </div>
 
-            {/* Tools */}
+            {/* Use Cases */}
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Tools</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Use Cases</p>
+              <div className="flex flex-col gap-2">
+                <Link href="/use-cases/agencies" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Agencies</Link>
+                <Link href="/use-cases/brands" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Brands</Link>
+                <Link href="/use-cases/studios" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Studios</Link>
+                <Link href="/use-cases/freelancers" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Freelancers</Link>
+                <Link href="/use-cases/content-creators" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Content Creators</Link>
+              </div>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Resources</p>
               <div className="flex flex-col gap-2">
                 <Link href="/tools/asset-resizing" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Asset Resizing</Link>
                 <Link href="/tools/image-cropping" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Image Cropping</Link>
@@ -659,6 +735,11 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 <a href="mailto:hello@aspctratio.com" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Contact</a>
               </div>
             </div>
+          </div>
+
+          {/* Feedback */}
+          <div className="border-t border-white/[0.06] pt-8 mb-8 max-w-md">
+            <FeedbackWidget />
           </div>
 
           <div className="border-t border-white/[0.06] pt-6">

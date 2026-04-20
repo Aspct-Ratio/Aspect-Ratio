@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import LogoMark from '@/components/LogoMark'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 export default function SiteFooter() {
   return (
     <footer className="bg-gray-900 border-t border-white/[0.06] py-14 px-6">
       <div className="max-w-[1100px] mx-auto">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 mb-10">
           <div>
             <Link href="/" className="no-underline">
               <LogoMark height={75} dark />
@@ -15,7 +16,17 @@ export default function SiteFooter() {
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Tools</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Use Cases</p>
+            <div className="flex flex-col gap-2">
+              <Link href="/use-cases/agencies" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Agencies</Link>
+              <Link href="/use-cases/brands" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Brands</Link>
+              <Link href="/use-cases/studios" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Studios</Link>
+              <Link href="/use-cases/freelancers" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Freelancers</Link>
+              <Link href="/use-cases/content-creators" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">For Content Creators</Link>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.8px] text-gray-400 mb-3">Resources</p>
             <div className="flex flex-col gap-2">
               <Link href="/tools/asset-resizing" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Asset Resizing</Link>
               <Link href="/tools/image-cropping" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Image Cropping</Link>
@@ -39,6 +50,11 @@ export default function SiteFooter() {
             </div>
           </div>
         </div>
+        {/* Feedback */}
+        <div className="border-t border-white/[0.06] pt-8 mb-8 max-w-md">
+          <FeedbackWidget />
+        </div>
+
         <div className="border-t border-white/[0.06] pt-6">
           <span className="text-[12px] text-gray-600">&copy; {new Date().getFullYear()} ASPCT RATIO LLC. All rights reserved.</span>
         </div>
