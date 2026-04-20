@@ -4,7 +4,7 @@ import SlicerApp from '@/components/slicer/SlicerApp'
 import AppHeader from '@/components/slicer/AppHeader'
 import type { UserPlan } from '@/components/slicer/Step1Upload'
 
-const VALID_PLANS: UserPlan[] = ['freelancer', 'studio', 'agency', 'enterprise']
+const VALID_PLANS: UserPlan[] = ['free', 'creator', 'freelancer', 'studio', 'agency', 'enterprise']
 
 export default async function AppPage() {
   const supabase = await createClient()
@@ -191,7 +191,7 @@ export default async function AppPage() {
   const rawPlan = subscription.plan as string
   const userPlan: UserPlan = VALID_PLANS.includes(rawPlan as UserPlan)
     ? (rawPlan as UserPlan)
-    : 'freelancer'
+    : 'free'
 
   return <SlicerApp userPlan={userPlan} />
 }

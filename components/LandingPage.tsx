@@ -109,7 +109,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       const plan = user?.user_metadata?.plan
-      const PAID_PLANS = ['freelancer', 'studio', 'agency', 'enterprise']
+      const PAID_PLANS = ['creator', 'freelancer', 'studio', 'agency', 'enterprise']
       setHasActiveSub(typeof plan === 'string' && PAID_PLANS.includes(plan))
     })
   }, [isLoggedIn])
@@ -515,8 +515,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       <section id="pricing" className="py-20 px-6 bg-gray-50">
         <div className="max-w-[1100px] mx-auto">
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Pricing</p>
-          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Simple, project-based pricing</h2>
-          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-8">One project = one batch upload session. Pay for what you actually use.</p>
+          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Plans for every workflow</h2>
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-8">From individual creators to enterprise teams — pick the plan that fits how you work.</p>
 
           {/* Toggle */}
           <div className="flex items-center gap-3 mb-12">
@@ -534,7 +534,70 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </div>
 
           {/* Cards */}
-          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 210px), 1fr))' }}>
+
+            {/* Free */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col">
+              <div className="mb-6">
+                <p className="text-sm font-bold text-gray-900 mb-1">Free</p>
+                <div className="flex items-end gap-1.5 mb-4">
+                  <span className="text-[40px] font-extrabold tracking-[-2px] text-gray-900">$0</span>
+                  <span className="text-sm text-gray-400 mb-2">forever</span>
+                </div>
+                <p className="text-sm text-gray-500">Try the core workflow — no credit card, no time limit.</p>
+              </div>
+              <ul className="space-y-2.5 mb-8 flex-1">
+                {[
+                  '2 images per session',
+                  '5 format exports',
+                  'Smart crop & adjust',
+                  'Watermarked exports',
+                  'JPG export only',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                    <span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/signup"
+                className="w-full h-10 flex items-center justify-center text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors no-underline"
+              >
+                Get started
+              </Link>
+            </div>
+
+            {/* Creator */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col">
+              <div className="mb-6">
+                <p className="text-sm font-bold text-gray-900 mb-1">Creator</p>
+                <div className="flex items-end gap-1.5 mb-4">
+                  <span className="text-[40px] font-extrabold tracking-[-2px] text-gray-900">{annual ? '$290' : '$29'}</span>
+                  <span className="text-sm text-gray-400 mb-2">{annual ? '/year' : '/mo'}</span>
+                </div>
+                <p className="text-sm text-gray-500">For content creators and social media managers posting across platforms.</p>
+              </div>
+              <ul className="space-y-2.5 mb-8 flex-1">
+                {[
+                  'Unlimited sessions',
+                  '10 images per session',
+                  'All platform formats',
+                  'Text overlays',
+                  'JPG, PNG, WebP export',
+                  'No watermark',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                    <span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => goToConfirm('creator')}
+                className="w-full h-10 flex items-center justify-center text-sm font-semibold border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              >
+                Start free trial
+              </button>
+            </div>
 
             {/* Freelancer */}
             <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col">
@@ -551,6 +614,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                   '3 projects / month',
                   'Up to 50 files per project',
                   'All platform formats',
+                  'Text overlays',
                   'JPG, PNG, WebP export',
                   'Custom naming conventions',
                 ].map(f => (
@@ -633,33 +697,17 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               </button>
             </div>
 
-            {/* Enterprise */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col">
-              <div className="mb-6">
-                <p className="text-sm font-bold text-gray-900 mb-1">Enterprise</p>
-                <div className="mb-4 pt-2">
-                  <span className="text-[28px] font-extrabold tracking-[-1px] text-gray-900">Custom pricing</span>
-                </div>
-                <p className="text-sm text-gray-500">For enterprise teams with bespoke production requirements.</p>
-              </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {[
-                  'Custom project volumes',
-                  'Unlimited file sizes',
-                  'White-labeling',
-                  'SLA & dedicated onboarding',
-                  'Annual contracts',
-                ].map(f => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                    <span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <a href="mailto:hello@aspctratio.com" className="w-full h-10 flex items-center justify-center text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors no-underline">
-                Talk to us →
-              </a>
-            </div>
+          </div>
 
+          {/* Enterprise callout */}
+          <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-bold text-gray-900 mb-1">Enterprise</p>
+              <p className="text-sm text-gray-500">Custom volumes, white-labeling, SLA, dedicated onboarding, and annual contracts.</p>
+            </div>
+            <a href="mailto:hello@aspctratio.com" className="flex-shrink-0 h-10 px-6 flex items-center justify-center text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors no-underline">
+              Talk to us →
+            </a>
           </div>
         </div>
       </section>

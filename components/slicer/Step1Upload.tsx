@@ -5,9 +5,11 @@ import { useSlicer, persistDeleteFile } from './SlicerContext'
 import { saveFile as persistSaveFile } from '@/lib/slicer-persist'
 import type { SlicerFile } from '@/types/slicer'
 
-export type UserPlan = 'freelancer' | 'studio' | 'agency' | 'enterprise'
+export type UserPlan = 'free' | 'creator' | 'freelancer' | 'studio' | 'agency' | 'enterprise'
 
 const PLAN_LIMITS: Record<UserPlan, number> = {
+  free: 2,
+  creator: 10,
   freelancer: 50,
   studio: 150,
   agency: 300,
@@ -15,6 +17,8 @@ const PLAN_LIMITS: Record<UserPlan, number> = {
 }
 
 const PLAN_LABELS: Record<UserPlan, string> = {
+  free: 'Free',
+  creator: 'Creator',
   freelancer: 'Freelancer',
   studio: 'Studio',
   agency: 'Agency',
@@ -22,6 +26,8 @@ const PLAN_LABELS: Record<UserPlan, string> = {
 }
 
 const UPGRADE_TO: Record<UserPlan, UserPlan | null> = {
+  free: 'creator',
+  creator: 'freelancer',
   freelancer: 'studio',
   studio: 'agency',
   agency: 'enterprise',

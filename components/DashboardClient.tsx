@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 // ── Constants ──────────────────────────────────────────────────
 
 const PLAN_LABELS: Record<string, string> = {
+  free:       'Free',
+  creator:    'Creator',
   freelancer: 'Freelancer',
   studio:     'Studio',
   agency:     'Agency',
@@ -13,6 +15,8 @@ const PLAN_LABELS: Record<string, string> = {
 }
 
 const PLAN_PROJECTS: Record<string, string> = {
+  free:       'Unlimited sessions',
+  creator:    'Unlimited sessions',
   freelancer: '3 / month',
   studio:     '15 / month',
   agency:     'Unlimited',
@@ -20,6 +24,8 @@ const PLAN_PROJECTS: Record<string, string> = {
 }
 
 const PLAN_FILES: Record<string, string> = {
+  free:       '2 per session',
+  creator:    '10 per session',
   freelancer: '50 per session',
   studio:     '150 per session',
   agency:     '300 per session',
@@ -27,6 +33,8 @@ const PLAN_FILES: Record<string, string> = {
 }
 
 const PLAN_SEATS: Record<string, string> = {
+  free:       '1',
+  creator:    '1',
   freelancer: '1',
   studio:     '5',
   agency:     '20',
@@ -276,7 +284,7 @@ export default function DashboardClient({ userEmail, userName, subscription, car
               <Row label="Projects">{PLAN_PROJECTS[plan!] ?? '—'}</Row>
               <Row label="Files / session">{PLAN_FILES[plan!] ?? '—'}</Row>
               <Row label="Team seats">{PLAN_SEATS[plan!] ?? '—'}</Row>
-              <Row label="Exports">{plan === 'freelancer' ? 'JPG, PNG, WebP' : 'All types'}</Row>
+              <Row label="Exports">{plan === 'free' ? 'JPG (watermarked)' : plan === 'creator' || plan === 'freelancer' ? 'JPG, PNG, WebP' : 'All types'}</Row>
               {isTrialing && trialEnd && (
                 <Row label="Trial ends">{fmt(trialEnd)}</Row>
               )}
@@ -306,7 +314,7 @@ export default function DashboardClient({ userEmail, userName, subscription, car
               >
                 {portalLoading ? 'Opening…' : 'Manage Billing'}
               </button>
-              {plan === 'freelancer' && !isCanceling && (
+              {(plan === 'free' || plan === 'creator' || plan === 'freelancer') && !isCanceling && (
                 <a href="/#pricing" className="text-sm font-semibold text-indigo-600 hover:underline">
                   Upgrade plan →
                 </a>

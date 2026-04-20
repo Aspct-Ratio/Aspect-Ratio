@@ -84,7 +84,7 @@ export default function SiteNav() {
       if (user) {
         setIsLoggedIn(true)
         const plan = user.user_metadata?.plan
-        const PAID_PLANS = ['freelancer', 'studio', 'agency', 'enterprise']
+        const PAID_PLANS = ['creator', 'freelancer', 'studio', 'agency', 'enterprise']
         setHasActiveSub(typeof plan === 'string' && PAID_PLANS.includes(plan))
       }
     })

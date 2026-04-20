@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const PLAN_LABELS: Record<string, string> = {
+  free:       'Free',
+  creator:    'Creator',
   freelancer: 'Freelancer',
   studio:     'Studio',
   agency:     'Agency',
