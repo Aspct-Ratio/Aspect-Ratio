@@ -204,7 +204,7 @@ export default function Step4Export({ onBack, onReset }: Props) {
         </div>
       )}
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 340px' }}>
+      <div className="grid gap-5 grid-cols-1 lg:grid-cols-[1fr_340px]">
         {/* Left: file list */}
         <div>
           <div className="text-sm font-bold text-gray-700 mb-3">Your exports</div>

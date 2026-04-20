@@ -114,7 +114,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── NAV ─────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
         {/* ── Desktop & mobile top bar ── */}
-        <div className="flex md:grid items-center h-[80px] px-10 justify-between" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+        <div className="flex md:grid items-center h-[80px] px-4 sm:px-6 md:px-10 justify-between" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
 
           {/* Left: Logo */}
           <div className="flex items-center">
@@ -319,7 +319,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             <span className="text-[11px] font-bold uppercase tracking-[1.2px] text-gray-400">What you get</span>
             <div className="h-px flex-1 bg-gray-200" />
           </div>
-          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}>
             {[
               { title: '60+ platform formats', body: 'Instagram, TikTok, YouTube, X, Snapchat, Pinterest, LinkedIn, PDP, homepage, email, IAB display, in-store, OOH, and more — all preloaded.' },
               { title: 'Custom naming conventions', body: 'Build tokens from client name, channel, dimension, platform, asset name, and date. Your file naming system — your rules.' },

@@ -557,9 +557,27 @@ function CopyStep({
         Add text to your assets
       </p>
 
-      <div className="flex gap-4 min-h-0" style={{ maxHeight: 360 }}>
-        {/* Left: format thumbnails */}
-        <div className="flex flex-col gap-1.5 overflow-y-auto flex-shrink-0 w-16">
+      {/* Mobile format selector — horizontal pills */}
+      <div className="flex sm:hidden gap-1.5 overflow-x-auto pb-2 mb-2 flex-shrink-0">
+        {formats.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setActiveFmt(f.id)}
+            className={[
+              'px-2.5 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap border transition',
+              f.id === activeFmt
+                ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
+                : 'border-gray-200 text-gray-500 hover:bg-gray-50',
+            ].join(' ')}
+          >
+            {f.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 min-h-0 overflow-y-auto sm:overflow-y-visible" style={{ maxHeight: 420 }}>
+        {/* Left: format thumbnails — hidden on mobile */}
+        <div className="hidden sm:flex flex-col gap-1.5 overflow-y-auto flex-shrink-0 w-16">
           {formats.map(f => {
             const ar = f.h / f.w
             const th = Math.round(48 * Math.min(ar, 1.5))
@@ -593,8 +611,8 @@ function CopyStep({
             ref={previewRef}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0 select-none"
-            style={{ width: PREVIEW_W, height: previewH, touchAction: 'none' }}
+            className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100 flex-shrink-0 select-none w-full sm:w-auto"
+            style={{ maxWidth: PREVIEW_W, height: previewH, touchAction: 'none' }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -635,7 +653,7 @@ function CopyStep({
         </div>
 
         {/* Right: controls */}
-        <div className="w-44 flex-shrink-0 overflow-y-auto">
+        <div className="w-full sm:w-44 flex-shrink-0 overflow-y-auto">
           {/* Presets */}
           <p className="text-[10px] font-bold uppercase tracking-[0.6px] text-gray-400 mb-1.5">Add Text</p>
           <div className="flex flex-wrap gap-1 mb-3">

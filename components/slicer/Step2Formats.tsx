@@ -33,7 +33,7 @@ export default function Step2Formats({ onBack, onNext }: Props) {
       <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">CHOOSE FORMATS &amp; CONFIGURE NAMING</h1>
       <p className="text-sm text-gray-500 mb-7">Select the channels you need, then set your file naming convention.</p>
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 340px' }}>
+      <div className="grid gap-5 grid-cols-1 lg:grid-cols-[1fr_340px]">
         {/* Left: channels */}
         <div>
           <ChannelAccordion />

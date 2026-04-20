@@ -1020,12 +1020,12 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
           </div>
         </div>
 
-        {/* Body: 3-column layout */}
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Body: 3-column layout (stacks on mobile) */}
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
 
-          {/* Left rail — format thumbnails */}
+          {/* Left rail — format thumbnails (hidden on mobile) */}
           {showThumbnails && (
-            <div className="w-[110px] flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto">
+            <div className="hidden md:block w-[110px] flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto">
               <div className="p-2 space-y-1">
                 <p className="text-[9px] font-bold uppercase tracking-[0.8px] text-gray-400 px-1 mb-1">Formats</p>
                 {selectedFmts.map(sf => (
@@ -1074,8 +1074,8 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
             </p>
           </div>
 
-          {/* Right — property sidebar */}
-          <div className="w-72 flex-shrink-0 overflow-y-auto bg-white border-l border-gray-200">
+          {/* Right — property sidebar (collapses on mobile) */}
+          <div className="w-full md:w-72 flex-shrink-0 overflow-y-auto bg-white border-t md:border-t-0 md:border-l border-gray-200 max-h-[40vh] md:max-h-none">
             <div className="p-4 space-y-5">
 
               {/* Add Text presets */}

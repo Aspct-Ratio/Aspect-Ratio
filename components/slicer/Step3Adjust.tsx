@@ -107,7 +107,7 @@ export default function Step3Adjust({ onBack, onNext }: Props) {
                   </span>
                   <div className="flex-1 h-px bg-gray-200" />
                 </div>
-                <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))' }}>
+                <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 230px), 1fr))' }}>
                   {formats.map(fmt => <CropCard key={fmt.id} fmt={fmt} file={file} />)}
                 </div>
               </div>

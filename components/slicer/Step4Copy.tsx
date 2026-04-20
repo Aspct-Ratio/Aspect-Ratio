@@ -489,7 +489,7 @@ export default function Step4Copy({ onBack, onNext, onSkip }: Props) {
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-[0.7px]">{label}</span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))' }}>
                 {groupFmts.map(fmt => (
                   <CopyCard
                     key={fmt.id}
