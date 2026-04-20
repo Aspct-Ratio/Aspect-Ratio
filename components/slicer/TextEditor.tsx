@@ -1021,7 +1021,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
         </div>
 
         {/* Body: 3-column layout (stacks on mobile) */}
-        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
 
           {/* Left rail — format thumbnails (hidden on mobile) */}
           {showThumbnails && (
@@ -1075,7 +1075,7 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
           </div>
 
           {/* Right — property sidebar (collapses on mobile) */}
-          <div className="w-full md:w-72 flex-shrink-0 overflow-y-auto bg-white border-t md:border-t-0 md:border-l border-gray-200 max-h-[40vh] md:max-h-none">
+          <div className="w-full md:w-72 flex-shrink-0 md:overflow-y-auto bg-white border-t md:border-t-0 md:border-l border-gray-200">
             <div className="p-4 space-y-5">
 
               {/* Add Text presets */}
