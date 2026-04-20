@@ -73,6 +73,7 @@ const RESOURCE_LINKS = [
   { label: 'Asset Resizing', href: '/tools/asset-resizing' },
   { label: 'Image Cropping', href: '/tools/image-cropping' },
   { label: 'Social Media Resizer', href: '/tools/social-media-image-resizer' },
+  { label: 'Content Creator Resizer', href: '/tools/content-creator-image-resizer' },
   { label: 'How to Resize for Social', href: '/guides/how-to-resize-images-for-social-media' },
   { label: 'Image Sizes Reference', href: '/guides/image-sizes-for-every-social-platform' },
 ]
@@ -636,6 +637,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                 <Link href="/tools/asset-resizing" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Asset Resizing</Link>
                 <Link href="/tools/image-cropping" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Image Cropping</Link>
                 <Link href="/tools/social-media-image-resizer" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Social Media Resizer</Link>
+                <Link href="/tools/content-creator-image-resizer" className="text-[13px] text-gray-500 hover:text-gray-300 transition-colors no-underline">Content Creator Resizer</Link>
               </div>
             </div>
 

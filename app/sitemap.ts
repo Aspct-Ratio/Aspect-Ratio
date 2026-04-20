@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/tools/asset-resizing`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/tools/image-cropping`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/tools/social-media-image-resizer`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/tools/content-creator-image-resizer`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/guides/how-to-resize-images-for-social-media`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/guides/image-sizes-for-every-social-platform`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
