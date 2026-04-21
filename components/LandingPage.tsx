@@ -14,62 +14,137 @@ function ep(elapsed: number, startMs: number, endMs: number) {
   return easeIO(Math.max(0, Math.min(1, (elapsed - startMs) / (endMs - startMs))))
 }
 
+const DEMO_TEXT = 'ASPCT RATIO'
+
 function MockupCropDemo() {
   const [anim, setAnim] = useState({
-    cursorX: 60, cursorY: 44, panX: 0, panY: 0, zoom: 100, pressing: false, visible: false,
+    cursorX: 60, cursorY: 44, panX: 0, panY: 0, zoom: 100,
+    pressing: false, visible: false,
+    typedLen: 0, textX: 50, textY: 38, textVisible: false, textDragging: false,
   })
 
   useEffect(() => {
-    const LOOP = 12000
+    // Timeline (18s loop):
+    //  0–800      cursor appears
+    //  800–1700   cursor → zoom slider
+    //  1700–4500  zoom 100→150
+    //  4500–5200  cursor → image center
+    //  5200–7500  drag pan
+    //  7500–8200  cursor → text area (move off image, prepare for copy phase)
+    //  8200–11000 text types in letter by letter ("ASPCT RATIO")
+    //  11000–11500 cursor moves to the text
+    //  11500–14000 cursor drags text from center-top to lower-right
+    //  14000–14700 cursor to slider
+    //  14700–15500 zoom resets
+    //  15500–16500 text fades, pause
+    //  16500–18000 reset
+    const LOOP = 18000
     const t0 = Date.now()
     const id = setInterval(() => {
       const e = (Date.now() - t0) % LOOP
 
+      // ── Cursor position ────────────────────────────────
       let cx = 60, cy = 44
-      if (e < 800)                     { cx = 60;  cy = 44 }
-      else if (e < 1700)               { cx = lerp(60, 88, ep(e, 800, 1700));  cy = lerp(44, 86, ep(e, 800, 1700)) }
-      else if (e < 6200)               { cx = 88;  cy = 86 }
-      else if (e < 7000)               { cx = lerp(88, 52, ep(e, 6200, 7000)); cy = lerp(86, 42, ep(e, 6200, 7000)) }
-      else if (e < 9800)               { cx = lerp(52, 28, ep(e, 7000, 9800)); cy = lerp(42, 60, ep(e, 7000, 9800)) }
-      else if (e < 10500)              { cx = lerp(28, 68, ep(e, 9800, 10500)); cy = lerp(60, 46, ep(e, 9800, 10500)) }
-      else if (e < 11200)              { cx = lerp(68, 88, ep(e, 10500, 11200)); cy = lerp(46, 86, ep(e, 10500, 11200)) }
-      else                             { cx = 88;  cy = 86 }
+      if (e < 800)            { cx = 60; cy = 44 }
+      else if (e < 1700)      { cx = lerp(60, 88, ep(e, 800, 1700));  cy = lerp(44, 86, ep(e, 800, 1700)) }
+      else if (e < 4500)      { cx = 88; cy = 86 }
+      else if (e < 5200)      { cx = lerp(88, 52, ep(e, 4500, 5200)); cy = lerp(86, 42, ep(e, 4500, 5200)) }
+      else if (e < 7500)      { cx = lerp(52, 30, ep(e, 5200, 7500)); cy = lerp(42, 58, ep(e, 5200, 7500)) }
+      else if (e < 8200)      { cx = lerp(30, 50, ep(e, 7500, 8200)); cy = lerp(58, 32, ep(e, 7500, 8200)) }
+      // typing phase — cursor sits near text
+      else if (e < 11000)     { cx = 65; cy = 40 }
+      // move cursor to text to grab it
+      else if (e < 11500)     { cx = lerp(65, 50, ep(e, 11000, 11500)); cy = lerp(40, 38, ep(e, 11000, 11500)) }
+      // drag text
+      else if (e < 14000)     { cx = lerp(50, 60, ep(e, 11500, 14000)); cy = lerp(38, 72, ep(e, 11500, 14000)) }
+      // move to slider
+      else if (e < 14700)     { cx = lerp(60, 88, ep(e, 14000, 14700)); cy = lerp(72, 86, ep(e, 14000, 14700)) }
+      else                    { cx = 88; cy = 86 }
 
-      const pressing = e >= 7000 && e < 10500
+      // ── Pressing (pan drag + text drag) ─────────────────
+      const pressing = (e >= 5200 && e < 7500) || (e >= 11500 && e < 14000)
 
+      // ── Zoom ──────────────────────────────────────────
       let zoom = 100
-      if (e >= 1700 && e < 6200)       { zoom = lerp(100, 175, ep(e, 1700, 6200)) }
-      else if (e >= 6200 && e < 11200) { zoom = 175 }
-      else if (e >= 11200)             { zoom = lerp(175, 100, ep(e, 11200, 12000)) }
+      if (e >= 1700 && e < 4500)        { zoom = lerp(100, 150, ep(e, 1700, 4500)) }
+      else if (e >= 4500 && e < 14700)  { zoom = 150 }
+      else if (e >= 14700 && e < 15500) { zoom = lerp(150, 100, ep(e, 14700, 15500)) }
 
+      // ── Pan ───────────────────────────────────────────
       const z = zoom / 100
       const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
-
       let rawPanX = 0, rawPanY = 0
-      if (e >= 7000 && e < 9800)       { rawPanX = lerp(0, -14, ep(e, 7000, 9800));  rawPanY = lerp(0, 6, ep(e, 7000, 9800)) }
-      else if (e >= 9800 && e < 11200) { rawPanX = lerp(-14, 0, ep(e, 9800, 11200)); rawPanY = lerp(6, 0, ep(e, 9800, 11200)) }
-
+      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, -10, ep(e, 5200, 7500));  rawPanY = lerp(0, 5, ep(e, 5200, 7500)) }
+      else if (e >= 7500 && e < 14700)  { rawPanX = -10; rawPanY = 5 }
+      else if (e >= 14700 && e < 15500) { rawPanX = lerp(-10, 0, ep(e, 14700, 15500)); rawPanY = lerp(5, 0, ep(e, 14700, 15500)) }
       const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
       const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
 
-      setAnim({ cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom), pressing, visible: e > 300 && e < 11800 })
+      // ── Text typing ───────────────────────────────────
+      let typedLen = 0
+      let textVisible = false
+      if (e >= 8200 && e < 16500) {
+        textVisible = true
+        const typeProgress = Math.min(1, (e - 8200) / 2500) // 2.5s to type all chars
+        typedLen = Math.floor(typeProgress * DEMO_TEXT.length)
+      }
+
+      // ── Text position (dragging) ──────────────────────
+      let textX = 50, textY = 38
+      const textDragging = e >= 11500 && e < 14000
+      if (e >= 11500 && e < 14000) {
+        textX = lerp(50, 60, ep(e, 11500, 14000))
+        textY = lerp(38, 72, ep(e, 11500, 14000))
+      } else if (e >= 14000 && e < 16500) {
+        textX = 60; textY = 72
+      }
+
+      setAnim({
+        cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom),
+        pressing, visible: e > 300 && e < 17500,
+        typedLen, textX, textY, textVisible, textDragging,
+      })
     }, 33)
     return () => clearInterval(id)
   }, [])
 
-  const { cursorX, cursorY, panX, panY, zoom, pressing, visible } = anim
-  const sliderPct = Math.round(Math.max(0, Math.min(100, (zoom - 100) / 75 * 100)))
+  const { cursorX, cursorY, panX, panY, zoom, pressing, visible, typedLen, textX, textY, textVisible, textDragging } = anim
+  const sliderPct = Math.round(Math.max(0, Math.min(100, (zoom - 100) / 50 * 100)))
 
   return (
     <div className="flex flex-col items-center px-4 py-4">
       <div className="relative rounded-lg overflow-hidden" style={{ width: 270, height: 480 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/Imag2.jpg"
+          src="/images/demo-hero.jpg"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           style={{ transform: `scale(${zoom / 100}) translate(${panX}%, ${panY}%)`, transformOrigin: 'center center' }}
         />
+        {/* Text overlay */}
+        {textVisible && typedLen > 0 && (
+          <div
+            className="absolute pointer-events-none z-[5] transition-opacity duration-300"
+            style={{
+              left: `${textX}%`, top: `${textY}%`,
+              transform: 'translate(-50%, -50%)',
+              opacity: textVisible ? 1 : 0,
+            }}
+          >
+            <span
+              className="text-white font-extrabold tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+              style={{ fontSize: 22, letterSpacing: '0.08em' }}
+            >
+              {DEMO_TEXT.slice(0, typedLen)}
+            </span>
+            {typedLen < DEMO_TEXT.length && (
+              <span className="inline-block w-[2px] h-[18px] bg-white ml-[1px] animate-pulse align-middle" />
+            )}
+            {textDragging && (
+              <div className="absolute -inset-1.5 border border-dashed border-white/60 rounded pointer-events-none" />
+            )}
+          </div>
+        )}
         <div className="absolute inset-0 border-2 border-indigo-600 pointer-events-none">
           {([['top-[-1px]','left-[-1px]'],['top-[-1px]','right-[-1px]'],['bottom-[-1px]','left-[-1px]'],['bottom-[-1px]','right-[-1px]']] as const).map(([t,l],i) => (
             <div key={i} className={`absolute w-3 h-3 border-2 border-indigo-600 bg-white rounded-[2px] ${t} ${l}`} />
@@ -474,7 +549,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                   { label: '\u2460 Upload', state: 'done' },
                   { label: '\u2461 Formats', state: 'done' },
                   { label: '\u2462 Adjust crops', state: 'active' },
-                  { label: '\u2463 Export', state: 'todo' },
+                  { label: '\u2463 Copy', state: 'active' },
+                  { label: '\u2464 Export', state: 'todo' },
                 ].map(({ label, state }) => (
                   <div key={label} className={[
                     'h-6 sm:h-7 px-2.5 sm:px-3.5 rounded-md text-[10px] sm:text-xs font-semibold flex items-center flex-shrink-0',
@@ -512,7 +588,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
                     ].map(({ label, cls, pos }) => (
                       <div key={label} className={`rounded-md overflow-hidden relative bg-gray-100 w-full ${cls}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/images/Imag2.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
+                        <img src="/images/demo-hero.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: pos }} />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] font-semibold px-1.5 py-0.5">{label}</div>
                       </div>
                     ))}
