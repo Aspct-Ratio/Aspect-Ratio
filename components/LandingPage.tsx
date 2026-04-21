@@ -52,13 +52,13 @@ function MockupCropDemo() {
       else if (e < 7500)      { cx = lerp(52, 72, ep(e, 5200, 7500)); cy = lerp(42, 50, ep(e, 5200, 7500)) }
       else if (e < 8200)      { cx = lerp(72, 50, ep(e, 7500, 8200)); cy = lerp(50, 32, ep(e, 7500, 8200)) }
       // typing phase — cursor sits near text
-      else if (e < 11000)     { cx = 60; cy = 52 }
+      else if (e < 11000)     { cx = 60; cy = 32 }
       // move cursor to text to grab it
-      else if (e < 11500)     { cx = lerp(60, 50, ep(e, 11000, 11500)); cy = lerp(52, 50, ep(e, 11000, 11500)) }
+      else if (e < 11500)     { cx = lerp(60, 50, ep(e, 11000, 11500)); cy = lerp(32, 30, ep(e, 11000, 11500)) }
       // drag text
-      else if (e < 14000)     { cx = lerp(50, 30, ep(e, 11500, 14000)); cy = lerp(50, 72, ep(e, 11500, 14000)) }
+      else if (e < 14000)     { cx = lerp(50, 25, ep(e, 11500, 14000)); cy = lerp(30, 60, ep(e, 11500, 14000)) }
       // move to slider
-      else if (e < 14700)     { cx = lerp(30, 88, ep(e, 14000, 14700)); cy = lerp(72, 86, ep(e, 14000, 14700)) }
+      else if (e < 14700)     { cx = lerp(25, 88, ep(e, 14000, 14700)); cy = lerp(60, 86, ep(e, 14000, 14700)) }
       else                    { cx = 88; cy = 86 }
 
       // ── Pressing (pan drag + text drag) ─────────────────
@@ -90,13 +90,13 @@ function MockupCropDemo() {
       }
 
       // ── Text position (dragging) ──────────────────────
-      let textX = 50, textY = 50
+      let textX = 50, textY = 30
       const textDragging = e >= 11500 && e < 14000
       if (e >= 11500 && e < 14000) {
-        textX = lerp(50, 30, ep(e, 11500, 14000))
-        textY = lerp(50, 72, ep(e, 11500, 14000))
+        textX = lerp(50, 25, ep(e, 11500, 14000))
+        textY = lerp(30, 60, ep(e, 11500, 14000))
       } else if (e >= 14000 && e < 16500) {
-        textX = 30; textY = 72
+        textX = 25; textY = 60
       }
 
       setAnim({
