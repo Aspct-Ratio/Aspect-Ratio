@@ -49,8 +49,8 @@ function MockupCropDemo() {
       else if (e < 1700)      { cx = lerp(60, 88, ep(e, 800, 1700));  cy = lerp(44, 86, ep(e, 800, 1700)) }
       else if (e < 4500)      { cx = 88; cy = 86 }
       else if (e < 5200)      { cx = lerp(88, 52, ep(e, 4500, 5200)); cy = lerp(86, 42, ep(e, 4500, 5200)) }
-      else if (e < 7500)      { cx = lerp(52, 32, ep(e, 5200, 7500)); cy = lerp(42, 50, ep(e, 5200, 7500)) }
-      else if (e < 8200)      { cx = lerp(32, 50, ep(e, 7500, 8200)); cy = lerp(50, 32, ep(e, 7500, 8200)) }
+      else if (e < 7500)      { cx = lerp(52, 72, ep(e, 5200, 7500)); cy = lerp(42, 50, ep(e, 5200, 7500)) }
+      else if (e < 8200)      { cx = lerp(72, 50, ep(e, 7500, 8200)); cy = lerp(50, 32, ep(e, 7500, 8200)) }
       // typing phase — cursor sits near text
       else if (e < 11000)     { cx = 65; cy = 40 }
       // move cursor to text to grab it
@@ -74,9 +74,9 @@ function MockupCropDemo() {
       const z = zoom / 100
       const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
       let rawPanX = 0, rawPanY = 0
-      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, 6, ep(e, 5200, 7500));  rawPanY = lerp(0, 0, ep(e, 5200, 7500)) }
-      else if (e >= 7500 && e < 14700)  { rawPanX = 6; rawPanY = 0 }
-      else if (e >= 14700 && e < 15500) { rawPanX = lerp(6, 0, ep(e, 14700, 15500)); rawPanY = lerp(0, 0, ep(e, 14700, 15500)) }
+      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, -6, ep(e, 5200, 7500));  rawPanY = lerp(0, 0, ep(e, 5200, 7500)) }
+      else if (e >= 7500 && e < 14700)  { rawPanX = -6; rawPanY = 0 }
+      else if (e >= 14700 && e < 15500) { rawPanX = lerp(-6, 0, ep(e, 14700, 15500)); rawPanY = lerp(0, 0, ep(e, 14700, 15500)) }
       const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
       const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
 
