@@ -74,9 +74,9 @@ function MockupCropDemo() {
       const z = zoom / 100
       const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
       let rawPanX = 0, rawPanY = 0
-      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, 4, ep(e, 5200, 7500));  rawPanY = lerp(0, -14, ep(e, 5200, 7500)) }
-      else if (e >= 7500 && e < 14700)  { rawPanX = 4; rawPanY = -14 }
-      else if (e >= 14700 && e < 15500) { rawPanX = lerp(4, 0, ep(e, 14700, 15500)); rawPanY = lerp(-14, 0, ep(e, 14700, 15500)) }
+      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, 3, ep(e, 5200, 7500));  rawPanY = lerp(0, -4, ep(e, 5200, 7500)) }
+      else if (e >= 7500 && e < 14700)  { rawPanX = 3; rawPanY = -4 }
+      else if (e >= 14700 && e < 15500) { rawPanX = lerp(3, 0, ep(e, 14700, 15500)); rawPanY = lerp(-4, 0, ep(e, 14700, 15500)) }
       const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
       const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
 
