@@ -55,10 +55,10 @@ function MockupCropDemo() {
       else if (e < 11000)     { cx = 55; cy = 42 }
       // move cursor onto text to grab it
       else if (e < 11500)     { cx = lerp(55, 50, ep(e, 11000, 11500)); cy = lerp(42, 40, ep(e, 11000, 11500)) }
-      // drag text down-left
-      else if (e < 14000)     { cx = lerp(50, 30, ep(e, 11500, 14000)); cy = lerp(40, 58, ep(e, 11500, 14000)) }
+      // drag text down
+      else if (e < 14000)     { cx = lerp(50, 65, ep(e, 11500, 14000)); cy = lerp(40, 55, ep(e, 11500, 14000)) }
       // hold — cursor stays at final drag position then fades
-      else                    { cx = 30; cy = 58 }
+      else                    { cx = 65; cy = 55 }
 
       // ── Pressing (pan drag + text drag) ─────────────────
       const pressing = (e >= 5200 && e < 7500) || (e >= 11500 && e < 14000)
@@ -93,10 +93,10 @@ function MockupCropDemo() {
       let textX = 65, textY = 35
       const textDragging = e >= 11500 && e < 14000
       if (e >= 11500 && e < 14000) {
-        textX = lerp(65, 30, ep(e, 11500, 14000))
+        textX = lerp(65, 65, ep(e, 11500, 14000))
         textY = lerp(35, 55, ep(e, 11500, 14000))
       } else if (e >= 14000 && e < 17500) {
-        textX = 30; textY = 55
+        textX = 65; textY = 55
       }
 
       setAnim({
