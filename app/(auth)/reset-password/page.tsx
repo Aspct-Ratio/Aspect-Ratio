@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     }
     setSuccess(true)
     setLoading(false)
-    setTimeout(() => router.push('/app'), 2000)
+    setTimeout(() => router.push('/login'), 2000)
   }
 
   return (
@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
               </svg>
             </div>
             <h1 className="text-xl font-bold text-gray-900 mb-1">Password updated</h1>
-            <p className="text-sm text-gray-500">Redirecting you to the app…</p>
+            <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
           </>
         ) : (
           <>
