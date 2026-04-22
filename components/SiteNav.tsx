@@ -54,7 +54,7 @@ function NavDropdown({
 }) {
   return (
     <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-      <button className="text-sm font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
+      <button className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
         {label}
         <Chevron open={open} />
       </button>
@@ -143,7 +143,7 @@ export default function SiteNav() {
           </NavDropdown>
 
           {/* Pricing — direct link */}
-          <Link href="/#pricing" className="text-sm font-extrabold text-gray-900 hover:text-indigo-600 transition-colors no-underline tracking-wide">PRICING</Link>
+          <Link href="/#pricing" className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors no-underline tracking-wide">PRICING</Link>
         </div>
 
         {/* Right: auth actions — desktop only */}
