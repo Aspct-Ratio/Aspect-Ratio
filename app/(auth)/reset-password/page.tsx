@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -14,6 +14,23 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [ready, setReady] = useState(false)
+
+  // Listen for the PASSWORD_RECOVERY auth event from hash fragments
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setReady(true)
+      }
+    })
+
+    // Also check if user is already authenticated (came via callback route)
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setReady(true)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,6 +52,8 @@ export default function ResetPasswordPage() {
       setLoading(false)
       return
     }
+    // Sign out so they log in fresh with new password
+    await supabase.auth.signOut()
     setSuccess(true)
     setLoading(false)
     setTimeout(() => router.push('/login'), 2000)
@@ -56,6 +75,18 @@ export default function ResetPasswordPage() {
             </div>
             <h1 className="text-xl font-bold text-gray-900 mb-1">Password updated</h1>
             <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
+          </>
+        ) : !ready ? (
+          <>
+            <h1 className="text-xl font-bold text-gray-900 mb-1">Verifying your link…</h1>
+            <p className="text-sm text-gray-500 mb-4">Please wait while we verify your password reset link.</p>
+            <div className="flex justify-center">
+              <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <p className="text-center text-xs text-gray-400 mt-6">
+              Link not working?{' '}
+              <Link href="/forgot-password" className="text-indigo-600 font-medium hover:underline">Request a new one</Link>
+            </p>
           </>
         ) : (
           <>
