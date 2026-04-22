@@ -90,10 +90,10 @@ function MockupCropDemo() {
       }
 
       // ── Text position (dragging) ──────────────────────
-      let textX = 50, textY = 35
+      let textX = 65, textY = 35
       const textDragging = e >= 11500 && e < 14000
       if (e >= 11500 && e < 14000) {
-        textX = lerp(50, 30, ep(e, 11500, 14000))
+        textX = lerp(65, 30, ep(e, 11500, 14000))
         textY = lerp(35, 55, ep(e, 11500, 14000))
       } else if (e >= 14000 && e < 17500) {
         textX = 30; textY = 55
