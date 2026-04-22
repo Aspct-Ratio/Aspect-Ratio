@@ -308,7 +308,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
             {/* Product dropdown — anchor links on homepage */}
             <div className="relative" onMouseEnter={() => setProductOpen(true)} onMouseLeave={() => setProductOpen(false)}>
-              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+              <button className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
                 PRODUCT
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${productOpen ? 'rotate-180' : ''}`}>
                   <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -329,7 +329,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
             {/* Use Cases dropdown */}
             <div className="relative" onMouseEnter={() => setUseCasesOpen(true)} onMouseLeave={() => setUseCasesOpen(false)}>
-              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+              <button className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
                 USE CASES
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${useCasesOpen ? 'rotate-180' : ''}`}>
                   <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -350,7 +350,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
             {/* Resources dropdown */}
             <div className="relative" onMouseEnter={() => setResourcesOpen(true)} onMouseLeave={() => setResourcesOpen(false)}>
-              <button className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors tracking-wide flex items-center gap-1">
+              <button className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
                 RESOURCES
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${resourcesOpen ? 'rotate-180' : ''}`}>
                   <path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -378,7 +378,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             </div>
 
             {/* Pricing — direct link */}
-            <a href="#pricing" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors no-underline tracking-wide">PRICING</a>
+            <a href="#pricing" className="text-[15px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors no-underline tracking-wide">PRICING</a>
           </div>
 
           {/* Right: auth actions — desktop only */}
