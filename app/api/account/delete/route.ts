@@ -24,14 +24,30 @@ export async function POST() {
       .limit(1)
       .single()
 
-    // 2. Cancel in Stripe (if subscription exists and isn't already canceled)
+    // 2. Cancel subscription & delete customer in Stripe
     if (sub?.stripe_subscription_id) {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
       try {
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
         await stripe.subscriptions.cancel(sub.stripe_subscription_id)
       } catch (stripeErr) {
         // Log but don't block deletion — subscription may already be canceled
         console.error('Stripe cancel on delete:', stripeErr)
+      }
+
+      // Also delete the Stripe customer record so it doesn't linger
+      const { data: subRow } = await admin
+        .from('subscriptions')
+        .select('stripe_customer_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .single()
+
+      if (subRow?.stripe_customer_id) {
+        try {
+          await stripe.customers.del(subRow.stripe_customer_id)
+        } catch (custErr) {
+          console.error('Stripe customer delete:', custErr)
+        }
       }
     }
 
