@@ -27,17 +27,16 @@ function MockupCropDemo() {
     // Timeline (18s loop):
     //  0–800      cursor appears
     //  800–1700   cursor → zoom slider
-    //  1700–4500  zoom 100→150
-    //  4500–5200  cursor → image center
-    //  5200–7500  drag pan
-    //  7500–8200  cursor → text area (move off image, prepare for copy phase)
-    //  8200–11000 text types in letter by letter ("ASPCT RATIO")
-    //  11000–11500 cursor moves to the text
-    //  11500–14000 cursor drags text from center-top to lower-right
-    //  14000–14700 cursor to slider
-    //  14700–15500 zoom resets
-    //  15500–16500 text fades, pause
-    //  16500–18000 reset
+    //  1700–4500  zoom 100→150 (into boat area via transformOrigin 65% 80%)
+    //  4500–5200  cursor → image
+    //  5200–7500  drag pan right to center boat
+    //  7500–8200  cursor moves to center of frame for typing
+    //  8200–11000 "ASPCT RATIO" types letter by letter
+    //  11000–11500 cursor moves onto text to grab it
+    //  11500–14000 cursor drags text down-left
+    //  14000–16500 hold final frame (zoomed + text placed)
+    //  16500–17500 cursor fades out
+    //  17500–18000 quick reset
     const LOOP = 18000
     const t0 = Date.now()
     const id = setInterval(() => {
@@ -50,58 +49,60 @@ function MockupCropDemo() {
       else if (e < 4500)      { cx = 88; cy = 86 }
       else if (e < 5200)      { cx = lerp(88, 52, ep(e, 4500, 5200)); cy = lerp(86, 42, ep(e, 4500, 5200)) }
       else if (e < 7500)      { cx = lerp(52, 72, ep(e, 5200, 7500)); cy = lerp(42, 50, ep(e, 5200, 7500)) }
-      else if (e < 8200)      { cx = lerp(72, 50, ep(e, 7500, 8200)); cy = lerp(50, 32, ep(e, 7500, 8200)) }
+      // cursor moves to center for typing
+      else if (e < 8200)      { cx = lerp(72, 55, ep(e, 7500, 8200)); cy = lerp(50, 42, ep(e, 7500, 8200)) }
       // typing phase — cursor sits near text
-      else if (e < 11000)     { cx = 60; cy = 32 }
-      // move cursor to text to grab it
-      else if (e < 11500)     { cx = lerp(60, 50, ep(e, 11000, 11500)); cy = lerp(32, 30, ep(e, 11000, 11500)) }
-      // drag text
-      else if (e < 14000)     { cx = lerp(50, 25, ep(e, 11500, 14000)); cy = lerp(30, 60, ep(e, 11500, 14000)) }
-      // move to slider
-      else if (e < 14700)     { cx = lerp(25, 88, ep(e, 14000, 14700)); cy = lerp(60, 86, ep(e, 14000, 14700)) }
-      else                    { cx = 88; cy = 86 }
+      else if (e < 11000)     { cx = 55; cy = 42 }
+      // move cursor onto text to grab it
+      else if (e < 11500)     { cx = lerp(55, 50, ep(e, 11000, 11500)); cy = lerp(42, 40, ep(e, 11000, 11500)) }
+      // drag text down-left
+      else if (e < 14000)     { cx = lerp(50, 30, ep(e, 11500, 14000)); cy = lerp(40, 58, ep(e, 11500, 14000)) }
+      // hold — cursor stays at final drag position then fades
+      else                    { cx = 30; cy = 58 }
 
       // ── Pressing (pan drag + text drag) ─────────────────
       const pressing = (e >= 5200 && e < 7500) || (e >= 11500 && e < 14000)
 
-      // ── Zoom ──────────────────────────────────────────
+      // ── Zoom: stays zoomed until quick reset ──────────
       let zoom = 100
       if (e >= 1700 && e < 4500)        { zoom = lerp(100, 150, ep(e, 1700, 4500)) }
-      else if (e >= 4500 && e < 14700)  { zoom = 150 }
-      else if (e >= 14700 && e < 15500) { zoom = lerp(150, 100, ep(e, 14700, 15500)) }
+      else if (e >= 4500 && e < 17500)  { zoom = 150 }
+      // quick snap back in the last 500ms
+      else if (e >= 17500)              { zoom = lerp(150, 100, ep(e, 17500, 18000)) }
 
-      // ── Pan ───────────────────────────────────────────
+      // ── Pan: stays panned until quick reset ───────────
       const z = zoom / 100
       const maxSafe = z > 1 ? ((z - 1) / (2 * z)) * 100 : 0
       let rawPanX = 0, rawPanY = 0
-      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, -6, ep(e, 5200, 7500));  rawPanY = lerp(0, 0, ep(e, 5200, 7500)) }
-      else if (e >= 7500 && e < 14700)  { rawPanX = -6; rawPanY = 0 }
-      else if (e >= 14700 && e < 15500) { rawPanX = lerp(-6, 0, ep(e, 14700, 15500)); rawPanY = lerp(0, 0, ep(e, 14700, 15500)) }
+      if (e >= 5200 && e < 7500)        { rawPanX = lerp(0, -6, ep(e, 5200, 7500)) }
+      else if (e >= 7500 && e < 17500)  { rawPanX = -6 }
+      else if (e >= 17500)              { rawPanX = lerp(-6, 0, ep(e, 17500, 18000)) }
       const panX = Math.max(-maxSafe, Math.min(maxSafe, rawPanX))
       const panY = Math.max(-maxSafe, Math.min(maxSafe, rawPanY))
 
       // ── Text typing ───────────────────────────────────
       let typedLen = 0
       let textVisible = false
-      if (e >= 8200 && e < 16500) {
+      if (e >= 8200 && e < 17500) {
         textVisible = true
-        const typeProgress = Math.min(1, (e - 8200) / 2500) // 2.5s to type all chars
+        const typeProgress = Math.min(1, (e - 8200) / 2500)
         typedLen = Math.floor(typeProgress * DEMO_TEXT.length)
       }
 
       // ── Text position (dragging) ──────────────────────
-      let textX = 50, textY = 30
+      // Starts at true center of the viewport (50%, 40% looks centered visually in 9:16)
+      let textX = 50, textY = 40
       const textDragging = e >= 11500 && e < 14000
       if (e >= 11500 && e < 14000) {
-        textX = lerp(50, 25, ep(e, 11500, 14000))
-        textY = lerp(30, 60, ep(e, 11500, 14000))
-      } else if (e >= 14000 && e < 16500) {
-        textX = 25; textY = 60
+        textX = lerp(50, 30, ep(e, 11500, 14000))
+        textY = lerp(40, 58, ep(e, 11500, 14000))
+      } else if (e >= 14000 && e < 17500) {
+        textX = 30; textY = 58
       }
 
       setAnim({
         cursorX: cx, cursorY: cy, panX, panY, zoom: Math.round(zoom),
-        pressing, visible: e > 300 && e < 17500,
+        pressing, visible: e > 300 && e < 16500,
         typedLen, textX, textY, textVisible, textDragging,
       })
     }, 33)
