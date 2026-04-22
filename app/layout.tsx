@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: {
-    default: 'ASPCT RATIO — Bulk Image Resizing & Asset Slicing for Every Ad Format',
+    default: 'ASPCT RATIO — Resize Once, Export Everywhere',
     template: '%s | ASPCT RATIO',
   },
   description:
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
   alternates: { canonical: 'https://aspctratio.com' },
   openGraph: {
-    title: 'ASPCT RATIO — Bulk Image Resizing & Asset Slicing',
+    title: 'ASPCT RATIO — Resize Once, Export Everywhere',
     description:
       'Upload once, export every format. Resize and crop images for social media, e-commerce, and paid ads in seconds.',
     url: 'https://aspctratio.com',
@@ -44,14 +44,14 @@ export const metadata: Metadata = {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'ASPCT RATIO — Bulk Asset Slicing & Resizing Tool',
+        alt: 'ASPCT RATIO — Resize Once, Export Everywhere',
       },
     ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ASPCT RATIO — Bulk Image Resizing & Asset Slicing',
+    title: 'ASPCT RATIO — Resize Once, Export Everywhere',
     description:
       'Upload once, export every format. Resize and crop images for social, e-commerce, and paid ads in seconds.',
     images: ['/images/og-image.jpg'],
