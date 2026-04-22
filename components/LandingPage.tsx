@@ -616,13 +616,11 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       </section>
 
       {/* ── HERO FEATURE CARDS ──────────────────────────────── */}
-      <section id="features" className="py-16 px-6 bg-gradient-to-b from-gray-50 to-white">
+      <section id="features" className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-[1100px] mx-auto">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-px flex-1 bg-gray-200" />
-            <span className="text-[11px] font-bold uppercase tracking-[1.2px] text-gray-400">What you get</span>
-            <div className="h-px flex-1 bg-gray-200" />
-          </div>
+          <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">What you get</p>
+          <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">Everything you need to ship assets fast</h2>
+          <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-12">Purpose-built tools for every step of asset production — no plugins, no workarounds.</p>
           <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}>
             {[
               { title: '60+ platform formats', body: 'Instagram, TikTok, YouTube, X, Snapchat, Pinterest, LinkedIn, PDP, homepage, email, IAB display, in-store, OOH, and more — all preloaded.' },
@@ -632,10 +630,8 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
               { title: 'Multi-format export', body: 'Export as JPG, PNG, WebP, PDF, or TIFF. Select multiple simultaneously. Full-resolution output in every format.' },
               { title: 'Nested folder structure', body: 'Every ZIP is organized by Channel → Platform → Section. The right person gets the right files instantly, no guesswork.' },
             ].map(({ title, body }) => (
-              <div key={title} className="bg-white border border-gray-200 rounded-2xl p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow">
-                <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center mb-4">
-                  <div className="w-5 h-5 rounded bg-indigo-600 opacity-70" />
-                </div>
+              <div key={title} className="bg-white border border-gray-100 rounded-2xl p-7">
+                <div className="w-2 h-2 rounded-full bg-indigo-600 mb-5" />
                 <h3 className="text-base font-bold text-gray-900 mb-2 tracking-[-0.3px]">{title}</h3>
                 <p className="text-sm text-gray-500 leading-[1.7]">{body}</p>
               </div>
