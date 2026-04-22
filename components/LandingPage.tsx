@@ -90,14 +90,13 @@ function MockupCropDemo() {
       }
 
       // ── Text position (dragging) ──────────────────────
-      // Starts at true center of the viewport (50%, 40% looks centered visually in 9:16)
-      let textX = 50, textY = 40
+      let textX = 50, textY = 35
       const textDragging = e >= 11500 && e < 14000
       if (e >= 11500 && e < 14000) {
         textX = lerp(50, 30, ep(e, 11500, 14000))
-        textY = lerp(40, 58, ep(e, 11500, 14000))
+        textY = lerp(35, 55, ep(e, 11500, 14000))
       } else if (e >= 14000 && e < 17500) {
-        textX = 30; textY = 58
+        textX = 30; textY = 55
       }
 
       setAnim({
@@ -125,7 +124,7 @@ function MockupCropDemo() {
         {/* Text overlay */}
         {textVisible && typedLen > 0 && (
           <div
-            className="absolute pointer-events-none z-[5] transition-opacity duration-300"
+            className="absolute pointer-events-none z-[5] transition-opacity duration-300 whitespace-nowrap text-center"
             style={{
               left: `${textX}%`, top: `${textY}%`,
               transform: 'translate(-50%, -50%)',
@@ -133,7 +132,7 @@ function MockupCropDemo() {
             }}
           >
             <span
-              className="text-white font-extrabold tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+              className="text-white font-extrabold tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] inline-block"
               style={{ fontSize: 22, letterSpacing: '0.08em' }}
             >
               {DEMO_TEXT.slice(0, typedLen)}
