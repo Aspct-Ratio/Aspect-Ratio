@@ -521,8 +521,10 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
       {/* ── PROOF BAR ───────────────────────────────────────── */}
       <div className="border-t border-b border-gray-100 bg-white py-6 px-6">
-        <div className="max-w-[900px] mx-auto flex items-center justify-center">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-[0.8px]">Brands · Agencies · Studios · Creatives</span>
+        <div className="max-w-[900px] mx-auto flex items-center justify-between">
+          {['Brands', 'Agencies', 'Studios', 'Creatives'].map((label) => (
+            <span key={label} className="text-xs font-semibold text-gray-400 uppercase tracking-[2px]">{label}</span>
+          ))}
         </div>
       </div>
 
