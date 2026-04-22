@@ -230,7 +230,7 @@ export default function SiteNav() {
           <div className="my-2 border-t border-gray-100" />
 
           {/* Pricing */}
-          <Link href="/#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">PRICING</Link>
+          <Link href="/#pricing" onClick={closeMenu} className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">PRICING</Link>
 
           <div className="my-2 border-t border-gray-100" />
 

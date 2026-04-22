@@ -284,7 +284,7 @@ export default function DashboardClient({ userEmail, userName, subscription, car
               <Row label="Exports">{PLAN_EXPORTS[plan!] ?? '—'}</Row>
               <Row label="Images / session">{PLAN_IMAGES[plan!] ?? '—'}</Row>
               <Row label="Team seats">{PLAN_SEATS[plan!] ?? '—'}</Row>
-              <Row label="Exports">{plan === 'free' ? 'JPG (watermarked)' : plan === 'creator' || plan === 'freelancer' ? 'JPG, PNG, WebP' : 'All types'}</Row>
+              <Row label="Export formats">{plan === 'free' ? 'JPG (watermarked)' : plan === 'creator' || plan === 'freelancer' ? 'JPG, PNG, WebP' : 'All types'}</Row>
               {isTrialing && trialEnd && (
                 <Row label="Trial ends">{fmt(trialEnd)}</Row>
               )}

@@ -6,7 +6,7 @@ function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!)
 }
 
-function getPriceToPlан(): Record<string, string> {
+function getPriceToPlan(): Record<string, string> {
   return {
     [process.env.STRIPE_CREATOR_PRICE_ID!]:    'creator',
     [process.env.STRIPE_FREELANCER_PRICE_ID!]: 'freelancer',
@@ -62,7 +62,7 @@ async function getUserIdByCustomer(customerId: string): Promise<string | null> {
 
 function planFromSubscription(subscription: Stripe.Subscription): string {
   const priceId = subscription.items.data[0]?.price?.id ?? ''
-  return getPriceToPlан()[priceId] ?? 'freelancer'
+  return getPriceToPlan()[priceId] ?? 'freelancer'
 }
 
 function toIso(ts: number | null | undefined): string | null {

@@ -465,7 +465,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             <div className="my-2 border-t border-gray-100" />
 
             {/* Pricing */}
-            <a href="#pricing" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">PRICING</a>
+            <a href="#pricing" onClick={closeMenu} className="text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">PRICING</a>
 
             <div className="my-2 border-t border-gray-100" />
 
@@ -724,7 +724,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <p className="text-xs font-bold uppercase tracking-[1px] text-indigo-600 mb-3">Early feedback</p>
           <h2 className="text-[clamp(28px,4vw,40px)] font-extrabold tracking-[-1.2px] text-gray-900 leading-[1.15] max-w-[620px] mb-4">People who&apos;ve lived this problem</h2>
           <p className="text-base text-gray-500 leading-[1.75] max-w-[560px] mb-12">Reactions from marketing professionals who&apos;ve spent careers managing creative production at global brands.</p>
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))' }}>
             {[
               { initial: 'J', name: 'Jordan M.', role: 'Senior Brand Manager, Footwear', quote: '"We\'d send a spec sheet to the agency and wait 3 days. If there was a change? Another 3 days. A tool like this would have saved us weeks every campaign cycle."' },
               { initial: 'A', name: 'Alyssa T.', role: 'Digital Production Lead, Agency', quote: '"The naming convention piece alone would be a game-changer. We spend more time arguing about file names than actually doing the work."' },

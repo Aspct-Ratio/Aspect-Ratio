@@ -155,7 +155,7 @@ export default async function AppPage() {
               </div>
               <ul className="space-y-2.5 mb-8 flex-1">
                 {[
-                  'Custom project volumes',
+                  'Custom export volumes',
                   'Unlimited file sizes',
                   'White-labeling',
                   'SLA & dedicated onboarding',
