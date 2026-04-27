@@ -1027,7 +1027,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           </div>
 
           <div className="border-t border-white/[0.06] pt-6">
-            <span className="text-[12px] text-gray-600">© 2026 ASPCT RATIO LLC. All rights reserved.</span>
+            <span className="text-[12px] text-gray-600">© {new Date().getFullYear()} ASPCT RATIO LLC. All rights reserved.</span>
           </div>
         </div>
       </footer>

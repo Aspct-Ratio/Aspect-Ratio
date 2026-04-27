@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import SlicerApp from '@/components/slicer/SlicerApp'
 import AppHeader from '@/components/slicer/AppHeader'
 import type { UserPlan } from '@/components/slicer/Step1Upload'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 const VALID_PLANS: UserPlan[] = ['free', 'creator', 'freelancer', 'studio', 'agency', 'enterprise']
 
@@ -16,7 +21,7 @@ export default async function AppPage() {
     .from('subscriptions')
     .select('plan, status')
     .eq('user_id', user!.id)
-    .in('status', ['active', 'trialing'])
+    .in('status', ['active', 'trialing', 'canceling'])
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
