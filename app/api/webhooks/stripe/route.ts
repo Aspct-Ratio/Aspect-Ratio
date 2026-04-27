@@ -45,8 +45,8 @@ async function updateSubscriptionStatus(subscriptionId: string, status: string) 
 
 async function getUserIdByEmail(email: string): Promise<string | null> {
   const supabase = createAdminClient()
-  const { data } = await supabase.auth.admin.listUsers({ filter: email, perPage: 1 })
-  const user = data?.users?.[0]
+  const { data } = await supabase.auth.admin.listUsers({ perPage: 1000 })
+  const user = data?.users?.find(u => u.email === email)
   return user?.id ?? null
 }
 
