@@ -5,7 +5,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/app'
+  let next = searchParams.get('next') ?? '/app'
+  // Prevent open redirect — only allow relative paths
+  if (!next.startsWith('/') || next.startsWith('//')) next = '/app'
   const type = searchParams.get('type')
 
   if (code) {

@@ -1,10 +1,22 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { createClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
+const MAX_FORMATS = 100
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
+const limiter = rateLimit({ windowMs: 60_000, max: 30 })
+
 export async function POST(request: NextRequest) {
+  // Rate limit
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  const { allowed } = limiter.check(ip)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
   // Auth guard
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -23,6 +35,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing file or formats' }, { status: 400 })
     }
 
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: 'File too large (max 20 MB)' }, { status: 400 })
+    }
+
     // Parse formats: [{id, w, h, cropX, cropY, cropW, cropH}]
     const formats: Array<{
       id: string
@@ -33,6 +50,10 @@ export async function POST(request: NextRequest) {
       cropW: number
       cropH: number
     }> = JSON.parse(formatsRaw)
+
+    if (formats.length > MAX_FORMATS) {
+      return NextResponse.json({ error: `Too many formats (max ${MAX_FORMATS})` }, { status: 400 })
+    }
 
     const buffer = Buffer.from(await file.arrayBuffer())
     const results: Array<{ id: string; data: string; mimeType: string }> = []
@@ -76,5 +97,5 @@ export async function POST(request: NextRequest) {
 
 // ── GET: health check ──────────────────────────────────────────
 export async function GET() {
-  return NextResponse.json({ status: 'ok', service: 'sharp-processor' })
+  return NextResponse.json({ status: 'ok' })
 }

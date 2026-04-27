@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createClient } from '@/lib/supabase/server'
+import { rateLimit } from '@/lib/rate-limit'
+
+const limiter = rateLimit({ windowMs: 60_000, max: 10 })
 
 export async function POST(req: NextRequest) {
+  // Rate limit
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+  const { allowed } = limiter.check(ip)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+  }
+
+  // Auth — must be signed in
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -12,7 +30,7 @@ export async function POST(req: NextRequest) {
       agency:     process.env.STRIPE_AGENCY_PRICE_ID,
     }
 
-    const { plan, email } = await req.json() as { plan: string; email?: string }
+    const { plan } = await req.json() as { plan: string }
 
     const priceId = PRICE_MAP[plan]
     if (!priceId) {
@@ -27,7 +45,7 @@ export async function POST(req: NextRequest) {
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
-      ...(email ? { customer_email: email } : {}),
+      customer_email: user.email,
       success_url: `${baseUrl}/app`,
       cancel_url:  `${baseUrl}/checkout/confirm?plan=${plan}&canceled=true`,
       allow_promotion_codes: true,
