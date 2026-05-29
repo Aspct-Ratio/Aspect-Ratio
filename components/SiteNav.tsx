@@ -54,7 +54,7 @@ function NavDropdown({
 }) {
   return (
     <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-      <button className="text-[13px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
+      <button aria-expanded={open} aria-haspopup="true" className="text-[13px] font-extrabold text-gray-900 hover:text-indigo-600 transition-colors tracking-wide flex items-center gap-1">
         {label}
         <Chevron open={open} />
       </button>
@@ -101,13 +101,13 @@ export default function SiteNav() {
   const dropdownLinkClass = "block px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors no-underline"
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
+    <nav aria-label="Main navigation" className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
       {/* Desktop & mobile top bar */}
       <div className="flex md:grid items-center h-[80px] px-4 sm:px-6 md:px-10 justify-between" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
 
         {/* Left: Logo */}
         <div className="flex items-center">
-          <Link href="/" className="no-underline flex-shrink-0">
+          <Link href="/" className="no-underline flex-shrink-0" aria-label="ASPCT RATIO home">
             <LogoMark height={75} />
           </Link>
         </div>
@@ -131,12 +131,12 @@ export default function SiteNav() {
 
           {/* Resources dropdown */}
           <NavDropdown label="RESOURCES" open={resourcesOpen} onEnter={() => setResourcesOpen(true)} onLeave={() => setResourcesOpen(false)}>
-            <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Tools</p>
+            <p className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.8px] text-gray-500">Tools</p>
             {RESOURCE_LINKS.filter(l => l.group === 'Tools').map(link => (
               <Link key={link.href} href={link.href} className={dropdownLinkClass}>{link.label}</Link>
             ))}
             <div className="my-1.5 border-t border-gray-100" />
-            <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.8px] text-gray-400">Guides</p>
+            <p className="px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.8px] text-gray-500">Guides</p>
             {RESOURCE_LINKS.filter(l => l.group === 'Guides').map(link => (
               <Link key={link.href} href={link.href} className={dropdownLinkClass}>{link.label}</Link>
             ))}

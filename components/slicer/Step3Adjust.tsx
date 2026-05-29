@@ -50,18 +50,20 @@ export default function Step3Adjust({ onBack, onNext }: Props) {
       {/* File switcher */}
       {state.files.length > 1 && (
         <div className="mb-4">
-          <p className="text-[11px] text-gray-500 font-semibold mb-2">Editing asset:</p>
+          <p className="text-xs text-gray-500 font-semibold mb-2">Editing asset:</p>
           <div className="flex gap-1.5 flex-wrap">
             {state.files.map((f, i) => (
-              <div
+              <button
                 key={f.id}
+                aria-label={`Edit ${f.name}`}
+                aria-pressed={i === state.activeFile}
                 onClick={() => dispatch({ type: 'SET_ACTIVE_FILE', index: i })}
-                className={`rounded-xl overflow-hidden border-2 cursor-pointer transition-all flex-shrink-0 w-[68px] ${i === state.activeFile ? 'border-indigo-500 shadow-[0_0_0_3px_rgba(79,70,229,0.15)]' : 'border-gray-200 hover:border-indigo-200'}`}
+                className={`rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 w-[68px] ${i === state.activeFile ? 'border-indigo-500 shadow-[0_0_0_3px_rgba(79,70,229,0.15)]' : 'border-gray-200 hover:border-indigo-200'}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={f.thumb} alt={f.name} className="w-full h-[44px] object-cover block" />
-                <div className="text-[8px] text-gray-500 px-1 py-0.5 truncate text-center bg-gray-50">{f.name}</div>
-              </div>
+                <div className="text-[11px] text-gray-500 px-1 py-0.5 truncate text-center bg-gray-50">{f.name}</div>
+              </button>
             ))}
           </div>
         </div>

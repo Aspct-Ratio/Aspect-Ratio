@@ -292,7 +292,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
     <div className="bg-white text-gray-800 antialiased leading-relaxed">
 
       {/* ── NAV ─────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
+      <nav aria-label="Main navigation" className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
         {/* ── Desktop & mobile top bar ── */}
         <div className="flex md:grid items-center h-[80px] px-4 sm:px-6 md:px-10 justify-between" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
 

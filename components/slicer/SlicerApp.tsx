@@ -53,7 +53,7 @@ function SlicerInner({ userPlan }: { userPlan?: UserPlan }) {
       <AppHeader step={step} />
       <main className="max-w-[1100px] mx-auto px-6 pt-28 pb-24">
         {restoredBanner && (
-          <div className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+          <div role="status" aria-live="polite" className="mb-5 flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
             <div className="flex items-center gap-2">
               <span className="text-emerald-500">✓</span>
               <p className="text-sm font-medium text-emerald-800">

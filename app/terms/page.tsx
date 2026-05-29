@@ -124,7 +124,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-white text-gray-800">
       {/* Nav */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 sm:px-6 md:px-10 h-[80px] flex items-center justify-between">
-        <Link href="/" className="no-underline">
+        <Link href="/" className="no-underline" aria-label="ASPCT RATIO home">
           <LogoMark height={75} />
         </Link>
         <Link href="/privacy" className="text-sm text-gray-500 hover:text-gray-900 transition no-underline">

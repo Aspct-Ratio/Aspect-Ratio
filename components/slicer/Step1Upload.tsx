@@ -144,7 +144,7 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
 
       {/* Limit error banner */}
       {limitError && (
-        <div className="mb-5 flex items-start gap-3 px-4 py-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+        <div role="alert" aria-live="assertive" className="mb-5 flex items-start gap-3 px-4 py-3.5 bg-amber-50 border border-amber-200 rounded-xl">
           <span className="text-amber-500 text-lg flex-shrink-0">⚠</span>
           <div>
             <p className="text-sm font-semibold text-amber-800">
@@ -162,9 +162,13 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
 
       {/* Drop zone */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload files"
         onDragOver={e => { e.preventDefault() }}
         onDrop={atLimit ? undefined : onDrop}
         onClick={atLimit ? undefined : () => inputRef.current?.click()}
+        onKeyDown={atLimit ? undefined : (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click() } }}
         className={[
           'border-[1.5px] border-dashed rounded-xl bg-white transition-all text-center',
           atLimit
@@ -205,9 +209,10 @@ export default function Step1Upload({ onNext, userPlan = 'freelancer' }: Props) 
               {f.isV && <span className="absolute top-1 left-1 bg-black/60 text-white text-[8px] font-bold px-1 py-0.5 rounded">▶ VIDEO</span>}
               <div className="px-2 py-1.5">
                 <div className="text-[10px] font-medium text-gray-700 truncate">{f.name}</div>
-                <div className="text-[9px] text-gray-400 mt-0.5">{f.w}×{f.h}</div>
+                <div className="text-[11px] text-gray-400 mt-0.5">{f.w}×{f.h}</div>
               </div>
               <button
+                aria-label={`Remove ${f.name}`}
                 onClick={e => {
                   e.stopPropagation()
                   dispatch({ type: 'REMOVE_FILE', id: f.id })
