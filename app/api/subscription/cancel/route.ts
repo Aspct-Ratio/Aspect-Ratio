@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     .from('subscriptions')
     .select('stripe_subscription_id, status, current_period_end')
     .eq('user_id', user.id)
-    .in('status', ['active', 'trialing'])
+    .in('status', ['active', 'trialing', 'canceling'])
     .order('created_at', { ascending: false })
     .limit(1)
     .single()

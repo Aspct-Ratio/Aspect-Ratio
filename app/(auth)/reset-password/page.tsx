@@ -30,7 +30,8 @@ export default function ResetPasswordPage() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

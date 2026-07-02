@@ -28,8 +28,13 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const formatsRaw = formData.get('formats') as string | null
-    const quality = parseInt(formData.get('quality') as string ?? '90', 10)
-    const outputFormat = (formData.get('outputFormat') as string | null) ?? 'jpeg'
+    const qualityRaw = parseInt(formData.get('quality') as string ?? '90', 10)
+    const quality = Number.isNaN(qualityRaw) ? 90 : Math.max(1, Math.min(100, qualityRaw))
+    const ALLOWED_FORMATS = ['jpeg', 'png', 'webp'] as const
+    const outputFormatRaw = (formData.get('outputFormat') as string | null) ?? 'jpeg'
+    const outputFormat = ALLOWED_FORMATS.includes(outputFormatRaw as typeof ALLOWED_FORMATS[number])
+      ? outputFormatRaw
+      : 'jpeg'
 
     if (!file || !formatsRaw) {
       return NextResponse.json({ error: 'Missing file or formats' }, { status: 400 })
