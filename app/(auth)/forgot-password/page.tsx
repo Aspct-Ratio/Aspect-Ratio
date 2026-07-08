@@ -16,16 +16,21 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/auth/callback?type=recovery`,
-    })
-    if (error) {
-      setError(error.message)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/auth/callback?type=recovery`,
+      })
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+      setSent(true)
       setLoading(false)
-      return
+    } catch {
+      setError('Unable to connect. Please check your internet connection and try again.')
+      setLoading(false)
     }
-    setSent(true)
-    setLoading(false)
   }
 
   return (

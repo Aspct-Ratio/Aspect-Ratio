@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
+import PasswordInput from '@/components/PasswordInput'
 
 export default function SignupPage() {
   return <Suspense><SignupForm /></Suspense>
@@ -27,24 +28,29 @@ function SignupForm() {
     setError('')
     setLoading(true)
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}` },
-    })
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}` },
+      })
 
-    if (error) { setError(error.message); setLoading(false); return }
+      if (error) { setError(error.message); setLoading(false); return }
 
-    // If email confirmation is disabled, user is immediately active — redirect
-    if (data.session) {
-      router.push(redirectTo)
-      router.refresh()
-      return
+      // If email confirmation is disabled, user is immediately active — redirect
+      if (data.session) {
+        router.push(redirectTo)
+        router.refresh()
+        return
+      }
+
+      // Otherwise show confirmation message
+      setDone(true)
+      setLoading(false)
+    } catch {
+      setError('Unable to connect. Please check your internet connection and try again.')
+      setLoading(false)
     }
-
-    // Otherwise show confirmation message
-    setDone(true)
-    setLoading(false)
   }
 
   async function handleGoogle() {
@@ -102,8 +108,7 @@ function SignupForm() {
           </div>
           <div>
             <label htmlFor="signup-password" className="block text-xs font-medium text-gray-700 mb-1">Password</label>
-            <input id="signup-password" type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 characters"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition" />
+            <PasswordInput id="signup-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 characters" minLength={6} />
           </div>
           {error && <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
           <button type="submit" disabled={loading}

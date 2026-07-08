@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import LogoMark from '@/components/LogoMark'
+import PasswordInput from '@/components/PasswordInput'
 
 export default function LoginPage() {
   return <Suspense><LoginForm /></Suspense>
@@ -25,10 +26,15 @@ function LoginForm() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); setLoading(false); return }
-    router.push(redirectTo)
-    router.refresh()
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) { setError(error.message); setLoading(false); return }
+      router.push(redirectTo)
+      router.refresh()
+    } catch {
+      setError('Unable to connect. Please check your internet connection and try again.')
+      setLoading(false)
+    }
   }
 
   async function handleGoogle() {
@@ -69,8 +75,7 @@ function LoginForm() {
               <label htmlFor="login-password" className="block text-xs font-medium text-gray-700">Password</label>
               <Link href="/forgot-password" className="text-xs text-indigo-600 hover:underline font-medium">Forgot password?</Link>
             </div>
-            <input id="login-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition" />
+            <PasswordInput id="login-password" value={password} onChange={e => setPassword(e.target.value)} />
           </div>
           {error && <p role="alert" className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
           <button type="submit" disabled={loading}
