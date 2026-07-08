@@ -503,7 +503,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <br />
           <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">EVERY TEAM.</em>
         </h1>
-        <p className="text-[18px] text-gray-500 max-w-[560px] mx-auto mb-11 leading-[1.7] font-normal">
+        <p className="text-[18px] text-gray-500 max-w-[700px] mx-auto mb-11 leading-[1.7] font-normal">
           Generate campaign-ready assets for social, ecommerce, paid media
           <br />
           and retail—automatically cropped, named and organized in minutes.
