@@ -499,9 +499,11 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
       {/* ── HERO ────────────────────────────────────────────── */}
       <section className="pt-24 pb-20 px-6 text-center bg-gradient-to-b from-white to-gray-50">
         <h1 className="text-[clamp(40px,6vw,68px)] font-extrabold leading-[1.1] tracking-[-2px] max-w-[900px] mx-auto mb-5 uppercase">
-          <span className="whitespace-nowrap">ONE UPLOAD. EVERY FORMAT.</span>
+          ONE UPLOAD.
           <br />
-          <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">EVERY TEAM.</em>
+          EVERY FORMAT.
+          <br />
+          <em className="not-italic bg-gradient-to-br from-indigo-600 to-indigo-400 bg-clip-text text-transparent">READY TO SHIP.</em>
         </h1>
         <p className="text-[18px] text-gray-500 max-w-[700px] mx-auto mb-11 leading-[1.7] font-normal">
           Generate campaign-ready assets for social, ecommerce, paid media
