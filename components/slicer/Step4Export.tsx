@@ -171,11 +171,17 @@ export default function Step4Export({ onBack, onReset }: Props) {
 
   return (
     <div className="animate-fade-up">
-      <div className="mb-6">
-        <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">Ready to export</h1>
-        <p className="text-sm text-gray-500">
-          {state.files.length} asset{state.files.length !== 1 ? 's' : ''} × {fmts.length} format{fmts.length !== 1 ? 's' : ''} × {efArr.length} file type{efArr.length !== 1 ? 's' : ''}
-        </p>
+      <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">Ready to export</h1>
+          <p className="text-sm text-gray-500">
+            {state.files.length} asset{state.files.length !== 1 ? 's' : ''} × {fmts.length} format{fmts.length !== 1 ? 's' : ''} × {efArr.length} file type{efArr.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition uppercase tracking-wide">← Back</button>
+          <button onClick={onReset} className="text-sm text-gray-400 hover:text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg transition uppercase tracking-wide">+ New Project</button>
+        </div>
       </div>
 
       {/* Summary + primary download CTA */}

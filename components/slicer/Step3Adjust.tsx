@@ -39,11 +39,13 @@ export default function Step3Adjust({ onBack, onNext }: Props) {
           <p className="text-sm text-gray-500">Drag to reposition · Zoom slider to tighten · Smart Crop for auto focal point</p>
         </div>
         <div className="flex items-center gap-2 mt-2">
+          <button onClick={onBack} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition uppercase tracking-wide">← Back</button>
           <button onClick={doSmartAll} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition">✦ Smart Crop All</button>
           <button onClick={doResetAll} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition">↺ Reset All</button>
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 text-[11px] font-semibold">
             {fmts.length} format{fmts.length !== 1 ? 's' : ''}
           </span>
+          <button onClick={onNext} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition uppercase tracking-wide">Add Copy →</button>
         </div>
       </div>
 

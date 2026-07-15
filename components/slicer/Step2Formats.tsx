@@ -30,7 +30,10 @@ export default function Step2Formats({ onBack, onNext }: Props) {
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-[22px] font-extrabold text-gray-900 mb-1 tracking-tight">CHOOSE FORMATS &amp; CONFIGURE NAMING</h1>
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-[22px] font-extrabold text-gray-900 tracking-tight">CHOOSE FORMATS &amp; CONFIGURE NAMING</h1>
+        <button onClick={handleNext} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition uppercase tracking-wide">Adjust Crops →</button>
+      </div>
       <p className="text-sm text-gray-500 mb-7">Select the channels you need, then set your file naming convention.</p>
 
       <div className="grid gap-5 grid-cols-1 lg:grid-cols-[1fr_340px]">
