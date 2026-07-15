@@ -16,9 +16,10 @@ const STEPS: { n: Step; label: string }[] = [
 
 interface Props {
   step: Step
+  onGoToStep?: (s: Step) => void
 }
 
-export default function AppHeader({ step }: Props) {
+export default function AppHeader({ step, onGoToStep }: Props) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -43,10 +44,14 @@ export default function AppHeader({ step }: Props) {
           return (
             <div key={s.n} className="flex items-center">
               {i > 0 && <div className="w-5 h-px bg-gray-200 mx-0.5" />}
-              <div className={[
-                'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all',
-                active ? 'bg-indigo-50 text-indigo-600' : done ? 'text-green-600' : 'text-gray-400',
-              ].join(' ')}>
+              <button
+                onClick={() => done && onGoToStep?.(s.n)}
+                disabled={!done}
+                className={[
+                  'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all',
+                  active ? 'bg-indigo-50 text-indigo-600' : done ? 'text-green-600 hover:bg-green-50 cursor-pointer' : 'text-gray-400 cursor-default',
+                ].join(' ')}
+              >
                 <div className={[
                   'w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all',
                   active ? 'bg-indigo-600 text-white' : done ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500',
@@ -54,7 +59,7 @@ export default function AppHeader({ step }: Props) {
                   {done ? '✓' : s.n}
                 </div>
                 {s.label}
-              </div>
+              </button>
             </div>
           )
         })}
