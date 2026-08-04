@@ -385,7 +385,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
           <div className="hidden md:flex items-center justify-end gap-2">
             {isLoggedIn ? (
               <>
-                <Link href={hasActiveSub ? '/app' : '/#pricing'} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
+                <Link href="/app" className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors no-underline tracking-wide">
                   {hasActiveSub ? 'START PROJECT →' : 'START FREE TRIAL'}
                 </Link>
                 <Link href="/account" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 no-underline tracking-wide">
@@ -472,7 +472,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
             {/* Auth actions */}
             {isLoggedIn ? (
               <>
-                <Link href={hasActiveSub ? '/app' : '/#pricing'} onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
+                <Link href="/app" onClick={closeMenu} className="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors no-underline tracking-wide text-center">
                   {hasActiveSub ? 'START PROJECT →' : 'START FREE TRIAL'}
                 </Link>
                 <Link href="/account" onClick={closeMenu} className="text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors no-underline tracking-wide px-3 py-3 rounded-lg">
@@ -513,7 +513,7 @@ export default function LandingPage({ isLoggedIn = false, userEmail }: { isLogge
 
         <div className="flex items-center justify-center gap-3 flex-wrap">
           <Link
-            href={hasActiveSub ? '/app' : isLoggedIn ? '/#pricing' : '/signup?redirectTo=%2F%23pricing'}
+            href={isLoggedIn ? '/app' : '/signup?redirectTo=%2Fapp'}
             className="h-12 px-7 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[15px] font-semibold rounded-[10px] transition-all whitespace-nowrap flex items-center no-underline"
           >
             {hasActiveSub ? 'START PROJECT →' : 'START FREE TRIAL →'}
