@@ -424,7 +424,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
       const fabricModule: any = await import('fabric')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const F: any = fabricModule.fabric ?? fabricModule.default?.fabric ?? fabricModule.default ?? fabricModule
-      console.log('[TextEditor] fabric loaded, type:', typeof F, 'keys:', Object.keys(F ?? {}).slice(0, 8))
 
       // Guard: make sure the classes we need actually exist
       // fabric v6 exports FabricImage (canonical) and Image (alias) at the top level
@@ -445,7 +444,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
       // If cleanup already ran (StrictMode), abort
       if (disposed) return
 
-      console.log('[TextEditor] creating canvas', fmt.w, 'x', fmt.h, 'scale:', scale, 'display:', dw, 'x', dh)
       // Canvas buffer = display size; setZoom maps fmt-space coords into the buffer.
       // This keeps a clean coord system: objects are positioned in fmt-space (0..fmt.w, 0..fmt.h)
       // and fabric handles the scale-to-display transform for rendering AND hit-testing.
@@ -483,7 +481,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
         scaleX: fmt.w / bgImg.width!,
         scaleY: fmt.h / bgImg.height!,
       })
-      console.log('[TextEditor] bg image loaded, size:', htmlImg.naturalWidth, 'x', htmlImg.naturalHeight)
       canvas.backgroundImage = bgImg
       canvas.requestRenderAll()
 
@@ -548,7 +545,6 @@ export default function TextEditor({ fmt, file, crop, initialLayers, allFmts, se
       canvas.on('object:removed',   refreshLayerList)
 
       refreshLayerList()
-      console.log('[TextEditor] init complete, setting ready')
       setReady(true)
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
